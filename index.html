@@ -9,6 +9,9 @@
   <!-- Google Material Icons -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
   <style>
+    /* ==========================================
+       1. 全域變數與主題設定 (CSS Variables)
+       ========================================== */
     :root {
       --primary-color: #3f51b5;
       --primary-dark: #303f9f;
@@ -30,6 +33,7 @@
       --modal-bg: #ffffff;
     }
 
+    /* 暗黑模式主題 */
     body.dark-mode {
       --primary-color: #5c6bc0;
       --primary-dark: #7986cb;
@@ -65,6 +69,7 @@
       transition: background-color var(--transition-speed), color var(--transition-speed);
     }
 
+    /* 手機版頂部 Header */
     .mobile-header {
       display: none;
       position: fixed;
@@ -87,6 +92,7 @@
       gap: 8px;
     }
 
+    /* 背景遮罩 */
     .sidebar-overlay {
       display: none;
       position: fixed;
@@ -102,6 +108,7 @@
       opacity: 1;
     }
 
+    /* 側邊欄 Sidebar */
     .sidebar {
       width: var(--sidebar-width);
       background-color: var(--sidebar-bg);
@@ -148,6 +155,7 @@
       display: none !important;
     }
 
+    /* 使用者個人資訊元件 */
     .user-profile {
       display: flex;
       align-items: center;
@@ -881,7 +889,6 @@
   </aside>
 
   <main class="main-wrapper">
-
     <header class="top-header">
       <div class="top-header-title">儀表板總覽</div>
     </header>
@@ -899,7 +906,6 @@
         </div>
       </div>
 
-      <!-- TAB 1: 新增薪資紀錄 -->
       <section id="inputTab" class="tab-content active">
         <div class="card">
           <h3 class="card-title"><span class="material-icons">add_circle_outline</span> 新增薪資紀錄</h3>
@@ -987,23 +993,22 @@
         </div>
       </section>
 
-      <!-- TAB 2: 歷史薪資明細 -->
       <section id="listTab" class="tab-content">
         <div class="card">
           <h3 class="card-title"><span class="material-icons">receipt_long</span> 歷史薪資明細</h3>
 
           <div class="form-grid" style="margin-bottom: 20px;">
             <div class="form-group">
-              <label>起始日期 (歸屬)</label>
+              <label>起始月份 (歸屬)</label>
               <div class="input-icon-wrapper">
-                <input type="date" id="filterStartDate" onchange="renderTable()">
+                <input type="month" id="filterStartDate" onchange="renderTable()">
                 <span class="material-icons field-icon">calendar_month</span>
               </div>
             </div>
             <div class="form-group">
-              <label>結束日期 (歸屬)</label>
+              <label>結束月份 (歸屬)</label>
               <div class="input-icon-wrapper">
-                <input type="date" id="filterEndDate" onchange="renderTable()">
+                <input type="month" id="filterEndDate" onchange="renderTable()">
                 <span class="material-icons field-icon">calendar_month</span>
               </div>
             </div>
@@ -1086,21 +1091,20 @@
         </div>
       </section>
 
-      <!-- TAB 3: 每月收入趨勢圖 -->
       <section id="trendTab" class="tab-content">
         <div class="card">
           <div class="form-grid" style="align-items: flex-end;">
             <div class="form-group">
-              <label>起始日期 (歸屬)</label>
+              <label>起始月份 (歸屬)</label>
               <div class="input-icon-wrapper">
-                <input type="date" class="stats-start-date" onchange="updateStatsView()">
+                <input type="month" class="stats-start-date" onchange="updateStatsView()">
                 <span class="material-icons field-icon">calendar_month</span>
               </div>
             </div>
             <div class="form-group">
-              <label>結束日期 (歸屬)</label>
+              <label>結束月份 (歸屬)</label>
               <div class="input-icon-wrapper">
-                <input type="date" class="stats-end-date" onchange="updateStatsView()">
+                <input type="month" class="stats-end-date" onchange="updateStatsView()">
                 <span class="material-icons field-icon">calendar_month</span>
               </div>
             </div>
@@ -1129,7 +1133,7 @@
           </div>
           <div class="stat-card" style="border-left-color: #2196f3;">
             <div>
-              <h4>區間平均月收入</h4>
+              <h4 id="labelAvgTitle">區間平均月收入</h4>
               <div class="value statMonthAvg">$0</div>
               <small class="statMonthTargetProgress" style="color: var(--text-secondary);">月目標達成率: 0%</small>
             </div>
@@ -1141,21 +1145,20 @@
         </div>
       </section>
 
-      <!-- TAB 4: 收入佔比圖表分析 -->
       <section id="pieTab" class="tab-content">
         <div class="card">
           <div class="form-grid" style="align-items: flex-end;">
             <div class="form-group">
-              <label>起始日期 (歸屬)</label>
+              <label>起始月份 (歸屬)</label>
               <div class="input-icon-wrapper">
-                <input type="date" class="stats-start-date" onchange="updateStatsView()">
+                <input type="month" class="stats-start-date" onchange="updateStatsView()">
                 <span class="material-icons field-icon">calendar_month</span>
               </div>
             </div>
             <div class="form-group">
-              <label>結束日期 (歸屬)</label>
+              <label>結束月份 (歸屬)</label>
               <div class="input-icon-wrapper">
-                <input type="date" class="stats-end-date" onchange="updateStatsView()">
+                <input type="month" class="stats-end-date" onchange="updateStatsView()">
                 <span class="material-icons field-icon">calendar_month</span>
               </div>
             </div>
@@ -1211,7 +1214,6 @@
     </div>
   </main>
 
-  <!-- Modals -->
   <div class="modal-overlay" id="trendModal" onclick="closeChartModalOnOverlay(event, 'trendModal')">
     <div class="modal-container large-modal">
       <div class="modal-header">
@@ -1325,19 +1327,11 @@
     const commonPieOptions = {
       responsive: true,
       maintainAspectRatio: false,
-      layout: {
-        padding: 10
-      },
+      layout: { padding: 10 },
       plugins: {
         legend: {
           position: 'bottom',
-          labels: {
-            boxWidth: 12,
-            padding: 12,
-            font: {
-              size: 12
-            }
-          }
+          labels: { boxWidth: 12, padding: 12, font: { size: 12 } }
         }
       }
     };
@@ -1360,17 +1354,14 @@
     themeToggleBtn.addEventListener('click', () => {
       document.body.classList.toggle('dark-mode');
       const isDark = document.body.classList.contains('dark-mode');
-      
       themeIcon.textContent = isDark ? 'light_mode' : 'dark_mode';
       themeText.textContent = isDark ? '切換明亮模式' : '切換暗黑模式';
-      
       updateStatsView();
     });
 
     function openChartModal(modalId) {
       const modal = document.getElementById(modalId);
       if (!modal) return;
-      
       modal.classList.add('active');
 
       setTimeout(() => {
@@ -1593,10 +1584,10 @@
       let filtered = records.slice().sort((a, b) => b.salaryMonth.localeCompare(a.salaryMonth));
 
       if (startDate) {
-        filtered = filtered.filter(r => `${r.salaryMonth}-01` >= startDate || r.salaryMonth >= startDate.substring(0, 7));
+        filtered = filtered.filter(r => r.salaryMonth >= startDate);
       }
       if (endDate) {
-        filtered = filtered.filter(r => `${r.salaryMonth}-31` <= endDate || r.salaryMonth <= endDate.substring(0, 7));
+        filtered = filtered.filter(r => r.salaryMonth <= endDate);
       }
 
       if (keyword) {
@@ -1613,7 +1604,7 @@
       }
 
       if (filterUnit !== 'ALL') filtered = filtered.filter(r => r.unit === filterUnit);
-      if (filterJobType !== 'ALL') filtered = filtered.filter(r => (r.jobType || '其他') === filterJobType);
+      if (filterJobType !== 'ALL') filtered = filtered.filter(r => (r.jobType || 'other') === filterJobType);
       if (filterCity !== 'ALL') filtered = filtered.filter(r => (r.city || '未標示') === filterCity);
 
       if (filterStatus === 'CURRENT') {
@@ -1682,24 +1673,15 @@
     }
 
     function initDateInputs() {
-      const now = new Date();
-      const year = now.getFullYear();
-      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const currentYear = new Date().getFullYear();
+      const defaultStart = `${currentYear}-01`;
+      const defaultEnd = `${currentYear}-12`;
       
-      const firstDay = `${year}-${month}-01`;
-      const lastDayObj = new Date(year, now.getMonth() + 1, 0);
-      const lastDay = `${year}-${month}-${String(lastDayObj.getDate()).padStart(2, '0')}`;
-      
-      const filterStart = document.getElementById('filterStartDate');
-      const filterEnd = document.getElementById('filterEndDate');
-      if (filterStart) filterStart.value = firstDay;
-      if (filterEnd) filterEnd.value = lastDay;
-
       document.querySelectorAll('.stats-start-date').forEach(input => {
-        input.value = firstDay;
+        input.value = defaultStart;
       });
       document.querySelectorAll('.stats-end-date').forEach(input => {
-        input.value = lastDay;
+        input.value = defaultEnd;
       });
     }
 
@@ -1715,19 +1697,28 @@
 
       let periodRecords = records.slice();
       if (startDate) {
-        periodRecords = periodRecords.filter(r => `${r.salaryMonth}-01` >= startDate || r.salaryMonth >= startDate.substring(0, 7));
+        periodRecords = periodRecords.filter(r => r.salaryMonth >= startDate);
       }
       if (endDate) {
-        periodRecords = periodRecords.filter(r => `${r.salaryMonth}-31` <= endDate || r.salaryMonth <= endDate.substring(0, 7));
+        periodRecords = periodRecords.filter(r => r.salaryMonth <= endDate);
       }
 
       const totalIncome = periodRecords.reduce((sum, r) => sum + r.totalPay, 0);
       const monthsCount = new Set(periodRecords.map(r => r.salaryMonth)).size || 1;
       const avgMonthlyIncome = totalIncome / monthsCount;
 
+      const isFiltered = Boolean(startDate || endDate);
       const labelTotalTitle = document.getElementById('labelTotalTitle');
-      if (labelTotalTitle) {
-        labelTotalTitle.textContent = '期間累計總收入';
+      const labelAvgTitle = document.getElementById('labelAvgTitle');
+
+      if (labelTotalTitle && labelAvgTitle) {
+        if (isFiltered) {
+          labelTotalTitle.textContent = '時段累計總收入';
+          labelAvgTitle.textContent = '時段平均月收入';
+        } else {
+          labelTotalTitle.textContent = '期間累計總收入';
+          labelAvgTitle.textContent = '區間平均月收入';
+        }
       }
 
       document.querySelectorAll('.statYearTotal').forEach(el => el.innerHTML = formatMoney(totalIncome));
@@ -1799,8 +1790,8 @@
 
       const ctx = canvas.getContext('2d');
 
-      let start = startDate ? startDate.substring(0, 7) : '2026-01';
-      let end = endDate ? endDate.substring(0, 7) : '2026-12';
+      let start = startDate || '2026-01';
+      let end = endDate || '2026-12';
       if (start > end) { [start, end] = [end, start]; }
 
       let current = start;
@@ -1843,13 +1834,7 @@
           maintainAspectRatio: false,
           scales: { 
             y: { beginAtZero: true },
-            x: {
-              ticks: {
-                font: {
-                  size: 11
-                }
-              }
-            }
+            x: { ticks: { font: { size: 11 } } }
           }
         }
       });
@@ -1869,10 +1854,7 @@
         type: 'doughnut',
         data: {
           labels: labels,
-          datasets: [{
-            data: data,
-            backgroundColor: ['#4caf50', '#ff9800']
-          }]
+          datasets: [{ data: data, backgroundColor: ['#4caf50', '#ff9800'] }]
         },
         options: commonPieOptions
       });
@@ -1892,10 +1874,7 @@
         type: 'pie',
         data: {
           labels: labels,
-          datasets: [{
-            data: data,
-            backgroundColor: ['#3f51b5', '#ff4081', '#4caf50', '#ff9800', '#9c27b0', '#00bcd4', '#795548', '#607d8b']
-          }]
+          datasets: [{ data: data, backgroundColor: ['#3f51b5', '#ff4081', '#4caf50', '#ff9800', '#9c27b0', '#00bcd4', '#795548', '#607d8b'] }]
         },
         options: commonPieOptions
       });
@@ -1915,10 +1894,7 @@
         type: 'doughnut',
         data: {
           labels: labels,
-          datasets: [{
-            data: data,
-            backgroundColor: ['#0288d1', '#26a69a', '#ab47bc', '#ffa726', '#78909c', '#ec407a', '#8d6e63', '#26c6da']
-          }]
+          datasets: [{ data: data, backgroundColor: ['#0288d1', '#26a69a', '#ab47bc', '#ffa726', '#78909c', '#ec407a', '#8d6e63', '#26c6da'] }]
         },
         options: commonPieOptions
       });
@@ -1938,10 +1914,7 @@
         type: 'pie',
         data: {
           labels: labels,
-          datasets: [{
-            data: data,
-            backgroundColor: ['#00bcd4', '#8e24aa', '#ff5722', '#43a047', '#e91e63', '#3f51b5', '#ffb300', '#009688']
-          }]
+          datasets: [{ data: data, backgroundColor: ['#00bcd4', '#8e24aa', '#ff5722', '#43a047', '#e91e63', '#3f51b5', '#ffb300', '#009688'] }]
         },
         options: commonPieOptions
       });
