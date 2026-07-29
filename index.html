@@ -1,4 +1,971 @@
-<!DOCTYPE html>
+<!DOCTYPE html><!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>薪資紀錄與統計分析系統</title>
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- Google Material Icons -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+<style>
+:root {
+--primary-color: #3f51b5;
+--primary-dark: #303f9f;
+--accent-color: #ff4081;
+--danger-color: #d32f2f;
+--danger-hover: #b71c1c;
+--bg-color: #f4f6f9;
+--card-bg: #ffffff;
+--text-color: #333333;
+--text-secondary: #666666;
+--border-color: #e0e0e0;
+--sidebar-width: 240px;
+--sidebar-collapsed-width: 64px;
+--transition-speed: 0.3s;
+}
+
+* {
+box-sizing: border-box;
+margin: 0;
+padding: 0;
+font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+body {
+background-color: var(--bg-color);
+color: var(--text-color);
+display: flex;
+min-height: 100vh;
+overflow-x: hidden;
+      position: relative;
+    }
+
+    /* 手機版頂部 Header 導覽條 */
+    .mobile-header {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 56px;
+      background-color: #1a237e;
+      color: #ffffff;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      z-index: 999;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+
+    .mobile-header-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* 背景遮罩 (手機版側邊欄展開時顯示) */
+    .sidebar-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      opacity: 0;
+      transition: opacity var(--transition-speed) ease;
+    }
+
+    .sidebar-overlay.active {
+      display: block;
+      opacity: 1;
+}
+
+/* 側邊欄 Sidebar */
+.sidebar {
+width: var(--sidebar-width);
+background-color: #1a237e;
+color: #ffffff;
+display: flex;
+flex-direction: column;
+      transition: width var(--transition-speed) ease;
+      transition: width var(--transition-speed) ease, transform var(--transition-speed) ease;
+position: fixed;
+top: 0; 
+bottom: 0; 
+left: 0;
+      z-index: 1000;
+      z-index: 1001;
+box-shadow: 2px 0 8px rgba(0,0,0,0.15);
+overflow-x: hidden;
+}
+
+.sidebar.collapsed { 
+width: var(--sidebar-collapsed-width); 
+}
+
+.sidebar-header {
+display: flex;
+align-items: center;
+justify-content: space-between;
+padding: 16px;
+height: 64px;
+border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sidebar-title {
+font-size: 1.1rem;
+font-weight: 600;
+white-space: nowrap;
+display: flex;
+align-items: center;
+gap: 8px;
+}
+
+.sidebar.collapsed .sidebar-title { 
+opacity: 0; 
+pointer-events: none; 
+}
+
+.toggle-btn {
+background: transparent;
+border: none;
+color: #ffffff;
+cursor: pointer;
+display: flex;
+align-items: center;
+justify-content: center;
+padding: 8px;
+border-radius: 50%;
+}
+
+.toggle-btn:hover {
+background-color: rgba(255, 255, 255, 0.1);
+}
+
+.sidebar-nav {
+display: flex;
+flex-direction: column;
+padding: 16px 0;
+gap: 8px;
+flex-grow: 1;
+}
+
+.nav-btn {
+display: flex;
+align-items: center;
+gap: 16px;
+padding: 12px 20px;
+color: rgba(255, 255, 255, 0.7);
+background: transparent;
+border: none;
+cursor: pointer;
+font-size: 1rem;
+white-space: nowrap;
+width: 100%;
+text-align: left;
+transition: background-color 0.2s, color 0.2s;
+}
+
+.nav-btn:hover {
+background-color: rgba(255, 255, 255, 0.05);
+color: #ffffff;
+}
+
+.nav-btn.active {
+background-color: var(--primary-color);
+color: #ffffff;
+border-left: 4px solid var(--accent-color);
+}
+
+.sidebar.collapsed .nav-btn-text { 
+display: none; 
+}
+
+/* 右側主區域 */
+.main-wrapper {
+flex-grow: 1;
+margin-left: var(--sidebar-width);
+      transition: margin-left var(--transition-speed) ease, width var(--transition-speed) ease;
+      transition: margin-left var(--transition-speed) ease, width var(--transition-speed) ease, padding var(--transition-speed) ease;
+padding: 24px;
+width: calc(100% - var(--sidebar-width));
+}
+
+.sidebar.collapsed ~ .main-wrapper {
+margin-left: var(--sidebar-collapsed-width);
+width: calc(100% - var(--sidebar-collapsed-width));
+}
+
+.tab-content { 
+display: none; 
+max-width: 1200px; 
+margin: 0 auto; 
+}
+
+.tab-content.active { 
+display: block; 
+}
+
+/* UI 卡片區塊 */
+.card {
+background: var(--card-bg);
+border-radius: 8px;
+padding: 20px;
+margin-bottom: 24px;
+box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.card-title {
+font-size: 1.2rem;
+margin-bottom: 16px;
+color: var(--primary-dark);
+display: flex;
+align-items: center;
+gap: 8px;
+}
+
+.form-grid {
+display: grid;
+grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+gap: 16px;
+margin-bottom: 16px;
+}
+
+.form-group { 
+display: flex; 
+flex-direction: column; 
+gap: 6px; 
+}
+
+.form-group label { 
+font-size: 0.85rem; 
+font-weight: 600; 
+color: var(--text-secondary); 
+}
+
+.form-group input, 
+.form-group select {
+padding: 10px;
+border: 1px solid var(--border-color);
+border-radius: 4px;
+font-size: 1rem;
+outline: none;
+}
+
+.form-group input:focus, 
+.form-group select:focus {
+border-color: var(--primary-color);
+}
+
+.btn-submit {
+background-color: var(--primary-color);
+color: #ffffff;
+border: none;
+padding: 12px 24px;
+border-radius: 4px;
+font-size: 1rem;
+font-weight: 600;
+cursor: pointer;
+transition: background-color 0.2s;
+      width: 100%;
+    }
+
+    @media (min-width: 576px) {
+      .btn-submit {
+        width: auto;
+      }
+}
+
+.btn-submit:hover {
+background-color: var(--primary-dark);
+}
+
+.btn-danger {
+background-color: var(--danger-color);
+color: #ffffff;
+border: none;
+padding: 10px 16px;
+border-radius: 4px;
+cursor: pointer;
+display: inline-flex;
+align-items: center;
+gap: 6px;
+font-weight: 600;
+transition: background-color 0.2s;
+}
+
+.btn-danger:hover {
+background-color: var(--danger-hover);
+}
+
+.batch-delete-box {
+background-color: #fff8f8;
+border: 1px solid #ffcdd2;
+border-radius: 6px;
+padding: 12px 16px;
+margin-bottom: 20px;
+display: flex;
+align-items: center;
+justify-content: space-between;
+flex-wrap: wrap;
+gap: 12px;
+}
+
+.rate-bar {
+display: flex;
+align-items: center;
+gap: 16px;
+flex-wrap: wrap;
+background-color: #e8eaf6;
+padding: 12px 16px;
+border-radius: 6px;
+margin-bottom: 20px;
+}
+
+/* 明細表格 */
+.table-container {
+width: 100%;
+overflow-x: auto;
+}
+
+table {
+width: 100%;
+border-collapse: collapse;
+text-align: left;
+}
+
+th, td {
+padding: 12px 16px;
+border-bottom: 1px solid var(--border-color);
+white-space: nowrap !important; /* 強制不折行 */
+}
+
+th { 
+background-color: #fafafa; 
+color: var(--text-secondary); 
+font-weight: 600; 
+}
+
+.status-badge {
+padding: 4px 8px;
+border-radius: 12px;
+font-size: 0.75rem;
+font-weight: 600;
+white-space: nowrap !important;
+}
+
+.status-badge.current { 
+background-color: #e8f5e9; 
+color: #2e7d32; 
+}
+
+.status-badge.cross { 
+background-color: #fff3e0; 
+color: #ef6c00; 
+}
+
+/* 看板與圖表佈局 */
+.stats-grid {
+display: grid;
+grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+gap: 16px;
+margin-bottom: 24px;
+}
+
+.stat-card {
+background: var(--card-bg);
+padding: 20px;
+border-radius: 8px;
+border-left: 4px solid var(--primary-color);
+box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.stat-card h4 { 
+color: var(--text-secondary); 
+font-size: 0.85rem; 
+margin-bottom: 8px; 
+}
+
+.stat-card .value { 
+font-size: 1.5rem; 
+font-weight: bold; 
+color: var(--primary-dark); 
+}
+
+.charts-grid {
+display: grid;
+grid-template-columns: 2fr 1fr;
+gap: 20px;
+}
+
+@media (max-width: 992px) {
+.charts-grid { 
+grid-template-columns: 1fr; 
+}
+}
+
+    /* =========================================================
+       📱 手機與平板響應式優化 (RWD Media Query)
+       ========================================================= */
+    @media (max-width: 768px) {
+      .mobile-header {
+        display: flex; /* 顯示手機版頂部標頭 */
+      }
+
+      .sidebar {
+        transform: translateX(-100%); /* 預設完全收起至螢幕左側外 */
+        width: 260px !important; /* 展開時固定為舒適的抽屜寬度 */
+      }
+
+      .sidebar.mobile-open {
+        transform: translateX(0); /* 展開抽屜選單 */
+      }
+
+      /* 在手機上隱藏側邊欄內部的收合按鈕 */
+      .sidebar-header .toggle-btn {
+        display: none;
+      }
+
+      .main-wrapper {
+        margin-left: 0 !important;
+        width: 100% !important;
+        padding: 16px;
+        padding-top: 72px; /* 留出手機頂部 Header 的高度 */
+      }
+
+      /* 側邊欄裡面的文字在手機版永遠顯示 */
+      .sidebar.collapsed .sidebar-title,
+      .sidebar.collapsed .nav-btn-text {
+        opacity: 1 !important;
+        display: inline-block !important;
+        pointer-events: auto !important;
+      }
+    }
+</style>
+</head>
+<body>
+
+  <!-- 手機版頂部 Header -->
+  <header class="mobile-header">
+    <div class="mobile-header-title">
+      <span class="material-icons">account_balance_wallet</span>
+      <span>薪資管理系統</span>
+    </div>
+    <button class="toggle-btn" id="openMobileMenu" title="開啟選單">
+      <span class="material-icons">menu</span>
+    </button>
+  </header>
+
+  <!-- 手機版側邊欄背景遮罩 -->
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<!-- 左側邊欄 -->
+<aside class="sidebar" id="sidebar">
+<div class="sidebar-header">
+<div class="sidebar-title">
+<span class="material-icons">account_balance_wallet</span>
+<span>薪資管理系統</span>
+</div>
+<button class="toggle-btn" id="toggleSidebar" title="展開/收合選單">
+<span class="material-icons" id="toggleIcon">chevron_left</span>
+</button>
+</div>
+
+<nav class="sidebar-nav">
+<button class="nav-btn active" onclick="switchTab('inputTab', this)">
+<span class="material-icons">edit_note</span>
+<span class="nav-btn-text">資料輸入與紀錄</span>
+</button>
+<button class="nav-btn" onclick="switchTab('statsTab', this)">
+<span class="material-icons">analytics</span>
+<span class="nav-btn-text">統計分析與目標</span>
+</button>
+</nav>
+</aside>
+
+<!-- 右側內容區 -->
+<main class="main-wrapper">
+
+<!-- 匯率與台幣開關 Bar -->
+<div class="rate-bar">
+<label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+<input type="checkbox" id="enableTwd" onchange="toggleTwdConversion()">
+<b>啟用台幣（TWD）換算顯示</b>
+</label>
+<div id="rateInputGroup" style="display: none; align-items: center; gap: 8px;">
+<span>匯率（1 外幣 = </span>
+<input type="number" id="audToTwdRate" value="20.5" step="0.1" style="width: 80px; padding: 4px 8px;" onchange="updateView()">
+<span>TWD）</span>
+</div>
+</div>
+
+<!-- TAB 1: 輸入與表格 -->
+<section id="inputTab" class="tab-content active">
+<!-- 新增薪資表單 -->
+<div class="card">
+<h3 class="card-title"><span class="material-icons">add_circle_outline</span> 新增薪資紀錄</h3>
+<form id="salaryForm" onsubmit="handleFormSubmit(event)">
+<div class="form-grid">
+<div class="form-group">
+<label>薪資歸屬月份</label>
+<input type="month" id="salaryMonth" required>
+</div>
+<div class="form-group">
+<label>付款單位 / 公司</label>
+<input type="text" id="unit" placeholder="例如：主合約、A廠商" required>
+</div>
+<div class="form-group">
+<label>時薪</label>
+<input type="number" id="hourlyRate" step="0.1" placeholder="30" required>
+</div>
+<div class="form-group">
+<label>當月工作天數</label>
+<input type="number" id="workDays" placeholder="20" required>
+</div>
+<div class="form-group">
+<label>每日基本工時 (小時)</label>
+<input type="number" id="dailyHours" value="8" step="0.5" required>
+</div>
+<div class="form-group">
+<label>總加班費 (選填)</label>
+<input type="number" id="overtimePay" placeholder="未填則計為 0">
+</div>
+<div class="form-group">
+<label>實際領錢 / 入帳日期</label>
+<input type="date" id="payDate" required>
+</div>
+</div>
+<button type="submit" class="btn-submit">儲存薪資紀錄</button>
+</form>
+</div>
+
+<!-- 明細列表 -->
+<div class="card">
+<h3 class="card-title"><span class="material-icons">list_alt</span> 歷史薪資明細</h3>
+
+<!-- 批次刪除功能區 -->
+<div class="batch-delete-box">
+<div style="display: flex; align-items: center; gap: 8px;">
+<span class="material-icons" style="color: var(--danger-color);">delete_sweep</span>
+<strong style="color: var(--danger-color);">批次清除月份資料</strong>
+</div>
+          <div style="display: flex; align-items: center; gap: 12px;">
+          <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+<input type="month" id="deleteMonthSelect">
+<button type="button" class="btn-danger" onclick="deleteRecordsByMonth()">
+<span class="material-icons" style="font-size: 18px;">delete_forever</span> 清除該月資料
+</button>
+</div>
+</div>
+
+<!-- 表格篩選選單 -->
+<div class="form-grid" style="margin-bottom: 20px;">
+<div class="form-group">
+<label>篩選付款單位</label>
+<select id="filterUnit" onchange="renderTable()">
+<option value="ALL">全部單位</option>
+</select>
+</div>
+<div class="form-group">
+<label>入帳狀態</label>
+<select id="filterStatus" onchange="renderTable()">
+<option value="ALL">全部狀態</option>
+<option value="CURRENT">本月入帳</option>
+<option value="CROSS">跨月/非本月入帳</option>
+</select>
+</div>
+</div>
+
+<!-- 歷史紀錄表格 -->
+<div class="table-container">
+<table>
+<thead>
+<tr>
+<th>薪資月份</th>
+<th>單位</th>
+<th>工時資訊</th>
+<th>總薪資</th>
+<th>入帳日期</th>
+<th>狀態</th>
+<th>操作</th>
+</tr>
+</thead>
+<tbody id="recordsTableBody"></tbody>
+</table>
+</div>
+</div>
+</section>
+
+<!-- TAB 2: 統計與圖表 -->
+<section id="statsTab" class="tab-content">
+<!-- 統計條件與目標設定 -->
+<div class="card">
+<div class="form-grid" style="align-items: flex-end;">
+<div class="form-group">
+<label>選擇統計年份</label>
+<select id="statsYear" onchange="updateStatsView()"></select>
+</div>
+<div class="form-group">
+<label>設定目標月薪</label>
+<input type="number" id="targetMonthly" value="5000" onchange="updateStatsView()">
+</div>
+<div class="form-group">
+<label>設定目標年薪</label>
+<input type="number" id="targetYearly" value="60000" onchange="updateStatsView()">
+</div>
+</div>
+</div>
+
+<!-- 看板數據卡片 -->
+<div class="stats-grid">
+<div class="stat-card">
+<h4>年度累計總收入</h4>
+<div class="value" id="statYearTotal">$0</div>
+<small id="statYearTargetProgress" style="color: var(--text-secondary);">年目標達成率: 0%</small>
+</div>
+<div class="stat-card" style="border-left-color: #2196f3;">
+<h4>平均月收入</h4>
+<div class="value" id="statMonthAvg">$0</div>
+<small id="statMonthTargetProgress" style="color: var(--text-secondary);">月目標達成率: 0%</small>
+</div>
+<div class="stat-card" style="border-left-color: #ff9800;">
+<h4>Top 3 主要收入來源</h4>
+<div class="value" id="statTopUnits" style="font-size: 1rem; font-weight: normal; margin-top: 4px;">無資料</div>
+</div>
+</div>
+
+<!-- 圖表展示區 -->
+<div class="charts-grid">
+<div class="card">
+<h3 class="card-title"><span class="material-icons">bar_chart</span> 每月收入與目標趨勢圖</h3>
+<div style="position: relative; height:320px;">
+<canvas id="monthlyChart"></canvas>
+</div>
+</div>
+
+<div class="card">
+<h3 class="card-title"><span class="material-icons">pie_chart</span> 各付款單位收入佔比</h3>
+<div style="position: relative; height:320px;">
+<canvas id="unitPieChart"></canvas>
+</div>
+</div>
+</div>
+</section>
+
+</main>
+
+<script>
+// 資料狀態管理 (全域變數)
+let records = JSON.parse(localStorage.getItem('salary_records')) || [];
+let isTwdEnabled = JSON.parse(localStorage.getItem('salary_twd_enabled')) || false;
+let monthlyChartInstance = null;
+let pieChartInstance = null;
+
+    // DOM 元素引用
+    const sidebar = document.getElementById('sidebar');
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
+    const openMobileMenuBtn = document.getElementById('openMobileMenu');
+    const toggleSidebarBtn = document.getElementById('toggleSidebar');
+
+// 頁面初始化
+document.addEventListener('DOMContentLoaded', () => {
+initYearOptions();
+document.getElementById('enableTwd').checked = isTwdEnabled;
+document.getElementById('rateInputGroup').style.display = isTwdEnabled ? 'flex' : 'none';
+updateView();
+});
+
+    // 側邊欄 Toggle
+    const sidebar = document.getElementById('sidebar');
+    document.getElementById('toggleSidebar').addEventListener('click', () => {
+    // 桌面版 側邊欄 Toggle (展開 / 收合)
+    toggleSidebarBtn.addEventListener('click', () => {
+sidebar.classList.toggle('collapsed');
+document.getElementById('toggleIcon').textContent = sidebar.classList.contains('collapsed') ? 'chevron_right' : 'chevron_left';
+});
+
+    // 分頁切換
+    // 手機版 開啟側邊欄抽屜
+    openMobileMenuBtn.addEventListener('click', () => {
+      sidebar.classList.add('mobile-open');
+      sidebarOverlay.classList.add('active');
+    });
+
+    // 手機版 關閉側邊欄抽屜 (點擊背景遮罩)
+    sidebarOverlay.addEventListener('click', closeMobileMenu);
+
+    function closeMobileMenu() {
+      sidebar.classList.remove('mobile-open');
+      sidebarOverlay.classList.remove('active');
+    }
+
+    // 分頁切換 (手機版點擊功能項目後自動收起側邊欄)
+function switchTab(tabId, btnEl) {
+document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+document.getElementById(tabId).classList.add('active');
+btnEl.classList.add('active');
+
+      if (window.innerWidth <= 768) {
+        closeMobileMenu();
+      }
+
+if (tabId === 'statsTab') updateStatsView();
+}
+
+// 切換台幣換算顯示
+function toggleTwdConversion() {
+isTwdEnabled = document.getElementById('enableTwd').checked;
+localStorage.setItem('salary_twd_enabled', JSON.stringify(isTwdEnabled));
+document.getElementById('rateInputGroup').style.display = isTwdEnabled ? 'flex' : 'none';
+updateView();
+}
+
+// 金額格式化工具函數
+function formatMoney(amount) {
+const formattedBase = `$${amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+if (!isTwdEnabled) return formattedBase;
+
+const rate = parseFloat(document.getElementById('audToTwdRate').value) || 20.5;
+const twdVal = amount * rate;
+const formattedTwd = `NT$ ${twdVal.toLocaleString('zh-TW', { maximumFractionDigits: 0 })}`;
+return `${formattedBase} <small style="color: var(--text-secondary);">(約 ${formattedTwd})</small>`;
+}
+
+// 表單提交處理
+function handleFormSubmit(event) {
+event.preventDefault();
+const salaryMonth = document.getElementById('salaryMonth').value;
+const unit = document.getElementById('unit').value.trim();
+const hourlyRate = parseFloat(document.getElementById('hourlyRate').value);
+const workDays = parseFloat(document.getElementById('workDays').value);
+const dailyHours = parseFloat(document.getElementById('dailyHours').value);
+const overtimeInput = document.getElementById('overtimePay').value;
+const payDate = document.getElementById('payDate').value;
+
+const overtimePay = overtimeInput !== "" ? parseFloat(overtimeInput) : 0;
+const totalPay = (hourlyRate * workDays * dailyHours) + overtimePay;
+const isCurrentMonthPay = (salaryMonth === payDate.substring(0, 7));
+
+records.push({
+id: Date.now(),
+salaryMonth,
+unit,
+hourlyRate,
+workDays,
+dailyHours,
+overtimePay,
+totalPay,
+payDate,
+isCurrentMonthPay
+});
+
+saveRecords();
+document.getElementById('salaryForm').reset();
+updateView();
+alert("薪資紀錄儲存成功！");
+}
+
+function saveRecords() {
+localStorage.setItem('salary_records', JSON.stringify(records));
+}
+
+// 單筆紀錄刪除
+function deleteRecord(id) {
+if (confirm("確定要刪除這筆薪資紀錄嗎？")) {
+records = records.filter(r => r.id !== id);
+saveRecords();
+updateView();
+}
+}
+
+// 批次刪除指定月份紀錄
+function deleteRecordsByMonth() {
+const selectedMonth = document.getElementById('deleteMonthSelect').value;
+if (!selectedMonth) return alert("請先選擇要刪除的月份！");
+
+const matchRecords = records.filter(r => r.salaryMonth === selectedMonth);
+if (matchRecords.length === 0) return alert(`找不到 ${selectedMonth} 的薪資紀錄。`);
+
+if (confirm(`確定要清除 ${selectedMonth} 月的所有資料嗎？（共 ${matchRecords.length} 筆）`)) {
+records = records.filter(r => r.salaryMonth !== selectedMonth);
+saveRecords();
+updateView();
+}
+}
+
+// 全域檢視更新
+function updateView() {
+renderTable();
+updateUnitFilterOptions();
+updateStatsView();
+}
+
+// 渲染歷史明細表格
+function renderTable() {
+const tbody = document.getElementById('recordsTableBody');
+const filterUnit = document.getElementById('filterUnit').value;
+const filterStatus = document.getElementById('filterStatus').value;
+tbody.innerHTML = '';
+
+let filtered = records.slice().sort((a, b) => b.salaryMonth.localeCompare(a.salaryMonth));
+
+if (filterUnit !== 'ALL') {
+filtered = filtered.filter(r => r.unit === filterUnit);
+}
+
+if (filterStatus === 'CURRENT') {
+filtered = filtered.filter(r => r.isCurrentMonthPay);
+} else if (filterStatus === 'CROSS') {
+filtered = filtered.filter(r => !r.isCurrentMonthPay);
+}
+
+if (filtered.length === 0) {
+tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding: 24px; color: var(--text-secondary);">尚無相符的紀錄</td></tr>';
+return;
+}
+
+filtered.forEach(r => {
+const tr = document.createElement('tr');
+const badge = r.isCurrentMonthPay 
+? '<span class="status-badge current">本月入帳</span>' 
+: '<span class="status-badge cross">跨月入帳</span>';
+
+tr.innerHTML = `
+         <td><b>${r.salaryMonth}</b></td>
+         <td>${r.unit}</td>
+         <td>$${r.hourlyRate}/hr × ${r.workDays}天 (${r.dailyHours}h)</td>
+         <td><b>${formatMoney(r.totalPay)}</b></td>
+         <td>${r.payDate}</td>
+         <td>${badge}</td>
+         <td>
+           <button onclick="deleteRecord(${r.id})" style="color:var(--danger-color); background:none; border:none; cursor:pointer;" title="刪除紀錄">
+             <span class="material-icons">delete</span>
+           </button>
+         </td>
+       `;
+tbody.appendChild(tr);
+});
+}
+
+// 動態更新篩選下拉選單
+function updateUnitFilterOptions() {
+const select = document.getElementById('filterUnit');
+const currentVal = select.value;
+const units = [...new Set(records.map(r => r.unit))];
+
+select.innerHTML = '<option value="ALL">全部單位</option>';
+units.forEach(u => {
+select.innerHTML += `<option value="${u}">${u}</option>`;
+});
+select.value = currentVal;
+}
+
+// 初始化年份選單（前 4 年至今年）
+function initYearOptions() {
+const select = document.getElementById('statsYear');
+const currentYear = new Date().getFullYear();
+select.innerHTML = '';
+for (let y = currentYear; y >= currentYear - 4; y--) {
+select.innerHTML += `<option value="${y}">${y} 年度</option>`;
+}
+}
+
+// 更新統計數據與圖表
+function updateStatsView() {
+const selectedYear = document.getElementById('statsYear').value;
+const targetMonthly = parseFloat(document.getElementById('targetMonthly').value) || 0;
+const targetYearly = parseFloat(document.getElementById('targetYearly').value) || 0;
+
+const yearRecords = records.filter(r => r.salaryMonth.startsWith(selectedYear));
+const totalIncome = yearRecords.reduce((sum, r) => sum + r.totalPay, 0);
+const monthsCount = new Set(yearRecords.map(r => r.salaryMonth)).size || 1;
+const avgMonthlyIncome = totalIncome / monthsCount;
+
+document.getElementById('statYearTotal').innerHTML = formatMoney(totalIncome);
+document.getElementById('statMonthAvg').innerHTML = formatMoney(avgMonthlyIncome);
+
+document.getElementById('statYearTargetProgress').textContent = `年目標達成率: ${targetYearly > 0 ? ((totalIncome / targetYearly) * 100).toFixed(1) : 0}%`;
+document.getElementById('statMonthTargetProgress').textContent = `月目標達成率: ${targetMonthly > 0 ? ((avgMonthlyIncome / targetMonthly) * 100).toFixed(1) : 0}%`;
+
+// Top 3 單位統計
+const unitSums = {};
+yearRecords.forEach(r => unitSums[r.unit] = (unitSums[r.unit] || 0) + r.totalPay);
+
+const sortedUnits = Object.entries(unitSums).sort((a,b) => b[1] - a[1]).slice(0, 3);
+document.getElementById('statTopUnits').innerHTML = sortedUnits.length > 0 
+? sortedUnits.map(([u, v], i) => `${i+1}. <b>${u}</b>: $${v.toLocaleString()}`).join('<br>')
+: "無紀錄";
+
+renderMonthlyChart(selectedYear, targetMonthly, yearRecords);
+renderUnitPieChart(unitSums);
+}
+
+// 繪製每月趨勢圖 (Chart.js)
+function renderMonthlyChart(year, targetMonthly, yearRecords) {
+const ctx = document.getElementById('monthlyChart').getContext('2d');
+const months = Array.from({ length: 12 }, (_, i) => `${year}-${String(i + 1).padStart(2, '0')}`);
+const monthlyTotals = months.map(m => yearRecords.filter(r => r.salaryMonth === m).reduce((sum, r) => sum + r.totalPay, 0));
+
+if (monthlyChartInstance) monthlyChartInstance.destroy();
+monthlyChartInstance = new Chart(ctx, {
+type: 'bar',
+data: {
+labels: ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'],
+datasets: [
+{ label: '實際收入', data: monthlyTotals, backgroundColor: '#3f51b5' },
+{ label: '目標月薪', data: Array(12).fill(targetMonthly), type: 'line', borderColor: '#ff4081', borderDash: [5, 5], fill: false }
+]
+},
+options: { 
+responsive: true, 
+maintainAspectRatio: false,
+scales: {
+y: { beginAtZero: true }
+}
+}
+});
+}
+
+// 繪製單位佔比圖 (Chart.js)
+function renderUnitPieChart(unitSums) {
+const ctx = document.getElementById('unitPieChart').getContext('2d');
+const labels = Object.keys(unitSums);
+const data = Object.values(unitSums);
+
+if (pieChartInstance) pieChartInstance.destroy();
+
+if (labels.length === 0) {
+ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+return;
+}
+
+pieChartInstance = new Chart(ctx, {
+type: 'pie',
+data: {
+labels: labels,
+datasets: [{
+data: data,
+backgroundColor: ['#3f51b5', '#ff4081', '#4caf50', '#ff9800', '#9c27b0', '#00bcd4']
+}]
+},
+options: {
+responsive: true,
+maintainAspectRatio: false,
+plugins: { 
+legend: { position: 'bottom' } 
+}
+}
+});
+}
+</script>
+</body>
+</html>
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8">
