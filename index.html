@@ -48,7 +48,12 @@
       border-radius: 8px;
       font-size: 15px;
       background-color: #fff;
-      -webkit-appearance: none;
+      height: 46px; /* 修正行動裝置高度塌陷 */
+    }
+    /* 專門修復選擇器與日曆圖示 */
+    input[type="date"], input[type="month"] {
+      -webkit-appearance: datefieldset; /* 保留原生觸發屬性 */
+      cursor: pointer;
     }
     input:focus, select:focus {
       outline: none;
@@ -84,7 +89,7 @@
       gap: 8px;
     }
     .filter-group label { font-weight: bold; font-size: 13px; white-space: nowrap; }
-    .filter-group input, .filter-group select { flex: 1; padding: 8px; font-size: 13px; }
+    .filter-group input, .filter-group select { flex: 1; padding: 8px; font-size: 13px; height: 38px; }
     .btn-clear {
       width: 100%;
       padding: 10px;
@@ -178,6 +183,7 @@
       width: 130px;
       padding: 6px 8px;
       font-size: 14px;
+      height: 36px;
     }
 
     /* 全年度總累計看板 */
@@ -325,11 +331,11 @@
   <div class="form-grid">
     <div class="form-group">
       <label for="month">薪資月份</label>
-      <input id="month" type="month">
+      <input id="month" type="month" onclick="tryShowPicker(this)">
     </div>
     <div class="form-group">
       <label for="payDate">實際領錢日期</label>
-      <input id="payDate" type="date">
+      <input id="payDate" type="date" onclick="tryShowPicker(this)">
     </div>
     <div class="form-group">
       <label for="wage">時薪 <span class="currency-label">(元)</span></label>
@@ -363,7 +369,7 @@
   <div class="filter-section">
     <div class="filter-group">
       <label for="filterPayDate">按領錢日期：</label>
-      <input id="filterPayDate" type="date" onchange="render()">
+      <input id="filterPayDate" type="date" onclick="tryShowPicker(this)" onchange="render()">
     </div>
     <div class="filter-group">
       <label for="filterType">入帳狀態：</label>
@@ -420,6 +426,13 @@
   document.getElementById("enableAudToggle").checked = enableAud;
   document.getElementById("audRate").value = audRate;
 
+  // 點擊觸發日期選擇面板 (支援 Modern Web API)
+  function tryShowPicker(inputEl) {
+    if ('showPicker' in HTMLInputElement.prototype) {
+      try { inputEl.showPicker(); } catch (e) {}
+    }
+  }
+
   function save() {
     localStorage.setItem("salaryRecords", JSON.stringify(records));
     localStorage.setItem("salaryTarget", targetSalary);
@@ -472,7 +485,7 @@
   }
 
   function addRecord() {
-    let rawMonth = month.value; // 原生 type="month" 會輸出 YYYY-MM 格式
+    let rawMonth = month.value; // YYYY-MM 格式
     let pDate = payDate.value;
     let w = +wage.value;
     let d = +days.value;
@@ -486,7 +499,7 @@
       return;
     }
 
-    // 將 YYYY-MM 轉為系統統一的 YYYY/MM 格式
+    // 將 YYYY-MM 轉換為系統統一的 YYYY/MM 格式
     let m = rawMonth.replace('-', '/');
 
     let normal = h * w * d;
@@ -543,7 +556,6 @@
   }
 
   function render() {
-    // 依據開關更新畫面幣別標示
     document.getElementById("audRateConfig").style.display = enableAud ? "flex" : "none";
     let labels = document.querySelectorAll(".currency-label");
     labels.forEach(el => el.textContent = enableAud ? "AUD" : "元");
