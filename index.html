@@ -4,24 +4,24 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>薪資管理系統 - Salary Management</title>
-  <!-- 引入 FontAwesome 圖示庫 -->
+  <!-- FontAwesome 圖示 -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   
   <style>
     /* ==========================================================================
-       1. 全局重置與 CSS 變數定义
+       1. 基礎與 CSS 變數定义
        ========================================================================== */
     :root {
       --sidebar-width-full: 240px;
       --sidebar-width-collapsed: 64px;
       --header-height: 60px;
-      --primary-color: #2c3e50;
-      --accent-color: #3498db;
-      --bg-color: #f4f6f9;
-      --text-color: #333333;
-      --light-text: #ecf0f1;
-      --hover-color: #34495e;
-      --transition-speed: 0.3s;
+      --primary-color: #1e293b;
+      --accent-color: #3b82f6;
+      --hover-bg: #334155;
+      --bg-color: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-light: #f8fafc;
+      --transition-speed: 0.25s;
     }
 
     * {
@@ -33,7 +33,7 @@
 
     body {
       background-color: var(--bg-color);
-      color: var(--text-color);
+      color: #0f172a;
       display: flex;
       min-height: 100vh;
       overflow-x: hidden;
@@ -49,10 +49,10 @@
       right: 0;
       height: var(--header-height);
       background-color: #ffffff;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
       display: flex;
       align-items: center;
-      padding: 0 1rem;
+      padding: 0 1.25rem;
       z-index: 1000;
     }
 
@@ -63,23 +63,23 @@
       color: var(--primary-color);
       cursor: pointer;
       padding: 0.5rem;
-      border-radius: 4px;
+      border-radius: 6px;
       transition: background var(--transition-speed);
     }
 
     .toggle-btn:hover {
-      background-color: #eef2f5;
+      background-color: #f1f5f9;
     }
 
     .header-title {
       margin-left: 1rem;
-      font-size: 1.15rem;
+      font-size: 1.1rem;
       font-weight: 600;
       color: var(--primary-color);
     }
 
     /* ==========================================================================
-       3. 左側選單 (Sidebar) - 桌機預設
+       3. 左側選單 (Sidebar) - 桌機預設展開
        ========================================================================== */
     .sidebar {
       position: fixed;
@@ -88,40 +88,41 @@
       bottom: 0;
       width: var(--sidebar-width-full);
       background-color: var(--primary-color);
-      color: var(--light-text);
+      color: var(--text-light);
       transition: width var(--transition-speed) ease, transform var(--transition-speed) ease;
       z-index: 999;
       overflow-y: auto;
-      overflow-x: hidden;
+      overflow-x: visible; /* 允許折疊時浮動子選單超出區域 */
     }
 
     .sidebar-menu {
       list-style: none;
-      padding: 1rem 0;
+      padding: 0.75rem 0;
     }
 
     .menu-item {
-      margin-bottom: 0.25rem;
+      position: relative;
     }
 
     .menu-link {
       display: flex;
       align-items: center;
       padding: 0.85rem 1.25rem;
-      color: #b8c7ce;
+      color: var(--text-muted);
       text-decoration: none;
       white-space: nowrap;
+      cursor: pointer;
+      user-select: none;
       transition: color var(--transition-speed), background var(--transition-speed);
     }
 
-    .menu-link:hover, .menu-link.active {
-      color: #ffffff;
-      background-color: var(--hover-color);
-      border-left: 4px solid var(--accent-color);
+    .menu-link:hover, .menu-item.active > .menu-link {
+      color: var(--text-light);
+      background-color: var(--hover-bg);
     }
 
     .menu-icon {
-      font-size: 1.2rem;
+      font-size: 1.1rem;
       width: 24px;
       text-align: center;
       margin-right: 1rem;
@@ -130,23 +131,69 @@
 
     .menu-text {
       font-size: 0.95rem;
+      flex: 1;
       transition: opacity var(--transition-speed);
     }
 
+    .arrow-icon {
+      font-size: 0.8rem;
+      transition: transform var(--transition-speed);
+    }
+
+    /* 展開子選單時箭頭旋轉 */
+    .menu-item.open > .menu-link .arrow-icon {
+      transform: rotate(180deg);
+    }
+
+    /* 子選單 (Sub-menu) */
+    .submenu {
+      list-style: none;
+      background-color: #0f172a;
+      display: none; /* 預設隱藏 */
+    }
+
+    .menu-item.open > .submenu {
+      display: block; /* 展開狀態 */
+    }
+
+    .submenu .menu-link {
+      padding-left: 3.25rem;
+      font-size: 0.9rem;
+    }
+
     /* ==========================================================================
-       4. 電腦端 - 縮小模式 (Collapsed)
+       4. 桌機端 - 縮小/折疊模式 (Collapsed State)
        ========================================================================== */
     body.sidebar-collapsed .sidebar {
       width: var(--sidebar-width-collapsed);
     }
 
-    body.sidebar-collapsed .menu-text {
+    body.sidebar-collapsed .menu-text,
+    body.sidebar-collapsed .arrow-icon {
       opacity: 0;
-      pointer-events: none;
+      display: none;
     }
 
     body.sidebar-collapsed .main-content {
       margin-left: var(--sidebar-width-collapsed);
+    }
+
+    /* 折疊狀態下的子選單：滑鼠懸停顯示浮動選單 (Pop-out Submenu) */
+    body.sidebar-collapsed .menu-item:hover > .submenu {
+      display: block !important;
+      position: absolute;
+      left: var(--sidebar-width-collapsed);
+      top: 0;
+      width: 200px;
+      background-color: var(--primary-color);
+      box-shadow: 4px 4px 12px rgba(0, 0, 0, 0.15);
+      border-radius: 0 6px 6px 0;
+      padding: 0.5rem 0;
+      z-index: 1001;
+    }
+
+    body.sidebar-collapsed .menu-item:hover > .submenu .menu-link {
+      padding-left: 1.25rem;
     }
 
     /* ==========================================================================
@@ -164,11 +211,11 @@
       background: #ffffff;
       border-radius: 8px;
       padding: 1.5rem;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
       margin-bottom: 1.5rem;
     }
 
-    /* 遮罩 (Mobile Overlay) */
+    /* 手機端遮罩 (Overlay) */
     .overlay {
       display: none;
       position: fixed;
@@ -176,30 +223,36 @@
       left: 0;
       right: 0;
       bottom: 0;
-      background: rgba(0, 0, 0, 0.5);
+      background: rgba(0, 0, 0, 0.4);
       z-index: 998;
     }
 
     /* ==========================================================================
-       6. 響應式微調 (Mobile - 小於 768px)
+       6. 手機端 (Mobile - Screen <= 768px)
        ========================================================================== */
     @media (max-width: 768px) {
       .sidebar {
-        width: var(--sidebar-width-full) !important; /* 手機端展開即全寬 */
-        transform: translateX(-100%); /* 預設推到螢幕外 */
+        width: var(--sidebar-width-full) !important;
+        transform: translateX(-100%);
       }
 
       .main-content {
-        margin-left: 0 !important; /* 手機端主要內容不留邊距 */
+        margin-left: 0 !important;
       }
 
-      /* 手機端打開側邊欄 */
       body.mobile-open .sidebar {
         transform: translateX(0);
       }
 
       body.mobile-open .overlay {
         display: block;
+      }
+
+      /* 手機模式取消 Hover Pop-out 選單 */
+      body.sidebar-collapsed .menu-item:hover > .submenu {
+        position: static !important;
+        width: 100% !important;
+        box-shadow: none !important;
       }
     }
   </style>
@@ -208,66 +261,89 @@
 
   <!-- 頂部導覽列 -->
   <header class="header">
-    <button class="toggle-btn" id="toggleBtn" aria-label="Toggle Sidebar">
+    <button class="toggle-btn" id="toggleBtn" aria-label="Toggle Navigation">
       <i class="fa-solid fa-bars"></i>
     </button>
     <h1 class="header-title">薪資管理系統</h1>
   </header>
 
-  <!-- 手機端遮罩 -->
+  <!-- 手機端半透明遮罩 -->
   <div class="overlay" id="overlay"></div>
 
   <!-- 左側導覽選單 -->
   <aside class="sidebar" id="sidebar">
     <ul class="sidebar-menu">
-      <li class="menu-item">
-        <a href="#" class="menu-link active">
+      
+      <!-- 單一選單 -->
+      <li class="menu-item active">
+        <a href="#" class="menu-link">
           <i class="fa-solid fa-chart-line menu-icon"></i>
-          <span class="menu-text">儀表板 (Dashboard)</span>
+          <span class="menu-text">儀表板</span>
         </a>
       </li>
-      <li class="menu-item">
-        <a href="#" class="menu-link">
+
+      <!-- 多層級選單 1 -->
+      <li class="menu-item has-submenu">
+        <a class="menu-link">
           <i class="fa-solid fa-users menu-icon"></i>
           <span class="menu-text">員工資料管理</span>
+          <i class="fa-solid fa-chevron-down arrow-icon"></i>
         </a>
+        <ul class="submenu">
+          <li><a href="#" class="menu-link"><span class="menu-text">員工列表</span></a></li>
+          <li><a href="#" class="menu-link"><span class="menu-text">新增員工</span></a></li>
+          <li><a href="#" class="menu-link"><span class="menu-text">部門設定</span></a></li>
+        </ul>
       </li>
-      <li class="menu-item">
-        <a href="#" class="menu-link">
+
+      <!-- 多層級選單 2 -->
+      <li class="menu-item has-submenu">
+        <a class="menu-link">
           <i class="fa-solid fa-file-invoice-dollar menu-icon"></i>
-          <span class="menu-text">薪資計算與發放</span>
+          <span class="menu-text">薪資計算管理</span>
+          <i class="fa-solid fa-chevron-down arrow-icon"></i>
         </a>
+        <ul class="submenu">
+          <li><a href="#" class="menu-link"><span class="menu-text">每月薪資結算</span></a></li>
+          <li><a href="#" class="menu-link"><span class="menu-text">獎金與扣款項</span></a></li>
+          <li><a href="#" class="menu-link"><span class="menu-text">發放紀錄查詢</span></a></li>
+        </ul>
       </li>
+
+      <!-- 單一選單 -->
       <li class="menu-item">
         <a href="#" class="menu-link">
           <i class="fa-solid fa-clock menu-icon"></i>
-          <span class="menu-text">出勤與工時紀錄</span>
+          <span class="menu-text">出勤打卡紀錄</span>
         </a>
       </li>
+
+      <!-- 單一選單 -->
       <li class="menu-item">
         <a href="#" class="menu-link">
           <i class="fa-solid fa-gear menu-icon"></i>
-          <span class="menu-text">系統設定</span>
+          <span class="menu-text">系統權限設定</span>
         </a>
       </li>
+
     </ul>
   </aside>
 
   <!-- 主要內容區 -->
   <main class="main-content">
     <div class="card">
-      <h2>歡迎使用薪資管理系統</h2>
-      <p style="margin-top: 0.5rem; color: #666;">
-        點擊左上角的選單按鈕（<i class="fa-solid fa-bars"></i>），即可體驗縮小/展開效果。
+      <h2>薪資管理系統主頁</h2>
+      <p style="margin-top: 0.5rem; color: #64748b;">
+        請點擊左上角的選單按鈕（<i class="fa-solid fa-bars"></i>）測試側邊欄的展開與折疊狀態。
       </p>
     </div>
 
     <div class="card">
-      <h3>功能特點</h3>
-      <ul style="margin-left: 1.2rem; margin-top: 0.5rem; line-height: 1.8;">
-        <li><strong>電腦端 (Desktop)</strong>：點擊開關可在「完整顯示 (240px)」與「只顯示圖示 (64px)」之間流暢切換。</li>
-        <li><strong>手機端 (Mobile)</strong>：寬度小於 768px 時，選單自動隱藏，點擊後以側滑抽屜方式呈現，並帶有背景遮罩。</li>
-        <li><strong>極簡無依賴</strong>：採用純 CSS 變數與原生 JavaScript 撰寫，效能高且易於套用至現有專案。</li>
+      <h3>核心修正說明</h3>
+      <ul style="margin-left: 1.25rem; margin-top: 0.5rem; line-height: 1.8; color: #334155;">
+        <li><strong>完整收合與展開</strong>：電腦端點擊按鈕可在全寬 (`240px`) 與縮小欄 (`64px`) 之間切換。</li>
+        <li><strong>折疊後的子選單處理</strong>：側邊欄折疊時，含有下拉選單的項目會改為懸停（Hover）彈出子選單，確保功能不會隱藏。</li>
+        <li><strong>手機端響應式 (RWD)</strong>：手機視窗（&lt; 768px）時自動轉為全螢幕抽屜模式並帶有黑底遮罩。</li>
       </ul>
     </div>
   </main>
@@ -276,25 +352,56 @@
   <script>
     const toggleBtn = document.getElementById('toggleBtn');
     const overlay = document.getElementById('overlay');
+    const submenuItems = document.querySelectorAll('.has-submenu');
 
+    // 1. 主按鈕點擊：切換折疊/手機抽屜
     toggleBtn.addEventListener('click', () => {
       const isMobile = window.innerWidth <= 768;
       
       if (isMobile) {
-        // 手機端：切換抽屜顯示/隱藏
         document.body.classList.toggle('mobile-open');
       } else {
-        // 電腦端：切換圖示模式/完整模式
         document.body.classList.toggle('sidebar-collapsed');
+        // 折疊時關閉所有展開的子選單
+        if (document.body.classList.contains('sidebar-collapsed')) {
+          submenuItems.forEach(item => item.classList.remove('open'));
+        }
       }
     });
 
-    // 點擊背景遮罩關閉手機選單
+    // 2. 多層級子選單展開/收合點擊
+    submenuItems.forEach(item => {
+      const link = item.querySelector('.menu-link');
+      link.addEventListener('click', (e) => {
+        // 在桌機折疊狀態下不透過點擊展開，改用 hover
+        if (document.body.classList.contains('sidebar-collapsed') && window.innerWidth > 768) {
+          return;
+        }
+        
+        e.preventDefault();
+        
+        // 切換目前點擊項目的展開狀態
+        const isOpen = item.classList.contains('open');
+        
+        // 關閉其他已展開的手風琴選單（可選）
+        submenuItems.forEach(other => {
+          if (other !== item) other.classList.remove('open');
+        });
+
+        if (!isOpen) {
+          item.classList.add('open');
+        } else {
+          item.classList.remove('open');
+        }
+      });
+    });
+
+    // 3. 點擊遮罩關閉手機選單
     overlay.addEventListener('click', () => {
       document.body.classList.remove('mobile-open');
     });
 
-    // 視窗大小改變時的防錯處理
+    // 4. 視窗大小重置
     window.addEventListener('resize', () => {
       if (window.innerWidth > 768) {
         document.body.classList.remove('mobile-open');
