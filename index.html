@@ -307,7 +307,7 @@
       margin-bottom: 20px;
     }
 
-    /* 表格樣式 */
+    /* 表格樣式：強制防止關鍵文字跳行 */
     .table-container {
       overflow-x: auto;
     }
@@ -321,6 +321,7 @@
     th, td {
       padding: 12px;
       border-bottom: 1px solid var(--border-color);
+      white-space: nowrap; /* 核心防止跳行設定 */
     }
 
     th {
@@ -334,6 +335,7 @@
       border-radius: 12px;
       font-size: 0.75rem;
       font-weight: 600;
+      white-space: nowrap;
     }
 
     .status-badge.current {
@@ -372,6 +374,19 @@
       font-size: 1.5rem;
       font-weight: bold;
       color: var(--primary-dark);
+    }
+
+    /* 雙圖表併排 Layout Grid */
+    .charts-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 20px;
+    }
+
+    @media (max-width: 992px) {
+      .charts-grid {
+        grid-template-columns: 1fr;
+      }
     }
 
     /* 手機版響應式設計 Mobile RWD */
@@ -599,11 +614,20 @@
         </div>
       </div>
 
-      <!-- 圖表展示 -->
-      <div class="card">
-        <h3 class="card-title"><span class="material-icons">bar_chart</span> 每月收入與目標比對趨勢圖</h3>
-        <div style="position: relative; height:320px; width:100%;">
-          <canvas id="monthlyChart"></canvas>
+      <!-- 雙圖表展示區（柱狀圖 + 圓餅圖） -->
+      <div class="charts-grid">
+        <div class="card">
+          <h3 class="card-title"><span class="material-icons">bar_chart</span> 每月收入與目標趨勢圖</h3>
+          <div style="position: relative; height:320px; width:100%;">
+            <canvas id="monthlyChart"></canvas>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3 class="card-title"><span class="material-icons">pie_chart</span> 各付款單位收入佔比</h3>
+          <div style="position: relative; height:320px; width:100%;">
+            <canvas id="unitPieChart"></canvas>
+          </div>
         </div>
       </div>
     </section>
@@ -616,7 +640,8 @@
     /* -------------------------------------------------------------------------- */
     let records = JSON.parse(localStorage.getItem('salary_records')) || [];
     let isTwdEnabled = JSON.parse(localStorage.getItem('salary_twd_enabled')) || false;
-    let chartInstance = null;
+    let monthlyChartInstance = null;
+    let pieChartInstance = null;
 
     // 頁面初始化
     document.addEventListener('DOMContentLoaded', () => {
@@ -682,10 +707,12 @@
       updateView();
     }
 
+    /* 修正問題 1：僅在勾選 enableTwd 時才顯示台幣換算金額 */
     function formatMoney(amountAud) {
       const rate = parseFloat(document.getElementById('audToTwdRate').value) || 20.5;
       const formattedAud = `AUD $${amountAud.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-      if (!isTwdEnabled) return formattedAud;
+      
+      if (!isTwdEnabled) return formattedAud; // 未開功能時，單純回傳 AUD 格式
       
       const twdVal = amountAud * rate;
       const formattedTwd = `NT$ ${twdVal.toLocaleString('zh-TW', { maximumFractionDigits: 0 })}`;
@@ -742,7 +769,6 @@
       }
     }
 
-    /* 一鍵按月份刪除全部資料 */
     function deleteRecordsByMonth() {
       const selectedMonth = document.getElementById('deleteMonthSelect').value;
       
@@ -849,7 +875,7 @@
     }
 
     /* -------------------------------------------------------------------------- */
-    /* 統計分析與 Chart.js 繪製                                                  */
+    /* 統計分析與 Chart.js 繪製（含圓餅圖）                                       */
     /* -------------------------------------------------------------------------- */
     function updateStatsView() {
       const selectedYear = document.getElementById('statsYear').value;
@@ -888,10 +914,12 @@
         document.getElementById('statTopUnits').textContent = "該年度無收入紀錄";
       }
 
-      renderChart(selectedYear, targetMonthly, yearRecords);
+      renderMonthlyChart(selectedYear, targetMonthly, yearRecords);
+      renderUnitPieChart(unitSums);
     }
 
-    function renderChart(year, targetMonthly, yearRecords) {
+    /* 渲染月收入柱狀圖 */
+    function renderMonthlyChart(year, targetMonthly, yearRecords) {
       const ctx = document.getElementById('monthlyChart').getContext('2d');
       
       const months = Array.from({ length: 12 }, (_, i) => `${year}-${String(i + 1).padStart(2, '0')}`);
@@ -901,11 +929,11 @@
           .reduce((sum, r) => sum + r.totalPay, 0);
       });
 
-      if (chartInstance) {
-        chartInstance.destroy();
+      if (monthlyChartInstance) {
+        monthlyChartInstance.destroy();
       }
 
-      chartInstance = new Chart(ctx, {
+      monthlyChartInstance = new Chart(ctx, {
         type: 'bar',
         data: {
           labels: ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'],
@@ -937,6 +965,56 @@
             },
             x: {
               grid: { display: false }
+            }
+          }
+        }
+      });
+    }
+
+    /* 修正問題 2：渲染付款單位佔比圓餅圖 */
+    function renderUnitPieChart(unitSums) {
+      const ctx = document.getElementById('unitPieChart').getContext('2d');
+      const labels = Object.keys(unitSums);
+      const data = Object.values(unitSums);
+
+      if (pieChartInstance) {
+        pieChartInstance.destroy();
+      }
+
+      if (labels.length === 0) {
+        ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+        return;
+      }
+
+      // 預設一組調和配色盤
+      const backgroundColors = [
+        '#3f51b5', '#ff4081', '#4caf50', '#ff9800', 
+        '#9c27b0', '#00bcd4', '#795548', '#607d8b'
+      ];
+
+      pieChartInstance = new Chart(ctx, {
+        type: 'pie',
+        data: {
+          labels: labels,
+          datasets: [{
+            data: data,
+            backgroundColor: backgroundColors.slice(0, labels.length)
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'bottom'
+            },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  const val = context.raw || 0;
+                  return ` ${context.label}: AUD $${val.toLocaleString()}`;
+                }
+              }
             }
           }
         }
