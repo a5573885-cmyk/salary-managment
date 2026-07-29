@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>薪資管理系統 - Salary Management</title>
-  <!-- FontAwesome 圖示庫 -->
+  <!-- 引入 FontAwesome 圖示庫 (CDN) -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   
   <style>
@@ -165,14 +165,14 @@
     }
 
     /* ==========================================================================
-       4. 桌機端 - 折疊/收起模式 (Collapsed State)
+       4. 桌機端 - 折疊/收起狀態 (Collapsed State)
        ========================================================================== */
     body.sidebar-collapsed .sidebar {
       width: var(--sidebar-width-collapsed);
     }
 
     body.sidebar-collapsed .sidebar-toggle-container {
-      justify-content: center; /* 收起時按鈕居中 */
+      justify-content: center;
       padding: 0.75rem 0;
     }
 
@@ -185,7 +185,7 @@
       margin-left: var(--sidebar-width-collapsed);
     }
 
-    /* 折疊時懸停顯示提示 Tooltip */
+    /* 折疊時懸停顯示 Tooltip */
     body.sidebar-collapsed .menu-link::after {
       content: attr(data-title);
       position: absolute;
@@ -250,7 +250,7 @@
       }
 
       .sidebar-toggle-container {
-        display: none; /* 手機端隱藏內建控制鈕，統一用 Header 按鈕 */
+        display: none;
       }
 
       .main-content {
@@ -271,7 +271,6 @@
 
   <!-- 頂部導覽列 -->
   <header class="header">
-    <!-- 按鈕 1：Header 導覽按鈕 -->
     <button class="toggle-btn" id="headerToggleBtn" title="切換選單">
       <i class="fa-solid fa-bars"></i>
     </button>
@@ -283,8 +282,6 @@
 
   <!-- 左側導覽選單 -->
   <aside class="sidebar" id="sidebar">
-    
-    <!-- 側邊欄內部展開/收折控制按鈕 -->
     <div class="sidebar-toggle-container">
       <button class="sidebar-toggle-btn" id="sidebarToggleBtn" title="展開/收折選單">
         <i class="fa-solid fa-angles-left" id="sidebarToggleIcon"></i>
@@ -351,7 +348,6 @@
     const sidebarToggleIcon = document.getElementById('sidebarToggleIcon');
     const overlay = document.getElementById('overlay');
 
-    // 切換選單狀態的通用函數
     function toggleSidebar() {
       const isMobile = window.innerWidth <= 768;
 
@@ -360,7 +356,6 @@
       } else {
         document.body.classList.toggle('sidebar-collapsed');
         
-        // 更新側邊欄按鈕圖示
         if (document.body.classList.contains('sidebar-collapsed')) {
           sidebarToggleIcon.className = 'fa-solid fa-angles-right';
         } else {
@@ -369,16 +364,13 @@
       }
     }
 
-    // 綁定事件
     headerToggleBtn.addEventListener('click', toggleSidebar);
     sidebarToggleBtn.addEventListener('click', toggleSidebar);
 
-    // 點擊遮罩關閉手機選單
     overlay.addEventListener('click', () => {
       document.body.classList.remove('mobile-open');
     });
 
-    // 視窗調整時防錯處理
     window.addEventListener('resize', () => {
       if (window.innerWidth > 768) {
         document.body.classList.remove('mobile-open');
