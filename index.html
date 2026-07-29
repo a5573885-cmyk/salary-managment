@@ -324,8 +324,8 @@
   <!-- 新增薪資表單 -->
   <div class="form-grid">
     <div class="form-group">
-      <label for="month">薪資月份 (如 2026/07)</label>
-      <input id="month" placeholder="2026/07">
+      <label for="month">薪資月份</label>
+      <input id="month" type="month">
     </div>
     <div class="form-group">
       <label for="payDate">實際領錢日期</label>
@@ -472,7 +472,7 @@
   }
 
   function addRecord() {
-    let m = month.value.trim();
+    let rawMonth = month.value; // 原生 type="month" 會輸出 YYYY-MM 格式
     let pDate = payDate.value;
     let w = +wage.value;
     let d = +days.value;
@@ -481,10 +481,13 @@
     let customOt = customOvertimePay.value !== "" ? +customOvertimePay.value : null;
     let ins = +insurance.value || 0;
 
-    if (!m || !w || !d || !h) {
+    if (!rawMonth || !w || !d || !h) {
       alert("請完整輸入：薪資月份、時薪、工作天數與每日工時");
       return;
     }
+
+    // 將 YYYY-MM 轉為系統統一的 YYYY/MM 格式
+    let m = rawMonth.replace('-', '/');
 
     let normal = h * w * d;
     let otPay = 0;
