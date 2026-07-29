@@ -47,9 +47,13 @@
       box-shadow: 0 2px 4px rgba(52, 152, 219, 0.3);
     }
 
-    /* 頁面切換控制 */
-    .page-content { display: none; }
-    .page-content.active { display: block; }
+    /* 頁面切換控制 (預設隱藏) */
+    .page-content {
+      display: none;
+    }
+    .page-content.active {
+      display: block !important;
+    }
 
     /* 通用卡片與元素 */
     .card {
@@ -550,7 +554,7 @@
     <!-- 整年統計大看板 -->
     <div id="annualSummaryContainer"></div>
 
-    <!-- 新增：各付款單位累積金額看板與專屬篩選器 -->
+    <!-- 各付款單位累積金額看板與專屬篩選器 -->
     <h4>🏢 各付款單位累計收入統計</h4>
 
     <div class="filter-section" style="margin-top: 8px; margin-bottom: 12px;">
@@ -601,20 +605,26 @@
   document.getElementById("enableAudToggle").checked = enableAud;
   document.getElementById("audRate").value = audRate;
 
-  // 切換 Tab 頁面
+  // 切換 Tab 頁面 (修復頁面顯示邏輯)
   function switchTab(tabId) {
-    document.getElementById("inputTab").classList.remove("active");
-    document.getElementById("statsTab").classList.remove("active");
-    document.getElementById("tabInputBtn").classList.remove("active");
-    document.getElementById("tabStatsBtn").classList.remove("active");
+    let inputTab = document.getElementById("inputTab");
+    let statsTab = document.getElementById("statsTab");
+    let inputBtn = document.getElementById("tabInputBtn");
+    let statsBtn = document.getElementById("tabStatsBtn");
 
-    document.getElementById(tabId).classList.add("active");
     if (tabId === 'inputTab') {
-      document.getElementById("tabInputBtn").classList.add("active");
+      inputTab.classList.add("active");
+      statsTab.classList.remove("active");
+      inputBtn.classList.add("active");
+      statsBtn.classList.remove("active");
     } else {
-      document.getElementById("tabStatsBtn").classList.add("active");
+      statsTab.classList.add("active");
+      inputTab.classList.remove("active");
+      statsBtn.classList.add("active");
+      inputBtn.classList.remove("active");
     }
 
+    render();
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
@@ -676,9 +686,9 @@
   }
 
   function addRecord() {
+    let comp = company.value.trim() || "未填寫單位";
     let rawMonth = month.value;
     let pDate = payDate.value;
-    let comp = company.value.trim() || "未填寫單位";
     let w = +wage.value;
     let d = +days.value;
     let h = +hours.value;
@@ -754,7 +764,6 @@
     let selectEl = document.getElementById("filterCompany");
     let currentSelected = selectEl.value;
     
-    // 收集所有出現過的公司名稱
     let companies = new Set();
     records.forEach(r => {
       if (r.company) companies.add(r.company);
@@ -831,10 +840,8 @@
     }
 
     records.forEach(r => {
-      // 統計每月總和
       monthTotals[r.month] = (monthTotals[r.month] || 0) + r.total;
       
-      // 統計各公司單位金額與比數
       let compKey = r.company || "未填寫單位";
       if (!companyTotals[compKey]) {
         companyTotals[compKey] = { name: compKey, total: 0, count: 0 };
@@ -892,21 +899,21 @@
       `;
     }
 
-    // --- 處理付款單位統計、篩選與 Top 3 提醒 ---
-    let searchCompText = document.getElementById("searchCompanyStat").value.trim().toLowerCase();
-    let sortCompMode = document.getElementById("sortCompanyStat").value;
+    // 處理付款單位統計、篩選與 Top 3 提醒
+    let searchCompInput = document.getElementById("searchCompanyStat");
+    let sortCompInput = document.getElementById("sortCompanyStat");
+
+    let searchCompText = searchCompInput ? searchCompInput.value.trim().toLowerCase() : "";
+    let sortCompMode = sortCompInput ? sortCompInput.value : "amountDesc";
 
     let compList = Object.values(companyTotals);
 
-    // 關鍵字過濾
     if (searchCompText) {
       compList = compList.filter(item => item.name.toLowerCase().includes(searchCompText));
     }
 
-    // 計算 Top 3 (強制依金額由高到低排序撈出)
     let topList = [...compList].sort((a, b) => b.total - a.total).slice(0, 3);
 
-    // 渲染 Top 3 提醒看板
     if (topList.length > 0) {
       let rankBadges = ["🥇 冠軍", "🥈 亞軍", "🥉 季軍"];
       let topHtml = topList.map((item, idx) => `
@@ -932,7 +939,6 @@
       top3Container.innerHTML = "";
     }
 
-    // 依使用者選取的模式進行列表排序
     compList.sort((a, b) => {
       if (sortCompMode === "amountDesc") return b.total - a.total;
       if (sortCompMode === "amountAsc") return a.total - b.total;
@@ -941,14 +947,10 @@
       return 0;
     });
 
-    // 渲染付款單位統計列表
     companySummaryContainer.innerHTML = "";
     if (compList.length === 0) {
       companySummaryContainer.innerHTML = "<div style='color:#777; font-size:13px; text-align:center; padding: 10px;'>無符合條件的單位資料</div>";
     } else {
-      // 建立最高金額對照以判定外觀樣式
-      let topAmount = topList.length > 0 ? topList[0].total : 0;
-
       compList.forEach(item => {
         let cardClass = "";
         if (topList[0] && item.name === topList[0].name) cardClass = "top1";
@@ -967,7 +969,6 @@
       });
     }
 
-    // 渲染單月明細統計
     summaryContainer.innerHTML = "";
     if (sortedMonths.length === 0) {
       summaryContainer.innerHTML = "<div style='color:#777;'>尚無月份資料</div>";
@@ -995,6 +996,7 @@
     }
   }
 
+  // 頁面初次載入執行一次
   render();
 </script>
 
