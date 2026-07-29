@@ -883,7 +883,7 @@
   <main class="main-wrapper">
 
     <header class="top-header">
-      <div class="top-header-title">儀表板總覽</div>
+      <div class="top-header-title" id="headerTitle">新增薪資紀錄</div>
     </header>
     
     <div class="content-container">
@@ -1434,6 +1434,18 @@
       document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
       document.getElementById(tabId).classList.add('active');
       btnEl.classList.add('active');
+
+      // 同步更新標題
+      const titles = {
+        'inputTab': '新增薪資紀錄',
+        'listTab': '歷史薪資明細',
+        'trendTab': '每月收入趨勢圖',
+        'pieTab': '收入佔比圖表分析'
+      };
+      const headerTitle = document.getElementById('headerTitle');
+      if (headerTitle && titles[tabId]) {
+        headerTitle.textContent = titles[tabId];
+      }
 
       if (window.innerWidth <= 768) closeMobileMenu();
 
