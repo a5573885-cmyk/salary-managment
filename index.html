@@ -2,53 +2,49 @@
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>進階薪資管理系統</title>
   <style>
     * { box-sizing: border-box; }
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      font-family: Arial, "Helvetica Neue", Helvetica, sans-serif;
       background: #f4f6f9;
-      max-width: 800px;
+      max-width: 950px;
       margin: 0 auto;
-      padding: 12px;
+      padding: 20px;
       color: #333;
     }
     .card {
       background: #ffffff;
-      padding: 16px;
+      padding: 24px;
       border-radius: 12px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-      margin-bottom: 16px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      margin-bottom: 20px;
     }
-    h2 { margin-top: 0; font-size: 20px; color: #2c3e50; }
-    h3 { font-size: 16px; color: #2c3e50; margin: 16px 0 10px 0; }
-    h4 { font-size: 14px; margin-bottom: 10px; color: #555; }
-    
+    h2, h3, h4 { margin-top: 0; color: #2c3e50; }
     .form-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-      gap: 10px;
-      margin-bottom: 12px;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px;
+      margin-bottom: 16px;
     }
     .form-group {
       display: flex;
       flex-direction: column;
     }
     .form-group label {
-      font-size: 12px;
+      font-size: 13px;
       font-weight: bold;
       margin-bottom: 4px;
       color: #555;
     }
     input, select {
       width: 100%;
-      padding: 12px;
+      padding: 10px;
       border: 1px solid #ccc;
-      border-radius: 8px;
-      font-size: 15px;
+      border-radius: 6px;
+      font-size: 14px;
       background-color: #fff;
-      -webkit-appearance: none;
     }
     input:focus, select:focus {
       outline: none;
@@ -56,51 +52,72 @@
     }
     button.btn-primary {
       width: 100%;
-      padding: 14px;
+      padding: 12px;
       background: #27ae60;
       color: white;
       border: none;
-      border-radius: 8px;
+      border-radius: 6px;
       font-size: 16px;
       font-weight: bold;
       cursor: pointer;
       transition: background 0.2s;
     }
-    button.btn-primary:active { background: #219150; }
+    button.btn-primary:hover { background: #219150; }
     
     .filter-section {
       background: #eef2f7;
-      padding: 12px;
+      padding: 14px 16px;
       border-radius: 8px;
-      margin: 16px 0;
+      margin: 20px 0 16px 0;
       display: flex;
-      flex-direction: column;
-      gap: 10px;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
     }
     .filter-group {
       display: flex;
       align-items: center;
-      justify-content: space-between;
       gap: 8px;
     }
-    .filter-group label { font-weight: bold; font-size: 13px; white-space: nowrap; }
-    .filter-group input, .filter-group select { flex: 1; padding: 8px; font-size: 13px; }
+    .filter-group label { font-weight: bold; font-size: 14px; }
+    .filter-group input, .filter-group select { width: auto; }
     .btn-clear {
-      width: 100%;
-      padding: 10px;
+      padding: 8px 12px;
       background: #7f8c8d;
       color: white;
       border: none;
       border-radius: 6px;
       cursor: pointer;
-      font-size: 13px;
     }
+
+    .table-container { overflow-x: auto; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 8px;
+    }
+    th, td {
+      border: 1px solid #e0e0e0;
+      padding: 10px;
+      text-align: center;
+      font-size: 14px;
+    }
+    th { background: #f8f9fa; color: #444; }
+    .btn-del {
+      background: #e74c3c;
+      color: white;
+      border: none;
+      padding: 6px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .btn-del:hover { background: #c0392b; }
 
     /* 狀態標籤 */
     .tag {
-      padding: 3px 8px;
+      padding: 4px 8px;
       border-radius: 12px;
-      font-size: 11px;
+      font-size: 12px;
       font-weight: bold;
       display: inline-block;
     }
@@ -110,107 +127,66 @@
     /* 目標與設定區塊 */
     .target-header {
       display: flex;
-      flex-direction: column;
-      gap: 10px;
-      margin-bottom: 12px;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 16px;
       background: #f8f9fa;
-      padding: 12px;
+      padding: 12px 16px;
       border-radius: 8px;
       border: 1px solid #e9ecef;
     }
     .target-input-group {
       display: flex;
       align-items: center;
-      justify-content: space-between;
       gap: 8px;
+      flex-wrap: wrap;
     }
     .target-input-group input {
-      width: 130px;
+      width: 120px;
       padding: 6px 8px;
-      font-size: 14px;
     }
 
     /* 全年度總累計看板 */
     .annual-box {
       background: linear-gradient(135deg, #1e3c72, #2a5298);
       color: #ffffff;
-      padding: 16px;
+      padding: 20px;
       border-radius: 10px;
-      margin-bottom: 16px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.12);
     }
     .annual-title-row {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 10px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+      gap: 10px;
     }
     .annual-title {
-      font-size: 15px;
+      font-size: 16px;
       font-weight: bold;
+      letter-spacing: 0.5px;
       color: #ecf0f1;
     }
     .annual-grid {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
     }
     .annual-item {
-      background: rgba(255, 255, 255, 0.12);
-      padding: 10px 12px;
+      background: rgba(255, 255, 255, 0.1);
+      padding: 12px 16px;
       border-radius: 8px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+      backdrop-filter: blur(5px);
     }
     .annual-value {
-      font-size: 18px;
+      font-size: 22px;
       font-weight: bold;
       color: #2ecc71;
-    }
-
-    /* 紀錄清單：手機為卡片式，電腦為表格 */
-    .record-card {
-      background: #fdfdfd;
-      border: 1px solid #e2e8f0;
-      border-radius: 8px;
-      padding: 12px;
-      margin-bottom: 10px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.03);
-    }
-    .record-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-bottom: 1px solid #edf2f7;
-      padding-bottom: 8px;
-      margin-bottom: 8px;
-    }
-    .record-title { font-weight: bold; font-size: 16px; color: #2d3748; }
-    .record-body {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 6px;
-      font-size: 13px;
-      color: #4a5568;
-    }
-    .record-footer {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-top: 8px;
-      padding-top: 8px;
-      border-top: 1px dashed #edf2f7;
-    }
-    .total-price { font-size: 16px; font-weight: bold; color: #27ae60; }
-    .btn-del {
-      background: #e74c3c;
-      color: white;
-      border: none;
-      padding: 6px 12px;
-      border-radius: 6px;
-      font-size: 12px;
-      cursor: pointer;
+      margin-top: 4px;
     }
 
     /* 單月明細卡片 */
@@ -218,33 +194,26 @@
       background: #ffffff;
       border: 1px solid #e0e0e0;
       border-radius: 8px;
-      padding: 12px;
-      margin-bottom: 10px;
+      padding: 16px;
+      margin-bottom: 12px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.04);
     }
     .summary-title {
-      font-size: 15px;
+      font-size: 16px;
       font-weight: bold;
       color: #2c3e50;
-      border-bottom: 1px solid #ecf0f1;
-      padding-bottom: 4px;
-      margin-bottom: 8px;
+      border-bottom: 2px solid #ecf0f1;
+      padding-bottom: 6px;
+      margin-bottom: 10px;
     }
     .summary-detail {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      font-size: 13px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 10px;
+      font-size: 14px;
     }
     .status-pass { color: #27ae60; font-weight: bold; }
     .status-fail { color: #e74c3c; font-weight: bold; }
-
-    /* 桌機適應 */
-    @media (min-width: 600px) {
-      .filter-section { flex-direction: row; }
-      .target-header { flex-direction: row; }
-      .annual-grid { display: grid; grid-template-columns: repeat(3, 1fr); }
-      .annual-item { flex-direction: column; align-items: flex-start; }
-    }
   </style>
 </head>
 <body>
@@ -255,16 +224,16 @@
   <!-- 新增薪資表單 -->
   <div class="form-grid">
     <div class="form-group">
-      <label>薪資月份 (如 2026/07)</label>
+      <label>薪資歸屬月份 (如 2026/07)</label>
       <input id="month" placeholder="2026/07">
     </div>
     <div class="form-group">
-      <label>實際領錢日期</label>
+      <label>實際領錢/發薪日期</label>
       <input id="payDate" type="date">
     </div>
     <div class="form-group">
-      <label>時薪 (元)</label>
-      <input id="wage" type="number" placeholder="時薪">
+      <label>時薪</label>
+      <input id="wage" type="number" placeholder="時薪 (元)">
     </div>
     <div class="form-group">
       <label>工作天數</label>
@@ -280,17 +249,17 @@
     </div>
     <div class="form-group">
       <label>加班費自訂金額 (選填)</label>
-      <input id="customOvertimePay" type="number" placeholder="留空自動算">
+      <input id="customOvertimePay" type="number" placeholder="留空則自動計算">
     </div>
     <div class="form-group">
       <label>扣除勞健保/雜費</label>
-      <input id="insurance" type="number" placeholder="預設 0" value="0">
+      <input id="insurance" type="number" placeholder="預設 0 元" value="0">
     </div>
   </div>
 
-  <button class="btn-primary" onclick="addRecord()">＋ 新增薪資紀錄</button>
+  <button class="btn-primary" onclick="addRecord()">新增薪資紀錄</button>
 
-  <!-- 篩選區塊 -->
+  <!-- 多功能篩選區塊 -->
   <div class="filter-section">
     <div class="filter-group">
       <label for="filterPayDate">按領錢日期：</label>
@@ -304,17 +273,33 @@
         <option value="DIFF">僅顯示跨月/非本月入帳</option>
       </select>
     </div>
-    <button class="btn-clear" onclick="clearFilter()">清除篩選條件</button>
+    <button class="btn-clear" onclick="clearFilter()">清除篩選</button>
   </div>
 
-  <!-- 薪資紀錄明細 -->
+  <!-- 薪資明細表格 -->
   <h3>薪資紀錄明細</h3>
-  <div id="recordList"></div>
+  <div class="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th>薪資月份</th>
+          <th>領錢日期</th>
+          <th>入帳狀態</th>
+          <th>本薪</th>
+          <th>加班費</th>
+          <th>扣除勞健保</th>
+          <th>實領總薪資</th>
+          <th>操作</th>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </div>
 </div>
 
-<!-- 統計與目標卡片 -->
+<!-- 統計與目標設定卡片 -->
 <div class="card">
-  <h3>薪資目標與統計差距</h3>
+  <h3>薪資目標設定與統計差距</h3>
 
   <!-- 目標設定區 -->
   <div class="target-header">
@@ -332,19 +317,22 @@
   <div id="annualSummaryContainer"></div>
 
   <!-- 單月明細統計 -->
-  <h4>各月份目標比對明細</h4>
+  <h4 style="margin-bottom: 12px; color: #555;">各月份目標比對明細</h4>
   <div id="summaryContainer"></div>
 </div>
 
 <script>
+  // 載入歷史紀錄與設定
   let records = JSON.parse(localStorage.getItem("salaryRecords") || "[]");
   let targetSalary = +(localStorage.getItem("salaryTarget") || 42000);
   let annualTargetSalary = +(localStorage.getItem("annualSalaryTarget") || 504000);
   let selectedYear = localStorage.getItem("selectedAnnualYear") || new Date().getFullYear().toString();
 
+  // 初始化目標輸入框
   document.getElementById("targetWage").value = targetSalary;
   document.getElementById("annualTargetWage").value = annualTargetSalary;
 
+  // 儲存資料
   function save() {
     localStorage.setItem("salaryRecords", JSON.stringify(records));
     localStorage.setItem("salaryTarget", targetSalary);
@@ -352,6 +340,7 @@
     localStorage.setItem("selectedAnnualYear", selectedYear);
   }
 
+  // 更新目標薪資
   function updateTarget() {
     let valM = +document.getElementById("targetWage").value;
     let valA = +document.getElementById("annualTargetWage").value;
@@ -363,13 +352,21 @@
     render();
   }
 
+  // 自動判斷「領錢日期的月份」與「薪資歸屬月份」是否一致
   function checkEntryType(monthStr, payDateStr) {
     if (!payDateStr || payDateStr === "未設定") return { text: "未設定", code: "UNKNOWN" };
+
     let formattedMonth = monthStr.replace('/', '-');
     let payMonth = payDateStr.substring(0, 7);
-    return formattedMonth === payMonth ? { text: "本月入帳", code: "SAME" } : { text: "跨月/非本月入帳", code: "DIFF" };
+
+    if (formattedMonth === payMonth) {
+      return { text: "本月入帳", code: "SAME" };
+    } else {
+      return { text: "跨月/非本月入帳", code: "DIFF" };
+    }
   }
 
+  // 新增薪資紀錄
   function addRecord() {
     let m = month.value.trim();
     let pDate = payDate.value;
@@ -408,6 +405,7 @@
     save();
     render();
 
+    // 清空輸入
     month.value = "";
     payDate.value = "";
     hours.value = "";
@@ -418,6 +416,7 @@
     insurance.value = "0";
   }
 
+  // 刪除紀錄
   function del(id) {
     if (confirm("確定要刪除這筆紀錄嗎？")) {
       records = records.filter(r => r.id !== id);
@@ -426,29 +425,33 @@
     }
   }
 
+  // 清除篩選
   function clearFilter() {
     document.getElementById("filterPayDate").value = "";
     document.getElementById("filterType").value = "ALL";
     render();
   }
 
+  // 切換年份
   function changeAnnualYear(year) {
     selectedYear = year;
     save();
     render();
   }
 
+  // 渲染畫面
   function render() {
-    let recordList = document.getElementById("recordList");
+    let tbody = document.getElementById("tbody");
     let summaryContainer = document.getElementById("summaryContainer");
     let annualSummaryContainer = document.getElementById("annualSummaryContainer");
     let filterDate = document.getElementById("filterPayDate").value;
     let filterType = document.getElementById("filterType").value;
 
-    recordList.innerHTML = "";
+    tbody.innerHTML = "";
     let monthTotals = {}; 
     let availableYears = new Set();
 
+    // 篩選紀錄
     let filteredRecords = records.filter(r => {
       let entryInfo = checkEntryType(r.month, r.payDate);
       if (filterDate && r.payDate !== filterDate) return false;
@@ -457,33 +460,28 @@
     });
 
     if (filteredRecords.length === 0) {
-      recordList.innerHTML = `<div style="text-align:center; color:#888; padding: 20px 0;">尚無符合條件的紀錄</div>`;
+      tbody.innerHTML = `<tr><td colspan="8" style="color:#888;">尚無符合條件的紀錄</td></tr>`;
     } else {
       filteredRecords.forEach((r) => {
         let entryInfo = checkEntryType(r.month, r.payDate);
         let tagClass = entryInfo.code === "SAME" ? "tag-same" : (entryInfo.code === "DIFF" ? "tag-diff" : "");
 
-        recordList.innerHTML += `
-          <div class="record-card">
-            <div class="record-header">
-              <span class="record-title">${r.month} 薪資</span>
-              <span class="tag ${tagClass}">${entryInfo.text}</span>
-            </div>
-            <div class="record-body">
-              <div>領錢日期：${r.payDate}</div>
-              <div>本薪：${r.normal.toLocaleString()} 元</div>
-              <div>加班費：${r.overtimePay.toLocaleString()} 元</div>
-              <div style="color:#c0392b;">扣勞健保：-${r.insurance.toLocaleString()} 元</div>
-            </div>
-            <div class="record-footer">
-              <div>實領：<span class="total-price">${r.total.toLocaleString()} 元</span></div>
-              <button class="btn-del" onclick="del(${r.id})">刪除</button>
-            </div>
-          </div>
+        tbody.innerHTML += `
+          <tr>
+            <td><strong>${r.month}</strong></td>
+            <td>${r.payDate}</td>
+            <td><span class="tag ${tagClass}">${entryInfo.text}</span></td>
+            <td>${r.normal.toLocaleString()} 元</td>
+            <td>${r.overtimePay.toLocaleString()} 元</td>
+            <td style="color:#c0392b;">-${r.insurance.toLocaleString()} 元</td>
+            <td style="font-weight:bold; color:#27ae60;">${r.total.toLocaleString()} 元</td>
+            <td><button class="btn-del" onclick="del(${r.id})">刪除</button></td>
+          </tr>
         `;
       });
     }
 
+    // 計算各月份實領總額與擷取年份
     records.forEach(r => {
       monthTotals[r.month] = (monthTotals[r.month] || 0) + r.total;
       let y = r.month.split('/')[0].split('-')[0].trim();
@@ -494,14 +492,16 @@
     let yearList = Array.from(availableYears).sort();
 
     if (yearList.length > 0 && !yearList.includes(selectedYear)) {
-      selectedYear = yearList[yearList.length - 1];
+      selectedYear = yearList[yearList.length - 1]; // 預設帶入最新年份
     }
 
+    // --- 全年度獨立統計計算 ---
     let yearMonths = sortedMonths.filter(m => m.startsWith(selectedYear));
     let totalYearIncome = yearMonths.reduce((sum, m) => sum + monthTotals[m], 0);
     let avgYearIncome = yearMonths.length > 0 ? Math.round(totalYearIncome / yearMonths.length) : 0;
     let annualDiff = totalYearIncome - annualTargetSalary;
 
+    // 渲染整年統計大看板
     if (sortedMonths.length === 0) {
       annualSummaryContainer.innerHTML = "";
     } else {
@@ -510,31 +510,35 @@
       annualSummaryContainer.innerHTML = `
         <div class="annual-box">
           <div class="annual-title-row">
-            <div class="annual-title">📊 年度統計看板</div>
-            <select style="width:auto; padding:4px 8px; color:#333; font-size:12px; border-radius:6px;" onchange="changeAnnualYear(this.value)">
-              ${yearOptions}
-            </select>
+            <div class="annual-title">📊 整年度薪資總統計看板</div>
+            <div>
+              <label style="font-size:14px; margin-right:4px;">選擇年份：</label>
+              <select style="width:auto; padding:4px 8px; color:#333;" onchange="changeAnnualYear(this.value)">
+                ${yearOptions}
+              </select>
+            </div>
           </div>
           <div class="annual-grid">
             <div class="annual-item">
-              <span>${selectedYear} 總收入</span>
-              <span class="annual-value">${totalYearIncome.toLocaleString()} 元</span>
+              <div>${selectedYear} 年度總實領收入</div>
+              <div class="annual-value">${totalYearIncome.toLocaleString()} 元</div>
             </div>
             <div class="annual-item">
-              <span>平均月薪</span>
-              <span class="annual-value" style="color: #3498db;">${avgYearIncome.toLocaleString()} 元</span>
+              <div>${selectedYear} 年度平均月薪</div>
+              <div class="annual-value" style="color: #3498db;">${avgYearIncome.toLocaleString()} 元</div>
             </div>
             <div class="annual-item">
-              <span>年度目標差距</span>
-              <span class="annual-value" style="color: ${annualDiff >= 0 ? '#2ecc71' : '#ff7675'};">
+              <div>整年目標差距 (目標: ${annualTargetSalary.toLocaleString()} 元)</div>
+              <div class="annual-value" style="color: ${annualDiff >= 0 ? '#2ecc71' : '#e74c3c'};">
                 ${annualDiff >= 0 ? `+${annualDiff.toLocaleString()}` : `${annualDiff.toLocaleString()}`} 元
-              </span>
+              </div>
             </div>
           </div>
         </div>
       `;
     }
 
+    // 渲染單月明細
     summaryContainer.innerHTML = "";
     if (sortedMonths.length === 0) {
       summaryContainer.innerHTML = "<div style='color:#777;'>尚無月份資料</div>";
@@ -548,11 +552,12 @@
           <div class="summary-card">
             <div class="summary-title">📅 月份：${m}</div>
             <div class="summary-detail">
-              <div>實領薪資：<strong>${actual.toLocaleString()} 元</strong>（目標：${targetSalary.toLocaleString()} 元）</div>
+              <div>實領薪資：<strong>${actual.toLocaleString()} 元</strong></div>
+              <div>單月目標：${targetSalary.toLocaleString()} 元</div>
               <div>
-                差距：
+                目標差距：
                 <span class="${isPass ? 'status-pass' : 'status-fail'}">
-                  ${isPass ? `+${diff.toLocaleString()} 元 (達標 🎉)` : `${diff.toLocaleString()} 元 (差 ${Math.abs(diff).toLocaleString()} 元)`}
+                  ${isPass ? `+${diff.toLocaleString()} 元 (已達標 🎉)` : `${diff.toLocaleString()} 元 (還差 ${Math.abs(diff).toLocaleString()} 元)`}
                 </span>
               </div>
             </div>
@@ -562,6 +567,7 @@
     }
   }
 
+  // 初始讀取與渲染
   render();
 </script>
 
