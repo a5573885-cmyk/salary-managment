@@ -153,7 +153,7 @@
       display: none !important;
     }
 
-    /* 新增：使用者個人資訊元件 */
+    /* 使用者個人資訊元件 */
     .user-profile {
       display: flex;
       align-items: center;
@@ -258,7 +258,7 @@
       display: none !important; 
     }
 
-    /* 新增：側邊欄底部黑夜模式切換按鈕 */
+    /* 側邊欄底部黑夜模式切換按鈕 */
     .sidebar-footer {
       padding: 12px;
       border-top: 1px solid rgba(255, 255, 255, 0.1);
@@ -305,7 +305,7 @@
       width: calc(100% - var(--sidebar-collapsed-width));
     }
 
-    /* 新增：頂部導航列 (Top Header) */
+    /* 頂部導航列 (Top Header) */
     .top-header {
       height: 64px;
       background-color: var(--header-bg);
@@ -372,6 +372,8 @@
     .content-container {
       padding: 24px;
       flex: 1;
+      width: 100%;
+      min-width: 0;
     }
 
     .tab-content { 
@@ -404,63 +406,40 @@
       gap: 8px;
     }
 
-    /* 可展開收合的 details 樣式設計 */
-    details.card-accordion {
-      background: var(--card-bg);
-      border-radius: 8px;
-      margin-bottom: 20px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-      border: 1px solid var(--border-color);
-      overflow: hidden;
-      transition: all 0.2s ease;
+    /* 內嵌於卡片內部的 details/summary 樣式 */
+    .inline-accordion {
+      margin-top: 16px;
+      border-top: 1px solid var(--border-color);
+      padding-top: 12px;
     }
 
-    details.card-accordion[open] {
-      border-color: var(--primary-color);
-    }
-
-    details.card-accordion summary {
-      padding: 16px 20px;
-      font-size: 1.1rem;
-      font-weight: 600;
-      color: var(--primary-color);
+    .inline-accordion summary {
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: space-between;
       user-select: none;
       list-style: none;
-      background-color: var(--card-bg);
-      transition: background-color 0.2s;
+      color: var(--primary-color);
+      font-weight: 600;
+      font-size: 0.85rem;
+      padding: 6px 0;
     }
 
-    details.card-accordion summary::-webkit-details-marker {
+    .inline-accordion summary::-webkit-details-marker {
       display: none;
     }
 
-    details.card-accordion summary:hover {
-      background-color: var(--bg-color);
+    .inline-accordion summary:hover {
+      opacity: 0.8;
     }
 
-    .summary-title {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .summary-icon {
-      transition: transform 0.3s ease;
-      color: var(--text-secondary);
-    }
-
-    details.card-accordion[open] .summary-icon {
+    .inline-accordion[open] .summary-icon {
       transform: rotate(180deg);
-      color: var(--primary-color);
     }
 
-    .accordion-body {
-      padding: 20px;
-      border-top: 1px solid var(--border-color);
+    .accordion-chart-body {
+      padding-top: 12px;
     }
 
     .form-grid {
@@ -641,19 +620,19 @@
 
     .stats-grid-4 {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: repeat(2, 1fr);
       gap: 16px;
       margin-bottom: 24px;
     }
 
-    @media (max-width: 1200px) {
+    @media (max-width: 992px) {
       .stats-grid-4 {
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: 1fr;
       }
     }
 
     @media (max-width: 768px) {
-      .stats-grid-2, .stats-grid-4 {
+      .stats-grid-2 {
         grid-template-columns: 1fr;
       }
     }
@@ -665,17 +644,9 @@
       border: 1px solid var(--border-color);
       border-left: 4px solid var(--primary-color);
       box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    }
-
-    .stat-card-clickable {
-      cursor: pointer;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-      position: relative;
-    }
-
-    .stat-card-clickable:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
     }
 
     .stat-card h4 { 
@@ -687,47 +658,35 @@
       justify-content: space-between;
     }
 
-    .click-hint {
-      font-size: 0.7rem;
-      color: var(--primary-color);
-      font-weight: normal;
-      background: var(--bg-color);
-      padding: 2px 6px;
-      border-radius: 4px;
-    }
-
     .stat-card .value { 
       font-size: 1.5rem; 
       font-weight: bold; 
       color: var(--primary-color); 
     }
 
-    /* 四欄圖表區佈局 */
-    .charts-grid-4 {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 20px;
-    }
-
+    /* 圖表容器 - 關鍵響應式修正，防止手機端被裁切 */
     .chart-box {
       position: relative;
-      height: 320px;
+      height: 350px;
       width: 100%;
+      min-width: 0;
     }
 
-    @media (max-width: 992px) {
-      .charts-grid-4 { 
-        grid-template-columns: 1fr; 
-      }
+    .pie-chart-box {
+      position: relative;
+      height: 260px;
+      width: 100%;
+      min-width: 0;
     }
 
     @media (max-width: 768px) {
       .top-header {
         padding-left: 16px;
+        padding-right: 16px;
       }
       
       .search-box {
-        width: 160px;
+        width: 140px;
       }
 
       .mobile-header {
@@ -746,10 +705,20 @@
       .main-wrapper {
         margin-left: 0 !important;
         width: 100% !important;
+        padding-top: 56px; /* 留出手機 Header 空間 */
       }
 
       .content-container {
-        padding: 16px;
+        padding: 12px;
+      }
+
+      /* 手機版圖表高度微調 */
+      .chart-box {
+        height: 280px;
+      }
+
+      .pie-chart-box {
+        height: 240px;
       }
 
       .sidebar .sidebar-title {
@@ -777,10 +746,6 @@
         justify-content: flex-start !important;
         padding: 12px 20px !important;
         gap: 16px !important;
-      }
-
-      .chart-box {
-        height: 300px;
       }
     }
   </style>
@@ -814,7 +779,7 @@
         </button>
       </div>
 
-      <!-- 新增：使用者個人資訊卡片 -->
+      <!-- 使用者個人資訊卡片 -->
       <div class="user-profile">
         <div class="avatar">A</div>
         <div class="user-info">
@@ -839,7 +804,7 @@
       </nav>
     </div>
 
-    <!-- 新增：側邊欄底部黑夜模式切換按鈕 -->
+    <!-- 側邊欄底部黑夜模式切換按鈕 -->
     <div class="sidebar-footer">
       <button id="theme-toggle" class="theme-toggle-btn">
         <span class="material-icons" id="theme-icon">dark_mode</span>
@@ -851,7 +816,7 @@
   <!-- 右側內容區 -->
   <main class="main-wrapper">
 
-    <!-- 新增：頂部導航列 (Top Header) -->
+    <!-- 頂部導航列 (Top Header) -->
     <header class="top-header">
       <div class="search-box">
         <span class="material-icons" style="color: var(--text-secondary); font-size: 20px;">search</span>
@@ -1079,13 +1044,13 @@
 
         <div class="card">
           <h3 class="card-title"><span class="material-icons">bar_chart</span> 每月收入與目標趨勢圖</h3>
-          <div class="chart-box" style="height: 360px;">
+          <div class="chart-box">
             <canvas id="monthlyChart"></canvas>
           </div>
         </div>
       </section>
 
-      <!-- TAB 3: 收入佔比圖表分析 -->
+      <!-- TAB 3: 收入佔比圖表分析 (已改為卡片內直接展開對應圓餅圖) -->
       <section id="pieTab" class="tab-content">
         <div class="card">
           <div class="form-grid" style="align-items: flex-end;">
@@ -1114,102 +1079,83 @@
           </div>
         </div>
 
-        <!-- 點擊觸發展開圖表的 4 個看板卡片 -->
+        <!-- 4 個看板卡片，各自包含專屬的手風琴圓餅圖區塊 -->
         <div class="stats-grid-4">
-          <div class="stat-card stat-card-clickable" style="border-left-color: #4caf50;" onclick="openAndScrollToChart('statusAccordion', statusChartInstance)">
-            <h4>
-              <span>入帳狀態統計</span>
-              <span class="click-hint">點擊展開圖表</span>
-            </h4>
-            <div class="value statPayStatusSummary" style="font-size: 0.9rem; font-weight: normal; margin-top: 4px;">無資料</div>
+          <!-- 1. 入帳狀態 -->
+          <div class="stat-card" style="border-left-color: #4caf50;">
+            <div>
+              <h4><span>入帳狀態統計</span></h4>
+              <div class="value statPayStatusSummary" style="font-size: 0.9rem; font-weight: normal; margin-top: 4px;">無資料</div>
+            </div>
+            <details class="inline-accordion" id="statusAccordion" ontoggle="handleAccordionToggle(this, statusChartInstance)">
+              <summary>
+                <span>查看佔比圖表</span>
+                <span class="material-icons summary-icon" style="font-size: 18px;">expand_more</span>
+              </summary>
+              <div class="accordion-chart-body">
+                <div class="pie-chart-box">
+                  <canvas id="statusPieChart"></canvas>
+                </div>
+              </div>
+            </details>
           </div>
 
-          <div class="stat-card stat-card-clickable" style="border-left-color: #ff9800;" onclick="openAndScrollToChart('unitAccordion', pieChartInstance)">
-            <h4>
-              <span>Top 3 主要單位</span>
-              <span class="click-hint">點擊展開圖表</span>
-            </h4>
-            <div class="value statTopUnits" style="font-size: 0.9rem; font-weight: normal; margin-top: 4px;">無資料</div>
+          <!-- 2. 付款單位 -->
+          <div class="stat-card" style="border-left-color: #ff9800;">
+            <div>
+              <h4><span>Top 3 主要單位</span></h4>
+              <div class="value statTopUnits" style="font-size: 0.9rem; font-weight: normal; margin-top: 4px;">無資料</div>
+            </div>
+            <details class="inline-accordion" id="unitAccordion" ontoggle="handleAccordionToggle(this, pieChartInstance)">
+              <summary>
+                <span>查看佔比圖表</span>
+                <span class="material-icons summary-icon" style="font-size: 18px;">expand_more</span>
+              </summary>
+              <div class="accordion-chart-body">
+                <div class="pie-chart-box">
+                  <canvas id="unitPieChart"></canvas>
+                </div>
+              </div>
+            </details>
           </div>
 
-          <div class="stat-card stat-card-clickable" style="border-left-color: #9c27b0;" onclick="openAndScrollToChart('jobTypeAccordion', jobTypeChartInstance)">
-            <h4>
-              <span>Top 3 工作類型</span>
-              <span class="click-hint">點擊展開圖表</span>
-            </h4>
-            <div class="value statTopJobTypes" style="font-size: 0.9rem; font-weight: normal; margin-top: 4px;">無資料</div>
+          <!-- 3. 工作類型 -->
+          <div class="stat-card" style="border-left-color: #9c27b0;">
+            <div>
+              <h4><span>Top 3 工作類型</span></h4>
+              <div class="value statTopJobTypes" style="font-size: 0.9rem; font-weight: normal; margin-top: 4px;">無資料</div>
+            </div>
+            <details class="inline-accordion" id="jobTypeAccordion" ontoggle="handleAccordionToggle(this, jobTypeChartInstance)">
+              <summary>
+                <span>查看佔比圖表</span>
+                <span class="material-icons summary-icon" style="font-size: 18px;">expand_more</span>
+              </summary>
+              <div class="accordion-chart-body">
+                <div class="pie-chart-box">
+                  <canvas id="jobTypePieChart"></canvas>
+                </div>
+              </div>
+            </details>
           </div>
 
-          <div class="stat-card stat-card-clickable" style="border-left-color: #00bcd4;" onclick="openAndScrollToChart('cityAccordion', cityChartInstance)">
-            <h4>
-              <span>Top 3 工作城市</span>
-              <span class="click-hint">點擊展開圖表</span>
-            </h4>
-            <div class="value statTopCities" style="font-size: 0.9rem; font-weight: normal; margin-top: 4px;">無資料</div>
+          <!-- 4. 工作城市 -->
+          <div class="stat-card" style="border-left-color: #00bcd4;">
+            <div>
+              <h4><span>Top 3 工作城市</span></h4>
+              <div class="value statTopCities" style="font-size: 0.9rem; font-weight: normal; margin-top: 4px;">無資料</div>
+            </div>
+            <details class="inline-accordion" id="cityAccordion" ontoggle="handleAccordionToggle(this, cityChartInstance)">
+              <summary>
+                <span>查看佔比圖表</span>
+                <span class="material-icons summary-icon" style="font-size: 18px;">expand_more</span>
+              </summary>
+              <div class="accordion-chart-body">
+                <div class="pie-chart-box">
+                  <canvas id="cityPieChart"></canvas>
+                </div>
+              </div>
+            </details>
           </div>
-        </div>
-
-        <!-- 四大佔比圓餅圖區 -->
-        <div class="charts-grid-4">
-          <!-- 1. 入帳狀態圖表 -->
-          <details class="card-accordion" id="statusAccordion" ontoggle="handleAccordionToggle(this, statusChartInstance)">
-            <summary>
-              <div class="summary-title">
-                <span class="material-icons">published_with_changes</span> 本月 vs 跨月入帳佔比
-              </div>
-              <span class="material-icons summary-icon">expand_more</span>
-            </summary>
-            <div class="accordion-body">
-              <div class="chart-box">
-                <canvas id="statusPieChart"></canvas>
-              </div>
-            </div>
-          </details>
-
-          <!-- 2. 付款單位圖表 -->
-          <details class="card-accordion" id="unitAccordion" ontoggle="handleAccordionToggle(this, pieChartInstance)">
-            <summary>
-              <div class="summary-title">
-                <span class="material-icons">pie_chart</span> 付款單位收入佔比
-              </div>
-              <span class="material-icons summary-icon">expand_more</span>
-            </summary>
-            <div class="accordion-body">
-              <div class="chart-box">
-                <canvas id="unitPieChart"></canvas>
-              </div>
-            </div>
-          </details>
-
-          <!-- 3. 工作類型圖表 -->
-          <details class="card-accordion" id="jobTypeAccordion" ontoggle="handleAccordionToggle(this, jobTypeChartInstance)">
-            <summary>
-              <div class="summary-title">
-                <span class="material-icons">donut_small</span> 工作類型收入佔比
-              </div>
-              <span class="material-icons summary-icon">expand_more</span>
-            </summary>
-            <div class="accordion-body">
-              <div class="chart-box">
-                <canvas id="jobTypePieChart"></canvas>
-              </div>
-            </div>
-          </details>
-
-          <!-- 4. 工作城市圖表 -->
-          <details class="card-accordion" id="cityAccordion" ontoggle="handleAccordionToggle(this, cityChartInstance)">
-            <summary>
-              <div class="summary-title">
-                <span class="material-icons">location_city</span> 工作城市收入佔比
-              </div>
-              <span class="material-icons summary-icon">expand_more</span>
-            </summary>
-            <div class="accordion-body">
-              <div class="chart-box">
-                <canvas id="cityPieChart"></canvas>
-              </div>
-            </div>
-          </details>
         </div>
       </section>
     </div>
@@ -1225,19 +1171,19 @@
     let cityChartInstance = null;
     let statusChartInstance = null;
 
-    // 共用圓餅圖預設設定
+    // 共用圓餅圖預設設定 (啟用 maintainAspectRatio: false 配合視窗彈性縮放)
     const commonPieOptions = {
       responsive: true,
       maintainAspectRatio: false,
       layout: {
-        padding: 15
+        padding: 5
       },
       plugins: {
         legend: {
           position: 'bottom',
           labels: {
-            boxWidth: 12,
-            padding: 12,
+            boxWidth: 10,
+            padding: 8,
             font: {
               size: 11
             }
@@ -1271,11 +1217,10 @@
       themeIcon.textContent = isDark ? 'light_mode' : 'dark_mode';
       themeText.textContent = isDark ? '切換明亮模式' : '切換暗黑模式';
       
-      // 切換主題時自動重繪所有圖表以符合情境
       updateStatsView();
     });
 
-    // 展開/收合 details 時，動態更新 Chart.js 尺寸
+    // 展開/收合 details 時，動態重新計算並繪製 Chart.js 尺寸
     function handleAccordionToggle(detailsEl, chartInstance) {
       if (detailsEl.open && chartInstance) {
         setTimeout(() => {
@@ -1283,25 +1228,6 @@
           chartInstance.update();
         }, 50);
       }
-    }
-
-    // 點擊看板卡片時：開啟對應的手風琴並滾動至該圖表
-    function openAndScrollToChart(accordionId, chartInstance) {
-      const accordion = document.getElementById(accordionId);
-      if (!accordion) return;
-
-      if (!accordion.open) {
-        accordion.open = true;
-      }
-
-      if (chartInstance) {
-        setTimeout(() => {
-          chartInstance.resize();
-          chartInstance.update();
-        }, 50);
-      }
-
-      accordion.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
     // 側邊欄 Toggle
@@ -1313,6 +1239,14 @@
         const isCollapsed = sidebar.classList.contains('collapsed');
         document.getElementById('toggleIcon').textContent = isCollapsed ? 'chevron_right' : 'chevron_left';
       }
+      // 側邊欄開合會影響內容寬度，觸發圖表自動調整
+      setTimeout(() => {
+        if (monthlyChartInstance) monthlyChartInstance.resize();
+        if (statusChartInstance) statusChartInstance.resize();
+        if (pieChartInstance) pieChartInstance.resize();
+        if (jobTypeChartInstance) jobTypeChartInstance.resize();
+        if (cityChartInstance) cityChartInstance.resize();
+      }, 300);
     });
 
     // 手機版選單控制
@@ -1661,7 +1595,7 @@
       renderCityPieChart(citySums);
     }
 
-    // 每月趨勢圖
+    // 每月趨勢圖 (修正 maintainAspectRatio 設定)
     function renderMonthlyChart(year, month, targetMonthly, periodRecords) {
       const canvas = document.getElementById('monthlyChart');
       if (!canvas) return;
