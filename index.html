@@ -183,14 +183,14 @@
 
     <!-- 匯率開關 -->
     <div class="switch-group">
-      <span class="switch-label">啟用匯率換算 (AUD)</span>
+      <span class="switch-label">啟用匯率換算</span>
       <label class="switch">
         <input type="checkbox" id="exchangeToggle">
         <span class="slider"></span>
       </label>
     </div>
 
-    <!-- 輸入欄位：AUD 匯率 (預設隱藏) -->
+    <!-- 輸入欄位：匯率 (預設隱藏) -->
     <div class="form-group hidden" id="exchangeRateGroup">
       <label for="audRate">匯率 (1 AUD 相當於多少 TWD)</label>
       <input type="number" id="audRate" value="20.8" step="0.1" min="0.1">
@@ -198,15 +198,15 @@
 
     <!-- 時薪結果顯示區 -->
     <div class="result-box">
-      <!-- 台幣顯示（預設持續顯示） -->
+      <!-- 未啟用匯率時：預設顯示標籤為「時薪」 -->
       <div class="rate-row">
-        <span class="rate-label">時薪 (TWD)</span>
+        <span class="rate-label" id="twdLabel">時薪</span>
         <span class="rate-value" id="twdResult">NT$ 250</span>
       </div>
 
-      <!-- 澳幣顯示（未啟用時隱藏） -->
+      <!-- 啟用匯率時：同時顯示澳幣金額 -->
       <div class="rate-row hidden" id="audResultRow">
-        <span class="rate-label">時薪 (AUD)</span>
+        <span class="rate-label">時薪</span>
         <span class="rate-value aud" id="audResult">A$ 0.00</span>
       </div>
     </div>
@@ -221,6 +221,7 @@
     const exchangeRateGroup = document.getElementById('exchangeRateGroup');
     const audResultRow = document.getElementById('audResultRow');
     
+    const twdLabel = document.getElementById('twdLabel');
     const twdResult = document.getElementById('twdResult');
     const audResult = document.getElementById('audResult');
 
@@ -235,20 +236,24 @@
 
       // 根據開關狀態決定顯示邏輯
       if (isEnabled) {
-        // 啟用時：計算並顯示 AUD 相關欄位
+        // 啟用時：顯示台幣與澳幣兩個欄位，標示幣別
+        twdLabel.textContent = '時薪 (TWD)';
+        
         const audVal = (twdVal / exchangeRateVal).toFixed(2);
         audResult.textContent = `A$ ${parseFloat(audVal).toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
 
         exchangeRateGroup.classList.remove('hidden');
         audResultRow.classList.remove('hidden');
       } else {
-        // 未啟用時：隱藏 AUD 相關欄位
+        // 未啟用時：隱藏 AUD 相關欄位，並將預設欄位標籤恢復為單純的「時薪」
+        twdLabel.textContent = '時薪';
+        
         exchangeRateGroup.classList.add('hidden');
         audResultRow.classList.add('hidden');
       }
     }
 
-    // 事件監聽 (輸入變更或開關切換時自動更新)
+    // 事件監聽
     twdRateInput.addEventListener('input', updateRates);
     audRateInput.addEventListener('input', updateRates);
     exchangeToggle.addEventListener('change', updateRates);
