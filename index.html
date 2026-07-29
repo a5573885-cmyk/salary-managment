@@ -401,7 +401,7 @@
       border-color: var(--primary-color);
     }
 
-    /* 附帶圖示的輸入或下拉選單外框包裝 */
+    /* 附帶圖示的外框包裝 */
     .input-icon-wrapper {
       position: relative;
       display: flex;
@@ -422,7 +422,6 @@
       pointer-events: none;
     }
 
-    /* 搜尋輸入框樣式 */
     .search-box-wrapper {
       position: relative;
       display: flex;
@@ -489,7 +488,6 @@
       opacity: 0.6;
     }
 
-    /* 懸浮按鈕樣式 */
     .btn-open-modal {
       display: inline-flex;
       align-items: center;
@@ -534,7 +532,6 @@
       margin-bottom: 20px;
     }
 
-    /* 明細表格 */
     .table-container {
       width: 100%;
       overflow-x: auto;
@@ -599,7 +596,6 @@
       color: #7b1fa2;
     }
 
-    /* 看板數據卡片網格 */
     .stats-grid-2 {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
@@ -887,7 +883,7 @@
         </button>
         <button class="nav-btn" onclick="switchTab('trendTab', this)">
           <span class="material-icons">show_chart</span>
-          <span class="nav-btn-text">每月收入趨勢圖</span>
+          <span class="nav-btn-text">收入趨勢圖</span>
         </button>
         <button class="nav-btn" onclick="switchTab('pieTab', this)">
           <span class="material-icons">pie_chart</span>
@@ -962,7 +958,7 @@
                 </datalist>
               </div>
               <div class="form-group">
-                <label>工作城市 / 地點 (可自行輸入)</label>
+                <label>工作城市 / 地點</label>
                 <div class="input-icon-wrapper">
                   <input type="text" id="city" list="cityOptions" placeholder="選擇或直接輸入城市名稱" required>
                   <span class="material-icons field-icon">arrow_drop_down</span>
@@ -1117,18 +1113,39 @@
         </div>
       </section>
 
-      <!-- TAB 3: 每月收入趨勢圖 -->
+      <!-- TAB 3: 收入趨勢圖 (支援年與月篩選) -->
       <section id="trendTab" class="tab-content">
         <div class="card">
           <div class="form-grid" style="align-items: flex-end;">
             <div class="form-group">
-              <label>選擇統計月份</label>
+              <label>統計年份篩選</label>
               <div class="input-icon-wrapper">
-                <input type="month" class="stats-month-picker-input" onchange="syncStatsMonthPicker(this.value)">
-                <span class="material-icons field-icon">event</span>
+                <select class="stats-year-select" onchange="syncStatsYear(this.value)">
+                  <!-- 動態產生年份選項 -->
+                </select>
+                <span class="material-icons field-icon">arrow_drop_down</span>
               </div>
-              <input type="hidden" class="stats-year-input">
-              <input type="hidden" class="stats-month-select" value="ALL">
+            </div>
+            <div class="form-group">
+              <label>統計月份篩選</label>
+              <div class="input-icon-wrapper">
+                <select class="stats-month-select" onchange="syncStatsMonth(this.value)">
+                  <option value="ALL">全年 (1-12月)</option>
+                  <option value="01">1月</option>
+                  <option value="02">2月</option>
+                  <option value="03">3月</option>
+                  <option value="04">4月</option>
+                  <option value="05">5月</option>
+                  <option value="06">6月</option>
+                  <option value="07">7月</option>
+                  <option value="08">8月</option>
+                  <option value="09">9月</option>
+                  <option value="10">10月</option>
+                  <option value="11">11月</option>
+                  <option value="12">12月</option>
+                </select>
+                <span class="material-icons field-icon">arrow_drop_down</span>
+              </div>
             </div>
             <div class="form-group">
               <label>設定目標月薪</label>
@@ -1151,7 +1168,7 @@
             </div>
             <button class="btn-open-modal" onclick="openChartModal('trendModal')">
               <span class="material-icons" style="font-size: 18px;">show_chart</span>
-              查看每月趨勢懸浮圖表
+              查看收入趨勢懸浮圖表
             </button>
           </div>
           <div class="stat-card" style="border-left-color: #2196f3;">
@@ -1162,24 +1179,45 @@
             </div>
             <button class="btn-open-modal" onclick="openChartModal('trendModal')">
               <span class="material-icons" style="font-size: 18px;">bar_chart</span>
-              查看每月趨勢懸浮圖表
+              查看收入趨勢懸浮圖表
             </button>
           </div>
         </div>
       </section>
 
-      <!-- TAB 4: 收入佔比圖表分析 -->
+      <!-- TAB 4: 收入佔比圖表分析 (支援年與月篩選) -->
       <section id="pieTab" class="tab-content">
         <div class="card">
           <div class="form-grid" style="align-items: flex-end;">
             <div class="form-group">
-              <label>選擇統計月份</label>
+              <label>統計年份篩選</label>
               <div class="input-icon-wrapper">
-                <input type="month" class="stats-month-picker-input" onchange="syncStatsMonthPicker(this.value)">
-                <span class="material-icons field-icon">event</span>
+                <select class="stats-year-select" onchange="syncStatsYear(this.value)">
+                  <!-- 動態產生年份選項 -->
+                </select>
+                <span class="material-icons field-icon">arrow_drop_down</span>
               </div>
-              <input type="hidden" class="stats-year-input">
-              <input type="hidden" class="stats-month-select" value="ALL">
+            </div>
+            <div class="form-group">
+              <label>統計月份篩選</label>
+              <div class="input-icon-wrapper">
+                <select class="stats-month-select" onchange="syncStatsMonth(this.value)">
+                  <option value="ALL">全年 (1-12月)</option>
+                  <option value="01">1月</option>
+                  <option value="02">2月</option>
+                  <option value="03">3月</option>
+                  <option value="04">4月</option>
+                  <option value="05">5月</option>
+                  <option value="06">6月</option>
+                  <option value="07">7月</option>
+                  <option value="08">8月</option>
+                  <option value="09">9月</option>
+                  <option value="10">10月</option>
+                  <option value="11">11月</option>
+                  <option value="12">12月</option>
+                </select>
+                <span class="material-icons field-icon">arrow_drop_down</span>
+              </div>
             </div>
           </div>
         </div>
@@ -1242,13 +1280,13 @@
        懸浮對話框元件 (Modals)
        ========================================== -->
 
-  <!-- 0. 每月收入與目標趨勢對話框 -->
+  <!-- 0. 收入與目標趨勢對話框 -->
   <div class="modal-overlay" id="trendModal" onclick="closeChartModalOnOverlay(event, 'trendModal')">
     <div class="modal-container large-modal">
       <div class="modal-header">
         <div class="modal-title">
           <span class="material-icons">bar_chart</span>
-          <span>每月收入與目標趨勢圖</span>
+          <span>收入與目標趨勢圖</span>
         </div>
         <button class="modal-close-btn" onclick="closeChartModal('trendModal')">
           <span class="material-icons">close</span>
@@ -1257,7 +1295,7 @@
       <div class="modal-body">
         <div class="scroll-hint">
           <span class="material-icons" style="font-size: 14px;">swipe</span>
-          <span>左右滑動查看完整 12 個月數據</span>
+          <span>左右滑動查看完整數據</span>
         </div>
         <div class="scrollable-chart-container">
           <div class="modal-trend-chart-box" id="trendChartBox">
@@ -1390,7 +1428,7 @@
 
     // 初始化
     document.addEventListener('DOMContentLoaded', () => {
-      initYearInputs();
+      initYearSelectOptions();
       document.getElementById('enableTwd').checked = isTwdEnabled;
       document.getElementById('rateInputGroup').style.display = isTwdEnabled ? 'flex' : 'none';
       updateView();
@@ -1486,21 +1524,19 @@
       }
     }
 
-    // 同步統計月份（透過 HTML5 <input type="month"> 日曆選擇器）
-    function syncStatsMonthPicker(val) {
-      document.querySelectorAll('.stats-month-picker-input').forEach(i => i.value = val);
-      
-      let yearVal = new Date().getFullYear();
-      let monthVal = 'ALL';
+    // 同步統計年份
+    function syncStatsYear(val) {
+      document.querySelectorAll('.stats-year-select').forEach(select => {
+        select.value = val;
+      });
+      updateStatsView();
+    }
 
-      if (val) {
-        const parts = val.split('-');
-        yearVal = parts[0];
-        monthVal = parts[1];
-      }
-
-      document.querySelectorAll('.stats-year-input').forEach(i => i.value = yearVal);
-      document.querySelectorAll('.stats-month-select').forEach(s => s.value = monthVal);
+    // 同步統計月份
+    function syncStatsMonth(val) {
+      document.querySelectorAll('.stats-month-select').forEach(select => {
+        select.value = val;
+      });
       updateStatsView();
     }
 
@@ -1625,12 +1661,13 @@
 
     // 全域畫面更新
     function updateView() {
+      initYearSelectOptions();
       renderTable();
       updateFilterOptions();
       updateStatsView();
     }
 
-    // 渲染明細表格（含關鍵字搜尋、日曆區間篩選與選單篩選）
+    // 渲染明細表格
     function renderTable() {
       const tbody = document.getElementById('recordsTableBody');
       if (!tbody) return;
@@ -1736,29 +1773,36 @@
       selectCity.value = currentCityVal;
     }
 
-    // 初始化日曆月份輸入框預設值
-    function initYearInputs() {
+    // 初始化動態年份選項（自動抓取現有紀錄的年份，若無則包含當前年份）
+    function initYearSelectOptions() {
       const currentYear = new Date().getFullYear();
-      const currentMonthStr = `${currentYear}-${String(new Date().getMonth() + 1).padStart(2, '0')}`;
-      
-      document.querySelectorAll('.stats-year-input').forEach(input => {
-        input.value = currentYear;
-      });
-      document.querySelectorAll('.stats-month-picker-input').forEach(input => {
-        input.value = currentMonthStr;
-      });
-      document.querySelectorAll('.stats-month-select').forEach(select => {
-        select.value = String(new Date().getMonth() + 1).padStart(2, '0');
+      const recordYears = records.map(r => r.salaryMonth ? r.salaryMonth.substring(0, 4) : '').filter(Boolean);
+      let years = [...new Set([String(currentYear), ...recordYears])].sort().reverse();
+
+      document.querySelectorAll('.stats-year-select').forEach(select => {
+        const currentValue = select.value || String(currentYear);
+        select.innerHTML = '';
+        years.forEach(y => {
+          const opt = document.createElement('option');
+          opt.value = y;
+          opt.textContent = `${y} 年`;
+          select.appendChild(opt);
+        });
+        if (years.includes(currentValue)) {
+          select.value = currentValue;
+        } else if (years.length > 0) {
+          select.value = years[0];
+        }
       });
     }
 
     // 更新統計看板與圖表
     function updateStatsView() {
-      const yearInput = document.querySelector('.stats-year-input');
+      const yearSelect = document.querySelector('.stats-year-select');
       const monthSelect = document.querySelector('.stats-month-select');
-      if (!yearInput || !monthSelect) return;
+      if (!yearSelect || !monthSelect) return;
 
-      const selectedYear = yearInput.value || String(new Date().getFullYear());
+      const selectedYear = yearSelect.value || String(new Date().getFullYear());
       const selectedMonth = monthSelect.value; 
       const targetMonthly = parseFloat(document.querySelector('.target-monthly-input').value) || 0;
       const targetYearly = parseFloat(document.querySelector('.target-yearly-input').value) || 0;
@@ -1777,7 +1821,7 @@
 
       const labelTotalTitle = document.getElementById('labelTotalTitle');
       if (labelTotalTitle) {
-        labelTotalTitle.textContent = selectedMonth === 'ALL' ? '年度累計總收入' : `${parseInt(selectedMonth)}月累計收入`;
+        labelTotalTitle.textContent = selectedMonth === 'ALL' ? `${selectedYear} 年度累計總收入` : `${selectedYear}年${parseInt(selectedMonth)}月累計收入`;
       }
 
       document.querySelectorAll('.statYearTotal').forEach(el => el.innerHTML = formatMoney(totalIncome));
@@ -1875,7 +1919,7 @@
         data: {
           labels: chartLabels,
           datasets: [
-            { label: '實際收入', data: monthlyTotals, backgroundColor: '#3f51b5', borderRadius: 4 },
+            { label: `${year} 實際收入`, data: monthlyTotals, backgroundColor: '#3f51b5', borderRadius: 4 },
             { label: '目標月薪', data: Array(chartLabels.length).fill(targetMonthly), type: 'line', borderColor: '#ff4081', borderDash: [5, 5], fill: false, pointRadius: 3 }
           ]
         },
