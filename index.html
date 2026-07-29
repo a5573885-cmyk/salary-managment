@@ -9,9 +9,6 @@
   <!-- Google Material Icons -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
   <style>
-    /* ==========================================
-       1. 全域變數與主題設定 (CSS Variables)
-       ========================================== */
     :root {
       --primary-color: #3f51b5;
       --primary-dark: #303f9f;
@@ -33,7 +30,6 @@
       --modal-bg: #ffffff;
     }
 
-    /* 暗黑模式主題 */
     body.dark-mode {
       --primary-color: #5c6bc0;
       --primary-dark: #7986cb;
@@ -69,7 +65,6 @@
       transition: background-color var(--transition-speed), color var(--transition-speed);
     }
 
-    /* 手機版頂部 Header */
     .mobile-header {
       display: none;
       position: fixed;
@@ -92,7 +87,6 @@
       gap: 8px;
     }
 
-    /* 背景遮罩 */
     .sidebar-overlay {
       display: none;
       position: fixed;
@@ -108,7 +102,6 @@
       opacity: 1;
     }
 
-    /* 側邊欄 Sidebar */
     .sidebar {
       width: var(--sidebar-width);
       background-color: var(--sidebar-bg);
@@ -155,7 +148,6 @@
       display: none !important;
     }
 
-    /* 使用者個人資訊元件 */
     .user-profile {
       display: flex;
       align-items: center;
@@ -260,7 +252,6 @@
       display: none !important; 
     }
 
-    /* 側邊欄底部黑夜模式切換按鈕 */
     .sidebar-footer {
       padding: 12px;
       border-top: 1px solid rgba(255, 255, 255, 0.1);
@@ -291,7 +282,6 @@
       display: none !important;
     }
 
-    /* 右側主區域與 Top Header */
     .main-wrapper {
       flex-grow: 1;
       margin-left: var(--sidebar-width);
@@ -307,7 +297,6 @@
       width: calc(100% - var(--sidebar-collapsed-width));
     }
 
-    /* 頂部導航列 (Top Header) */
     .top-header {
       height: 64px;
       background-color: var(--header-bg);
@@ -346,7 +335,6 @@
       display: block; 
     }
 
-    /* UI 卡片區塊 */
     .card {
       background: var(--card-bg);
       border-radius: 8px;
@@ -401,7 +389,6 @@
       border-color: var(--primary-color);
     }
 
-    /* 附帶圖示的輸入或下拉選單外框包裝 */
     .input-icon-wrapper {
       position: relative;
       display: flex;
@@ -422,7 +409,6 @@
       pointer-events: none;
     }
 
-    /* 搜尋輸入框樣式 */
     .search-box-wrapper {
       position: relative;
       display: flex;
@@ -489,7 +475,6 @@
       opacity: 0.6;
     }
 
-    /* 懸浮按鈕樣式 */
     .btn-open-modal {
       display: inline-flex;
       align-items: center;
@@ -534,7 +519,6 @@
       margin-bottom: 20px;
     }
 
-    /* 明細表格 */
     .table-container {
       width: 100%;
       overflow-x: auto;
@@ -599,7 +583,6 @@
       color: #7b1fa2;
     }
 
-    /* 看板數據卡片網格 */
     .stats-grid-2 {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
@@ -653,9 +636,6 @@
       color: var(--primary-color); 
     }
 
-    /* ==========================================
-       懸浮對話框 Modal 樣式
-       ========================================== */
     .modal-overlay {
       display: none;
       position: fixed;
@@ -690,7 +670,6 @@
       flex-direction: column;
     }
 
-    /* 針對趨勢圖放大 Modal 寬度 */
     .modal-container.large-modal {
       max-width: 850px;
     }
@@ -745,7 +724,6 @@
       width: 100%;
     }
 
-    /* 趨勢圖專用橫向滾動容器 */
     .scrollable-chart-container {
       width: 100%;
       overflow-x: auto;
@@ -842,7 +820,6 @@
 </head>
 <body>
 
-  <!-- 手機版頂部 Header -->
   <header class="mobile-header">
     <div class="mobile-header-title">
       <span class="material-icons">account_balance_wallet</span>
@@ -853,10 +830,8 @@
     </button>
   </header>
 
-  <!-- 手機版側邊欄背景遮罩 -->
   <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
-  <!-- 左側邊欄 -->
   <aside class="sidebar" id="sidebar">
     <div>
       <div class="sidebar-header">
@@ -869,7 +844,6 @@
         </button>
       </div>
 
-      <!-- 使用者個人資訊卡片 -->
       <div class="user-profile">
         <div class="avatar">A</div>
         <div class="user-info">
@@ -898,7 +872,6 @@
       </nav>
     </div>
 
-    <!-- 側邊欄底部黑夜模式切換按鈕 -->
     <div class="sidebar-footer">
       <button id="theme-toggle" class="theme-toggle-btn">
         <span class="material-icons" id="theme-icon">dark_mode</span>
@@ -907,16 +880,13 @@
     </div>
   </aside>
 
-  <!-- 右側內容區 -->
   <main class="main-wrapper">
 
-    <!-- 頂部導航列 (Top Header) -->
     <header class="top-header">
       <div class="top-header-title">儀表板總覽</div>
     </header>
     
     <div class="content-container">
-      <!-- 匯率與台幣開關 Bar -->
       <div class="rate-bar">
         <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
           <input type="checkbox" id="enableTwd" onchange="toggleTwdConversion()">
@@ -1022,19 +992,18 @@
         <div class="card">
           <h3 class="card-title"><span class="material-icons">receipt_long</span> 歷史薪資明細</h3>
 
-          <!-- 表格搜尋與篩選列 (使用日曆區間篩選) -->
           <div class="form-grid" style="margin-bottom: 20px;">
             <div class="form-group">
-              <label>起始月份 (歸屬)</label>
+              <label>起始日期 (歸屬)</label>
               <div class="input-icon-wrapper">
-                <input type="month" id="filterStartDate" onchange="renderTable()">
+                <input type="date" id="filterStartDate" onchange="renderTable()">
                 <span class="material-icons field-icon">calendar_month</span>
               </div>
             </div>
             <div class="form-group">
-              <label>結束月份 (歸屬)</label>
+              <label>結束日期 (歸屬)</label>
               <div class="input-icon-wrapper">
-                <input type="month" id="filterEndDate" onchange="renderTable()">
+                <input type="date" id="filterEndDate" onchange="renderTable()">
                 <span class="material-icons field-icon">calendar_month</span>
               </div>
             </div>
@@ -1085,7 +1054,6 @@
             </div>
           </div>
 
-          <!-- 批次刪除按鈕工具列 -->
           <div class="action-bar">
             <div style="font-size: 0.9rem; color: var(--text-secondary);">
               已勾選 <strong id="selectedCount" style="color: var(--primary-color);">0</strong> 筆資料
@@ -1095,7 +1063,6 @@
             </button>
           </div>
 
-          <!-- 歷史紀錄表格 -->
           <div class="table-container">
             <table>
               <thead>
@@ -1124,16 +1091,16 @@
         <div class="card">
           <div class="form-grid" style="align-items: flex-end;">
             <div class="form-group">
-              <label>起始月份 (歸屬)</label>
+              <label>起始日期 (歸屬)</label>
               <div class="input-icon-wrapper">
-                <input type="month" class="stats-start-date" onchange="updateStatsView()">
+                <input type="date" class="stats-start-date" onchange="updateStatsView()">
                 <span class="material-icons field-icon">calendar_month</span>
               </div>
             </div>
             <div class="form-group">
-              <label>結束月份 (歸屬)</label>
+              <label>結束日期 (歸屬)</label>
               <div class="input-icon-wrapper">
-                <input type="month" class="stats-end-date" onchange="updateStatsView()">
+                <input type="date" class="stats-end-date" onchange="updateStatsView()">
                 <span class="material-icons field-icon">calendar_month</span>
               </div>
             </div>
@@ -1148,7 +1115,6 @@
           </div>
         </div>
 
-        <!-- 看板數據卡片（含懸浮趨勢圖按鈕） -->
         <div class="stats-grid-2">
           <div class="stat-card">
             <div>
@@ -1180,25 +1146,23 @@
         <div class="card">
           <div class="form-grid" style="align-items: flex-end;">
             <div class="form-group">
-              <label>起始月份 (歸屬)</label>
+              <label>起始日期 (歸屬)</label>
               <div class="input-icon-wrapper">
-                <input type="month" class="stats-start-date" onchange="updateStatsView()">
+                <input type="date" class="stats-start-date" onchange="updateStatsView()">
                 <span class="material-icons field-icon">calendar_month</span>
               </div>
             </div>
             <div class="form-group">
-              <label>結束月份 (歸屬)</label>
+              <label>結束日期 (歸屬)</label>
               <div class="input-icon-wrapper">
-                <input type="month" class="stats-end-date" onchange="updateStatsView()">
+                <input type="date" class="stats-end-date" onchange="updateStatsView()">
                 <span class="material-icons field-icon">calendar_month</span>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- 4 個看板卡片（含彈出對話框按鈕） -->
         <div class="stats-grid-4">
-          <!-- 1. 入帳狀態 -->
           <div class="stat-card" style="border-left-color: #4caf50;">
             <div>
               <h4><span>入帳狀態統計</span></h4>
@@ -1210,7 +1174,6 @@
             </button>
           </div>
 
-          <!-- 2. 付款單位 -->
           <div class="stat-card" style="border-left-color: #ff9800;">
             <div>
               <h4><span>Top 3 主要單位</span></h4>
@@ -1222,7 +1185,6 @@
             </button>
           </div>
 
-          <!-- 3. 工作類型 -->
           <div class="stat-card" style="border-left-color: #9c27b0;">
             <div>
               <h4><span>Top 3 工作類型</span></h4>
@@ -1234,7 +1196,6 @@
             </button>
           </div>
 
-          <!-- 4. 工作城市 -->
           <div class="stat-card" style="border-left-color: #00bcd4;">
             <div>
               <h4><span>Top 3 工作城市</span></h4>
@@ -1250,11 +1211,7 @@
     </div>
   </main>
 
-  <!-- ==========================================
-       懸浮對話框元件 (Modals)
-       ========================================== -->
-
-  <!-- 0. 每月收入與目標趨勢對話框 -->
+  <!-- Modals -->
   <div class="modal-overlay" id="trendModal" onclick="closeChartModalOnOverlay(event, 'trendModal')">
     <div class="modal-container large-modal">
       <div class="modal-header">
@@ -1280,7 +1237,6 @@
     </div>
   </div>
 
-  <!-- 1. 入帳狀態對話框 -->
   <div class="modal-overlay" id="statusModal" onclick="closeChartModalOnOverlay(event, 'statusModal')">
     <div class="modal-container">
       <div class="modal-header">
@@ -1300,7 +1256,6 @@
     </div>
   </div>
 
-  <!-- 2. 付款單位對話框 -->
   <div class="modal-overlay" id="unitModal" onclick="closeChartModalOnOverlay(event, 'unitModal')">
     <div class="modal-container">
       <div class="modal-header">
@@ -1320,7 +1275,6 @@
     </div>
   </div>
 
-  <!-- 3. 工作類型對話框 -->
   <div class="modal-overlay" id="jobTypeModal" onclick="closeChartModalOnOverlay(event, 'jobTypeModal')">
     <div class="modal-container">
       <div class="modal-header">
@@ -1340,7 +1294,6 @@
     </div>
   </div>
 
-  <!-- 4. 工作城市對話框 -->
   <div class="modal-overlay" id="cityModal" onclick="closeChartModalOnOverlay(event, 'cityModal')">
     <div class="modal-container">
       <div class="modal-header">
@@ -1361,7 +1314,6 @@
   </div>
 
   <script>
-    // 資料狀態管理
     let records = JSON.parse(localStorage.getItem('salary_records')) || [];
     let isTwdEnabled = JSON.parse(localStorage.getItem('salary_twd_enabled')) || false;
     let monthlyChartInstance = null;
@@ -1370,7 +1322,6 @@
     let cityChartInstance = null;
     let statusChartInstance = null;
 
-    // 共用圓餅圖預設設定
     const commonPieOptions = {
       responsive: true,
       maintainAspectRatio: false,
@@ -1391,7 +1342,6 @@
       }
     };
 
-    // DOM 元素引用
     const sidebar = document.getElementById('sidebar');
     const sidebarOverlay = document.getElementById('sidebarOverlay');
     const openMobileMenuBtn = document.getElementById('openMobileMenu');
@@ -1400,7 +1350,6 @@
     const themeIcon = document.getElementById('theme-icon');
     const themeText = document.getElementById('theme-text');
 
-    // 初始化
     document.addEventListener('DOMContentLoaded', () => {
       initDateInputs();
       document.getElementById('enableTwd').checked = isTwdEnabled;
@@ -1408,7 +1357,6 @@
       updateView();
     });
 
-    // 暗黑模式切換邏輯
     themeToggleBtn.addEventListener('click', () => {
       document.body.classList.toggle('dark-mode');
       const isDark = document.body.classList.contains('dark-mode');
@@ -1419,7 +1367,6 @@
       updateStatsView();
     });
 
-    // 懸浮對話框 控制邏輯
     function openChartModal(modalId) {
       const modal = document.getElementById(modalId);
       if (!modal) return;
@@ -1457,7 +1404,6 @@
       }
     }
 
-    // 側邊欄 Toggle
     toggleSidebarBtn.addEventListener('click', () => {
       if (window.innerWidth <= 768) {
         closeMobileMenu();
@@ -1471,7 +1417,6 @@
       }, 300);
     });
 
-    // 手機版選單控制
     openMobileMenuBtn.addEventListener('click', () => {
       sidebar.classList.add('mobile-open');
       sidebarOverlay.classList.add('active');
@@ -1484,7 +1429,6 @@
       sidebarOverlay.classList.remove('active');
     }
 
-    // 分頁切換
     function switchTab(tabId, btnEl) {
       document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
       document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
@@ -1498,18 +1442,6 @@
       }
     }
 
-    // 同步統計日期區間至所有區段 (使趨勢圖與佔比圖分頁連動)
-    function syncStatsStartDate(val) {
-      document.querySelectorAll('.stats-start-date').forEach(el => el.value = val);
-      updateStatsView();
-    }
-
-    function syncStatsEndDate(val) {
-      document.querySelectorAll('.stats-end-date').forEach(el => el.value = val);
-      updateStatsView();
-    }
-
-    // 為所有 stats-start-date / stats-end-date 綁定同步監聽
     document.addEventListener('input', (e) => {
       if (e.target.classList.contains('stats-start-date')) {
         const val = e.target.value;
@@ -1536,7 +1468,6 @@
       updateStatsView();
     }
 
-    // 切換台幣換算顯示
     function toggleTwdConversion() {
       isTwdEnabled = document.getElementById('enableTwd').checked;
       localStorage.setItem('salary_twd_enabled', JSON.stringify(isTwdEnabled));
@@ -1544,7 +1475,6 @@
       updateView();
     }
 
-    // 格式化金額顯示
     function formatMoney(amount) {
       const formattedBase = `$${amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
       if (!isTwdEnabled) return formattedBase;
@@ -1555,7 +1485,6 @@
       return `${formattedBase} <small style="color: var(--text-secondary);">(約 ${formattedTwd})</small>`;
     }
 
-    // 表單提交
     function handleFormSubmit(event) {
       event.preventDefault();
       const salaryMonth = document.getElementById('salaryMonth').value;
@@ -1597,14 +1526,12 @@
       localStorage.setItem('salary_records', JSON.stringify(records));
     }
 
-    // 全選 / 反選控制
     function toggleSelectAll(masterCheckbox) {
       const rowCheckboxes = document.querySelectorAll('.record-checkbox');
       rowCheckboxes.forEach(cb => cb.checked = masterCheckbox.checked);
       updateDeleteButtonState();
     }
 
-    // 更新刪除按鈕狀態與計數
     function updateDeleteButtonState() {
       const checkedBoxes = document.querySelectorAll('.record-checkbox:checked');
       const deleteBtn = document.getElementById('deleteSelectedBtn');
@@ -1631,7 +1558,6 @@
       }
     }
 
-    // 刪除勾選項目
     function deleteSelectedRecords() {
       const checkedBoxes = document.querySelectorAll('.record-checkbox:checked');
       const idsToDelete = Array.from(checkedBoxes).map(cb => Number(cb.value));
@@ -1645,14 +1571,12 @@
       }
     }
 
-    // 全域畫面更新
     function updateView() {
       renderTable();
       updateFilterOptions();
       updateStatsView();
     }
 
-    // 渲染明細表格（含關鍵字搜尋、日曆區間篩選與選單篩選）
     function renderTable() {
       const tbody = document.getElementById('recordsTableBody');
       if (!tbody) return;
@@ -1668,12 +1592,11 @@
 
       let filtered = records.slice().sort((a, b) => b.salaryMonth.localeCompare(a.salaryMonth));
 
-      // 日曆區間篩選 (salaryMonth 格式為 YYYY-MM)
       if (startDate) {
-        filtered = filtered.filter(r => r.salaryMonth >= startDate);
+        filtered = filtered.filter(r => `${r.salaryMonth}-01` >= startDate || r.salaryMonth >= startDate.substring(0, 7));
       }
       if (endDate) {
-        filtered = filtered.filter(r => r.salaryMonth <= endDate);
+        filtered = filtered.filter(r => `${r.salaryMonth}-31` <= endDate || r.salaryMonth <= endDate.substring(0, 7));
       }
 
       if (keyword) {
@@ -1733,7 +1656,6 @@
       updateDeleteButtonState();
     }
 
-    // 動態更新篩選選單
     function updateFilterOptions() {
       const selectUnit = document.getElementById('filterUnit');
       if (!selectUnit) return;
@@ -1759,21 +1681,28 @@
       selectCity.value = currentCityVal;
     }
 
-    // 初始化日曆區間預設值（預設當年度 1 月至 12 月或當月）
     function initDateInputs() {
-      const currentYear = new Date().getFullYear();
-      const defaultStart = `${currentYear}-01`;
-      const defaultEnd = `${currentYear}-12`;
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
       
+      const firstDay = `${year}-${month}-01`;
+      const lastDayObj = new Date(year, now.getMonth() + 1, 0);
+      const lastDay = `${year}-${month}-${String(lastDayObj.getDate()).padStart(2, '0')}`;
+      
+      const filterStart = document.getElementById('filterStartDate');
+      const filterEnd = document.getElementById('filterEndDate');
+      if (filterStart) filterStart.value = firstDay;
+      if (filterEnd) filterEnd.value = lastDay;
+
       document.querySelectorAll('.stats-start-date').forEach(input => {
-        input.value = defaultStart;
+        input.value = firstDay;
       });
       document.querySelectorAll('.stats-end-date').forEach(input => {
-        input.value = defaultEnd;
+        input.value = lastDay;
       });
     }
 
-    // 更新統計看板與圖表（根據日曆區間篩選）
     function updateStatsView() {
       const startDateInput = document.querySelector('.stats-start-date');
       const endDateInput = document.querySelector('.stats-end-date');
@@ -1786,10 +1715,10 @@
 
       let periodRecords = records.slice();
       if (startDate) {
-        periodRecords = periodRecords.filter(r => r.salaryMonth >= startDate);
+        periodRecords = periodRecords.filter(r => `${r.salaryMonth}-01` >= startDate || r.salaryMonth >= startDate.substring(0, 7));
       }
       if (endDate) {
-        periodRecords = periodRecords.filter(r => r.salaryMonth <= endDate);
+        periodRecords = periodRecords.filter(r => `${r.salaryMonth}-31` <= endDate || r.salaryMonth <= endDate.substring(0, 7));
       }
 
       const totalIncome = periodRecords.reduce((sum, r) => sum + r.totalPay, 0);
@@ -1833,27 +1762,23 @@
         }
       });
 
-      // 入帳狀態看板統計
       const statusSummaryHtml = periodRecords.length > 0
         ? `🟢 <b>本月入帳</b>: $${statusSums['本月入帳'].toLocaleString()} (${statusCounts['本月入帳']}筆)<br>🟠 <b>跨月入帳</b>: $${statusSums['跨月入帳'].toLocaleString()} (${statusCounts['跨月入帳']}筆)`
         : "無紀錄";
       document.querySelectorAll('.statPayStatusSummary').forEach(el => el.innerHTML = statusSummaryHtml);
 
-      // Top 3 單位
       const sortedUnits = Object.entries(unitSums).sort((a,b) => b[1] - a[1]).slice(0, 3);
       const topUnitsHtml = sortedUnits.length > 0 
         ? sortedUnits.map(([u, v], i) => `${i+1}. <b>${u}</b>: $${v.toLocaleString()}`).join('<br>')
         : "無紀錄";
       document.querySelectorAll('.statTopUnits').forEach(el => el.innerHTML = topUnitsHtml);
 
-      // Top 3 工作類型
       const sortedJobTypes = Object.entries(jobTypeSums).sort((a,b) => b[1] - a[1]).slice(0, 3);
       const topJobTypesHtml = sortedJobTypes.length > 0 
         ? sortedJobTypes.map(([j, v], i) => `${i+1}. <b>${j}</b>: $${v.toLocaleString()}`).join('<br>')
         : "無紀錄";
       document.querySelectorAll('.statTopJobTypes').forEach(el => el.innerHTML = topJobTypesHtml);
 
-      // Top 3 城市
       const sortedCities = Object.entries(citySums).sort((a,b) => b[1] - a[1]).slice(0, 3);
       const topCitiesHtml = sortedCities.length > 0 
         ? sortedCities.map(([c, v], i) => `${i+1}. <b>${c}</b>: $${v.toLocaleString()}`).join('<br>')
@@ -1867,7 +1792,6 @@
       renderCityPieChart(citySums);
     }
 
-    // 每月趨勢圖（根據起訖月份動態產生區間月份標籤）
     function renderMonthlyChart(startDate, endDate, targetMonthly, periodRecords) {
       const canvas = document.getElementById('monthlyChart');
       const chartBox = document.getElementById('trendChartBox');
@@ -1875,11 +1799,10 @@
 
       const ctx = canvas.getContext('2d');
 
-      let start = startDate || '2026-01';
-      let end = endDate || '2026-12';
+      let start = startDate ? startDate.substring(0, 7) : '2026-01';
+      let end = endDate ? endDate.substring(0, 7) : '2026-12';
       if (start > end) { [start, end] = [end, start]; }
 
-      // 產生區間內的 YYYY-MM 陣列
       let current = start;
       let monthsList = [];
       while (current <= end) {
@@ -1932,7 +1855,6 @@
       });
     }
 
-    // 入帳狀態佔比圖
     function renderStatusPieChart(statusSums) {
       const canvas = document.getElementById('statusPieChart');
       if (!canvas) return;
@@ -1956,7 +1878,6 @@
       });
     }
 
-    // 單位佔比圖
     function renderUnitPieChart(unitSums) {
       const canvas = document.getElementById('unitPieChart');
       if (!canvas) return;
@@ -1980,7 +1901,6 @@
       });
     }
 
-    // 工作類型佔比圖
     function renderJobTypePieChart(jobTypeSums) {
       const canvas = document.getElementById('jobTypePieChart');
       if (!canvas) return;
@@ -2004,7 +1924,6 @@
       });
     }
 
-    // 工作城市佔比圖
     function renderCityPieChart(citySums) {
       const canvas = document.getElementById('cityPieChart');
       if (!canvas) return;
