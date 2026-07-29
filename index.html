@@ -30,6 +30,7 @@
       --transition-speed: 0.3s;
       --header-bg: #ffffff;
       --shadow: 0 2px 8px rgba(0,0,0,0.08);
+      --modal-bg: #ffffff;
     }
 
     /* 暗黑模式主題 */
@@ -48,6 +49,7 @@
       --sidebar-hover: rgba(255, 255, 255, 0.08);
       --header-bg: #1e293b;
       --shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+      --modal-bg: #1e293b;
     }
 
     * {
@@ -321,52 +323,10 @@
       box-shadow: var(--shadow);
     }
 
-    .search-box {
-      display: flex;
-      align-items: center;
-      background-color: var(--bg-color);
-      border: 1px solid var(--border-color);
-      border-radius: 8px;
-      padding: 6px 12px;
-      width: 280px;
-      transition: all 0.2s;
-    }
-
-    .search-box input {
-      border: none;
-      background: transparent;
-      outline: none;
+    .top-header-title {
+      font-size: 1.1rem;
+      font-weight: 600;
       color: var(--text-color);
-      width: 100%;
-      margin-left: 8px;
-      font-size: 0.9rem;
-    }
-
-    .header-actions {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-    }
-
-    .action-icon-btn {
-      background: none;
-      border: none;
-      cursor: pointer;
-      color: var(--text-secondary);
-      position: relative;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .badge {
-      position: absolute;
-      top: 0px;
-      right: 0px;
-      width: 8px;
-      height: 8px;
-      background-color: var(--danger-color);
-      border-radius: 50%;
     }
 
     .content-container {
@@ -406,42 +366,6 @@
       gap: 8px;
     }
 
-    /* 內嵌於卡片內部的 details/summary 樣式 */
-    .inline-accordion {
-      margin-top: 16px;
-      border-top: 1px solid var(--border-color);
-      padding-top: 12px;
-    }
-
-    .inline-accordion summary {
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      user-select: none;
-      list-style: none;
-      color: var(--primary-color);
-      font-weight: 600;
-      font-size: 0.85rem;
-      padding: 6px 0;
-    }
-
-    .inline-accordion summary::-webkit-details-marker {
-      display: none;
-    }
-
-    .inline-accordion summary:hover {
-      opacity: 0.8;
-    }
-
-    .inline-accordion[open] .summary-icon {
-      transform: rotate(180deg);
-    }
-
-    .accordion-chart-body {
-      padding-top: 12px;
-    }
-
     .form-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -475,6 +399,26 @@
     .form-group input:focus, 
     .form-group select:focus {
       border-color: var(--primary-color);
+    }
+
+    /* 搜尋輸入框樣式 */
+    .search-box-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .search-box-wrapper .search-icon {
+      position: absolute;
+      left: 10px;
+      color: var(--text-secondary);
+      font-size: 20px;
+      pointer-events: none;
+    }
+
+    .search-box-wrapper input {
+      padding-left: 36px !important;
+      width: 100%;
     }
 
     .btn-submit {
@@ -522,6 +466,30 @@
       background-color: #cccccc;
       cursor: not-allowed;
       opacity: 0.6;
+    }
+
+    /* 懸浮按鈕樣式 */
+    .btn-open-modal {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      margin-top: 12px;
+      padding: 8px 14px;
+      background-color: transparent;
+      color: var(--primary-color);
+      border: 1px solid var(--primary-color);
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      width: 100%;
+    }
+
+    .btn-open-modal:hover {
+      background-color: var(--primary-color);
+      color: #ffffff;
     }
 
     .action-bar {
@@ -664,29 +632,127 @@
       color: var(--primary-color); 
     }
 
-    /* 圖表容器 - 關鍵響應式修正，防止手機端被裁切 */
-    .chart-box {
+    /* ==========================================
+       懸浮對話框 Modal 樣式
+       ========================================== */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: rgba(0, 0, 0, 0.6);
+      z-index: 2000;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      opacity: 0;
+      transition: opacity 0.25s ease;
+      backdrop-filter: blur(2px);
+    }
+
+    .modal-overlay.active {
+      display: flex;
+      opacity: 1;
+    }
+
+    .modal-container {
+      background-color: var(--modal-bg);
+      color: var(--text-color);
+      border-radius: 12px;
+      width: 100%;
+      max-width: 550px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+      border: 1px solid var(--border-color);
+      overflow: hidden;
+      transform: scale(0.9);
+      transition: transform 0.25s ease;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* 針對趨勢圖放大 Modal 寬度 */
+    .modal-container.large-modal {
+      max-width: 850px;
+    }
+
+    .modal-overlay.active .modal-container {
+      transform: scale(1);
+    }
+
+    .modal-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .modal-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--primary-color);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .modal-close-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-secondary);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 4px;
+      border-radius: 50%;
+      transition: background-color 0.2s, color 0.2s;
+    }
+
+    .modal-close-btn:hover {
+      background-color: rgba(0, 0, 0, 0.1);
+      color: var(--text-color);
+    }
+
+    .modal-body {
+      padding: 20px;
+      position: relative;
+    }
+
+    .modal-pie-chart-box {
+      position: relative;
+      height: 320px;
+      width: 100%;
+    }
+
+    /* 趨勢圖專用橫向滾動容器（支援手機完整顯示1-12月） */
+    .scrollable-chart-container {
+      width: 100%;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .modal-trend-chart-box {
       position: relative;
       height: 350px;
       width: 100%;
-      min-width: 0;
+      min-width: 100%; /* 預設滿寬，JS會依據手機版動態拉寬 */
     }
 
-    .pie-chart-box {
-      position: relative;
-      height: 260px;
-      width: 100%;
-      min-width: 0;
+    .scroll-hint {
+      display: none;
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      text-align: right;
+      margin-bottom: 6px;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 4px;
     }
 
     @media (max-width: 768px) {
       .top-header {
         padding-left: 16px;
         padding-right: 16px;
-      }
-      
-      .search-box {
-        width: 140px;
       }
 
       .mobile-header {
@@ -705,20 +771,23 @@
       .main-wrapper {
         margin-left: 0 !important;
         width: 100% !important;
-        padding-top: 56px; /* 留出手機 Header 空間 */
+        padding-top: 56px;
       }
 
       .content-container {
         padding: 12px;
       }
 
-      /* 手機版圖表高度微調 */
-      .chart-box {
+      .modal-pie-chart-box {
         height: 280px;
       }
 
-      .pie-chart-box {
-        height: 240px;
+      .modal-trend-chart-box {
+        height: 300px;
+      }
+
+      .scroll-hint {
+        display: flex;
       }
 
       .sidebar .sidebar-title {
@@ -791,7 +860,11 @@
       <nav class="sidebar-nav">
         <button class="nav-btn active" onclick="switchTab('inputTab', this)">
           <span class="material-icons">edit_note</span>
-          <span class="nav-btn-text">資料輸入與紀錄</span>
+          <span class="nav-btn-text">新增薪資紀錄</span>
+        </button>
+        <button class="nav-btn" onclick="switchTab('listTab', this)">
+          <span class="material-icons">receipt_long</span>
+          <span class="nav-btn-text">歷史薪資明細</span>
         </button>
         <button class="nav-btn" onclick="switchTab('trendTab', this)">
           <span class="material-icons">show_chart</span>
@@ -818,19 +891,7 @@
 
     <!-- 頂部導航列 (Top Header) -->
     <header class="top-header">
-      <div class="search-box">
-        <span class="material-icons" style="color: var(--text-secondary); font-size: 20px;">search</span>
-        <input type="text" placeholder="搜尋紀錄...">
-      </div>
-      <div class="header-actions">
-        <button class="action-icon-btn" title="通知">
-          <span class="material-icons">notifications</span>
-          <span class="badge"></span>
-        </button>
-        <button class="action-icon-btn" title="說明">
-          <span class="material-icons">help_outline</span>
-        </button>
-      </div>
+      <div class="top-header-title">儀表板總覽</div>
     </header>
     
     <div class="content-container">
@@ -847,9 +908,8 @@
         </div>
       </div>
 
-      <!-- TAB 1: 輸入與表格 -->
+      <!-- TAB 1: 新增薪資紀錄 -->
       <section id="inputTab" class="tab-content active">
-        <!-- 新增薪資表單 -->
         <div class="card">
           <h3 class="card-title"><span class="material-icons">add_circle_outline</span> 新增薪資紀錄</h3>
           <form id="salaryForm" onsubmit="handleFormSubmit(event)">
@@ -922,13 +982,22 @@
             <button type="submit" class="btn-submit">儲存薪資紀錄</button>
           </form>
         </div>
+      </section>
 
-        <!-- 明細列表 -->
+      <!-- TAB 2: 歷史薪資明細 -->
+      <section id="listTab" class="tab-content">
         <div class="card">
-          <h3 class="card-title"><span class="material-icons">list_alt</span> 歷史薪資明細</h3>
+          <h3 class="card-title"><span class="material-icons">receipt_long</span> 歷史薪資明細</h3>
 
-          <!-- 表格篩選選單 -->
+          <!-- 表格搜尋與篩選列 -->
           <div class="form-grid" style="margin-bottom: 20px;">
+            <div class="form-group" style="grid-column: 1 / -1;">
+              <label>關鍵字搜尋</label>
+              <div class="search-box-wrapper">
+                <span class="material-icons search-icon">search</span>
+                <input type="text" id="searchKeyword" placeholder="搜尋單位、類型、城市、歸屬月份、入帳日期..." oninput="renderTable()">
+              </div>
+            </div>
             <div class="form-group">
               <label>篩選付款單位</label>
               <select id="filterUnit" onchange="renderTable()">
@@ -991,7 +1060,7 @@
         </div>
       </section>
 
-      <!-- TAB 2: 每月收入趨勢圖 -->
+      <!-- TAB 3: 每月收入趨勢圖 -->
       <section id="trendTab" class="tab-content">
         <div class="card">
           <div class="form-grid" style="align-items: flex-end;">
@@ -1028,29 +1097,34 @@
           </div>
         </div>
 
-        <!-- 看板數據卡片 -->
+        <!-- 看板數據卡片（含懸浮趨勢圖按鈕） -->
         <div class="stats-grid-2">
           <div class="stat-card">
-            <h4 id="labelTotalTitle">期間累計總收入</h4>
-            <div class="value statYearTotal">$0</div>
-            <small class="statYearTargetProgress" style="color: var(--text-secondary);">年目標達成率: 0%</small>
+            <div>
+              <h4 id="labelTotalTitle">期間累計總收入</h4>
+              <div class="value statYearTotal">$0</div>
+              <small class="statYearTargetProgress" style="color: var(--text-secondary);">年目標達成率: 0%</small>
+            </div>
+            <button class="btn-open-modal" onclick="openChartModal('trendModal')">
+              <span class="material-icons" style="font-size: 18px;">show_chart</span>
+              查看每月趨勢懸浮圖表
+            </button>
           </div>
           <div class="stat-card" style="border-left-color: #2196f3;">
-            <h4>平均月收入</h4>
-            <div class="value statMonthAvg">$0</div>
-            <small class="statMonthTargetProgress" style="color: var(--text-secondary);">月目標達成率: 0%</small>
-          </div>
-        </div>
-
-        <div class="card">
-          <h3 class="card-title"><span class="material-icons">bar_chart</span> 每月收入與目標趨勢圖</h3>
-          <div class="chart-box">
-            <canvas id="monthlyChart"></canvas>
+            <div>
+              <h4>平均月收入</h4>
+              <div class="value statMonthAvg">$0</div>
+              <small class="statMonthTargetProgress" style="color: var(--text-secondary);">月目標達成率: 0%</small>
+            </div>
+            <button class="btn-open-modal" onclick="openChartModal('trendModal')">
+              <span class="material-icons" style="font-size: 18px;">bar_chart</span>
+              查看每月趨勢懸浮圖表
+            </button>
           </div>
         </div>
       </section>
 
-      <!-- TAB 3: 收入佔比圖表分析 (已改為卡片內直接展開對應圓餅圖) -->
+      <!-- TAB 4: 收入佔比圖表分析 -->
       <section id="pieTab" class="tab-content">
         <div class="card">
           <div class="form-grid" style="align-items: flex-end;">
@@ -1079,7 +1153,7 @@
           </div>
         </div>
 
-        <!-- 4 個看板卡片，各自包含專屬的手風琴圓餅圖區塊 -->
+        <!-- 4 個看板卡片（含彈出對話框按鈕） -->
         <div class="stats-grid-4">
           <!-- 1. 入帳狀態 -->
           <div class="stat-card" style="border-left-color: #4caf50;">
@@ -1087,17 +1161,10 @@
               <h4><span>入帳狀態統計</span></h4>
               <div class="value statPayStatusSummary" style="font-size: 0.9rem; font-weight: normal; margin-top: 4px;">無資料</div>
             </div>
-            <details class="inline-accordion" id="statusAccordion" ontoggle="handleAccordionToggle(this, statusChartInstance)">
-              <summary>
-                <span>查看佔比圖表</span>
-                <span class="material-icons summary-icon" style="font-size: 18px;">expand_more</span>
-              </summary>
-              <div class="accordion-chart-body">
-                <div class="pie-chart-box">
-                  <canvas id="statusPieChart"></canvas>
-                </div>
-              </div>
-            </details>
+            <button class="btn-open-modal" onclick="openChartModal('statusModal')">
+              <span class="material-icons" style="font-size: 18px;">pie_chart</span>
+              查看懸浮圖表
+            </button>
           </div>
 
           <!-- 2. 付款單位 -->
@@ -1106,17 +1173,10 @@
               <h4><span>Top 3 主要單位</span></h4>
               <div class="value statTopUnits" style="font-size: 0.9rem; font-weight: normal; margin-top: 4px;">無資料</div>
             </div>
-            <details class="inline-accordion" id="unitAccordion" ontoggle="handleAccordionToggle(this, pieChartInstance)">
-              <summary>
-                <span>查看佔比圖表</span>
-                <span class="material-icons summary-icon" style="font-size: 18px;">expand_more</span>
-              </summary>
-              <div class="accordion-chart-body">
-                <div class="pie-chart-box">
-                  <canvas id="unitPieChart"></canvas>
-                </div>
-              </div>
-            </details>
+            <button class="btn-open-modal" onclick="openChartModal('unitModal')">
+              <span class="material-icons" style="font-size: 18px;">pie_chart</span>
+              查看懸浮圖表
+            </button>
           </div>
 
           <!-- 3. 工作類型 -->
@@ -1125,17 +1185,10 @@
               <h4><span>Top 3 工作類型</span></h4>
               <div class="value statTopJobTypes" style="font-size: 0.9rem; font-weight: normal; margin-top: 4px;">無資料</div>
             </div>
-            <details class="inline-accordion" id="jobTypeAccordion" ontoggle="handleAccordionToggle(this, jobTypeChartInstance)">
-              <summary>
-                <span>查看佔比圖表</span>
-                <span class="material-icons summary-icon" style="font-size: 18px;">expand_more</span>
-              </summary>
-              <div class="accordion-chart-body">
-                <div class="pie-chart-box">
-                  <canvas id="jobTypePieChart"></canvas>
-                </div>
-              </div>
-            </details>
+            <button class="btn-open-modal" onclick="openChartModal('jobTypeModal')">
+              <span class="material-icons" style="font-size: 18px;">pie_chart</span>
+              查看懸浮圖表
+            </button>
           </div>
 
           <!-- 4. 工作城市 -->
@@ -1144,22 +1197,125 @@
               <h4><span>Top 3 工作城市</span></h4>
               <div class="value statTopCities" style="font-size: 0.9rem; font-weight: normal; margin-top: 4px;">無資料</div>
             </div>
-            <details class="inline-accordion" id="cityAccordion" ontoggle="handleAccordionToggle(this, cityChartInstance)">
-              <summary>
-                <span>查看佔比圖表</span>
-                <span class="material-icons summary-icon" style="font-size: 18px;">expand_more</span>
-              </summary>
-              <div class="accordion-chart-body">
-                <div class="pie-chart-box">
-                  <canvas id="cityPieChart"></canvas>
-                </div>
-              </div>
-            </details>
+            <button class="btn-open-modal" onclick="openChartModal('cityModal')">
+              <span class="material-icons" style="font-size: 18px;">pie_chart</span>
+              查看懸浮圖表
+            </button>
           </div>
         </div>
       </section>
     </div>
   </main>
+
+  <!-- ==========================================
+       懸浮對話框元件 (Modals)
+       ========================================== -->
+
+  <!-- 0. 每月收入與目標趨勢對話框 (支援手機橫向滑動完整顯示1-12月) -->
+  <div class="modal-overlay" id="trendModal" onclick="closeChartModalOnOverlay(event, 'trendModal')">
+    <div class="modal-container large-modal">
+      <div class="modal-header">
+        <div class="modal-title">
+          <span class="material-icons">bar_chart</span>
+          <span>每月收入與目標趨勢圖</span>
+        </div>
+        <button class="modal-close-btn" onclick="closeChartModal('trendModal')">
+          <span class="material-icons">close</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="scroll-hint">
+          <span class="material-icons" style="font-size: 14px;">swipe</span>
+          <span>左右滑動查看完整 12 個月數據</span>
+        </div>
+        <div class="scrollable-chart-container">
+          <div class="modal-trend-chart-box" id="trendChartBox">
+            <canvas id="monthlyChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 1. 入帳狀態對話框 -->
+  <div class="modal-overlay" id="statusModal" onclick="closeChartModalOnOverlay(event, 'statusModal')">
+    <div class="modal-container">
+      <div class="modal-header">
+        <div class="modal-title">
+          <span class="material-icons">donut_small</span>
+          <span>入帳狀態佔比分析</span>
+        </div>
+        <button class="modal-close-btn" onclick="closeChartModal('statusModal')">
+          <span class="material-icons">close</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-pie-chart-box">
+          <canvas id="statusPieChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. 付款單位對話框 -->
+  <div class="modal-overlay" id="unitModal" onclick="closeChartModalOnOverlay(event, 'unitModal')">
+    <div class="modal-container">
+      <div class="modal-header">
+        <div class="modal-title">
+          <span class="material-icons">pie_chart</span>
+          <span>付款單位佔比分析</span>
+        </div>
+        <button class="modal-close-btn" onclick="closeChartModal('unitModal')">
+          <span class="material-icons">close</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-pie-chart-box">
+          <canvas id="unitPieChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. 工作類型對話框 -->
+  <div class="modal-overlay" id="jobTypeModal" onclick="closeChartModalOnOverlay(event, 'jobTypeModal')">
+    <div class="modal-container">
+      <div class="modal-header">
+        <div class="modal-title">
+          <span class="material-icons">donut_small</span>
+          <span>工作類型佔比分析</span>
+        </div>
+        <button class="modal-close-btn" onclick="closeChartModal('jobTypeModal')">
+          <span class="material-icons">close</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-pie-chart-box">
+          <canvas id="jobTypePieChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. 工作城市對話框 -->
+  <div class="modal-overlay" id="cityModal" onclick="closeChartModalOnOverlay(event, 'cityModal')">
+    <div class="modal-container">
+      <div class="modal-header">
+        <div class="modal-title">
+          <span class="material-icons">pie_chart</span>
+          <span>工作城市佔比分析</span>
+        </div>
+        <button class="modal-close-btn" onclick="closeChartModal('cityModal')">
+          <span class="material-icons">close</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-pie-chart-box">
+          <canvas id="cityPieChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <script>
     // 資料狀態管理
@@ -1171,21 +1327,21 @@
     let cityChartInstance = null;
     let statusChartInstance = null;
 
-    // 共用圓餅圖預設設定 (啟用 maintainAspectRatio: false 配合視窗彈性縮放)
+    // 共用圓餅圖預設設定
     const commonPieOptions = {
       responsive: true,
       maintainAspectRatio: false,
       layout: {
-        padding: 5
+        padding: 10
       },
       plugins: {
         legend: {
           position: 'bottom',
           labels: {
-            boxWidth: 10,
-            padding: 8,
+            boxWidth: 12,
+            padding: 12,
             font: {
-              size: 11
+              size: 12
             }
           }
         }
@@ -1220,13 +1376,42 @@
       updateStatsView();
     });
 
-    // 展開/收合 details 時，動態重新計算並繪製 Chart.js 尺寸
-    function handleAccordionToggle(detailsEl, chartInstance) {
-      if (detailsEl.open && chartInstance) {
-        setTimeout(() => {
-          chartInstance.resize();
-          chartInstance.update();
-        }, 50);
+    // 懸浮對話框 控制邏輯
+    function openChartModal(modalId) {
+      const modal = document.getElementById(modalId);
+      if (!modal) return;
+      
+      modal.classList.add('active');
+
+      // 延遲 resize 以利 Chart.js 重新調整比例
+      setTimeout(() => {
+        if (modalId === 'trendModal' && monthlyChartInstance) {
+          monthlyChartInstance.resize();
+          monthlyChartInstance.update();
+        } else if (modalId === 'statusModal' && statusChartInstance) {
+          statusChartInstance.resize();
+          statusChartInstance.update();
+        } else if (modalId === 'unitModal' && pieChartInstance) {
+          pieChartInstance.resize();
+          pieChartInstance.update();
+        } else if (modalId === 'jobTypeModal' && jobTypeChartInstance) {
+          jobTypeChartInstance.resize();
+          jobTypeChartInstance.update();
+        } else if (modalId === 'cityModal' && cityChartInstance) {
+          cityChartInstance.resize();
+          cityChartInstance.update();
+        }
+      }, 50);
+    }
+
+    function closeChartModal(modalId) {
+      const modal = document.getElementById(modalId);
+      if (modal) modal.classList.remove('active');
+    }
+
+    function closeChartModalOnOverlay(event, modalId) {
+      if (event.target.classList.contains('modal-overlay')) {
+        closeChartModal(modalId);
       }
     }
 
@@ -1239,13 +1424,8 @@
         const isCollapsed = sidebar.classList.contains('collapsed');
         document.getElementById('toggleIcon').textContent = isCollapsed ? 'chevron_right' : 'chevron_left';
       }
-      // 側邊欄開合會影響內容寬度，觸發圖表自動調整
       setTimeout(() => {
         if (monthlyChartInstance) monthlyChartInstance.resize();
-        if (statusChartInstance) statusChartInstance.resize();
-        if (pieChartInstance) pieChartInstance.resize();
-        if (jobTypeChartInstance) jobTypeChartInstance.resize();
-        if (cityChartInstance) cityChartInstance.resize();
       }, 300);
     });
 
@@ -1351,7 +1531,7 @@
       saveRecords();
       document.getElementById('salaryForm').reset();
       updateView();
-      alert("薪資紀錄儲存成功！");
+      alert("薪資紀錄儲存成功！可切換至「歷史薪資明細」查看紀錄。");
     }
 
     function saveRecords() {
@@ -1370,22 +1550,25 @@
       const checkedBoxes = document.querySelectorAll('.record-checkbox:checked');
       const deleteBtn = document.getElementById('deleteSelectedBtn');
       const selectedCountEl = document.getElementById('selectedCount');
-      const count = checkedBoxes.length;
+      if (!deleteBtn || !selectedCountEl) return;
 
+      const count = checkedBoxes.length;
       selectedCountEl.textContent = count;
       deleteBtn.disabled = (count === 0);
 
       const allBoxes = document.querySelectorAll('.record-checkbox');
       const masterCheckbox = document.getElementById('selectAllCheckbox');
-      if (allBoxes.length > 0 && checkedBoxes.length === allBoxes.length) {
-        masterCheckbox.checked = true;
-        masterCheckbox.indeterminate = false;
-      } else if (checkedBoxes.length > 0) {
-        masterCheckbox.checked = false;
-        masterCheckbox.indeterminate = true;
-      } else {
-        masterCheckbox.checked = false;
-        masterCheckbox.indeterminate = false;
+      if (masterCheckbox) {
+        if (allBoxes.length > 0 && checkedBoxes.length === allBoxes.length) {
+          masterCheckbox.checked = true;
+          masterCheckbox.indeterminate = false;
+        } else if (checkedBoxes.length > 0) {
+          masterCheckbox.checked = false;
+          masterCheckbox.indeterminate = true;
+        } else {
+          masterCheckbox.checked = false;
+          masterCheckbox.indeterminate = false;
+        }
       }
     }
 
@@ -1410,9 +1593,12 @@
       updateStatsView();
     }
 
-    // 渲染明細表格
+    // 渲染明細表格（含關鍵字搜尋與選單篩選）
     function renderTable() {
       const tbody = document.getElementById('recordsTableBody');
+      if (!tbody) return;
+
+      const keyword = (document.getElementById('searchKeyword')?.value || '').trim().toLowerCase();
       const filterUnit = document.getElementById('filterUnit').value;
       const filterJobType = document.getElementById('filterJobType').value;
       const filterCity = document.getElementById('filterCity').value;
@@ -1421,6 +1607,21 @@
 
       let filtered = records.slice().sort((a, b) => b.salaryMonth.localeCompare(a.salaryMonth));
 
+      // 關鍵字搜尋比對
+      if (keyword) {
+        filtered = filtered.filter(r => {
+          const matchMonth = r.salaryMonth.toLowerCase().includes(keyword);
+          const matchUnit = r.unit.toLowerCase().includes(keyword);
+          const matchJobType = (r.jobType || '').toLowerCase().includes(keyword);
+          const matchCity = (r.city || '').toLowerCase().includes(keyword);
+          const matchPayDate = r.payDate.toLowerCase().includes(keyword);
+          const matchInfo = `$${r.hourlyRate}/hr × ${r.workDays}天`.toLowerCase().includes(keyword);
+
+          return matchMonth || matchUnit || matchJobType || matchCity || matchPayDate || matchInfo;
+        });
+      }
+
+      // 下拉選單選取比對
       if (filterUnit !== 'ALL') filtered = filtered.filter(r => r.unit === filterUnit);
       if (filterJobType !== 'ALL') filtered = filtered.filter(r => (r.jobType || '其他') === filterJobType);
       if (filterCity !== 'ALL') filtered = filtered.filter(r => (r.city || '未標示') === filterCity);
@@ -1468,6 +1669,8 @@
     // 動態更新篩選選單
     function updateFilterOptions() {
       const selectUnit = document.getElementById('filterUnit');
+      if (!selectUnit) return;
+      
       const currentUnitVal = selectUnit.value;
       const units = [...new Set(records.map(r => r.unit))].filter(Boolean);
       selectUnit.innerHTML = '<option value="ALL">全部單位</option>';
@@ -1595,10 +1798,12 @@
       renderCityPieChart(citySums);
     }
 
-    // 每月趨勢圖 (修正 maintainAspectRatio 設定)
+    // 每月趨勢圖（含手機版 1-12 月橫向完整拉寬顯示）
     function renderMonthlyChart(year, month, targetMonthly, periodRecords) {
       const canvas = document.getElementById('monthlyChart');
-      if (!canvas) return;
+      const chartBox = document.getElementById('trendChartBox');
+      if (!canvas || !chartBox) return;
+
       const ctx = canvas.getContext('2d');
 
       let chartLabels = [];
@@ -1608,9 +1813,17 @@
         chartLabels = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
         const months = Array.from({ length: 12 }, (_, i) => `${year}-${String(i + 1).padStart(2, '0')}`);
         monthlyTotals = months.map(m => periodRecords.filter(r => r.salaryMonth === m).reduce((sum, r) => sum + r.totalPay, 0));
+        
+        // 手機版全年度顯示時，設定容器最小寬度以保證柱狀圖清晰不擁擠
+        if (window.innerWidth <= 768) {
+          chartBox.style.minWidth = '650px';
+        } else {
+          chartBox.style.minWidth = '100%';
+        }
       } else {
         chartLabels = [`${parseInt(month)}月`];
         monthlyTotals = [periodRecords.reduce((sum, r) => sum + r.totalPay, 0)];
+        chartBox.style.minWidth = '100%';
       }
 
       if (monthlyChartInstance) monthlyChartInstance.destroy();
@@ -1619,14 +1832,23 @@
         data: {
           labels: chartLabels,
           datasets: [
-            { label: '實際收入', data: monthlyTotals, backgroundColor: '#3f51b5' },
-            { label: '目標月薪', data: Array(chartLabels.length).fill(targetMonthly), type: 'line', borderColor: '#ff4081', borderDash: [5, 5], fill: false }
+            { label: '實際收入', data: monthlyTotals, backgroundColor: '#3f51b5', borderRadius: 4 },
+            { label: '目標月薪', data: Array(chartLabels.length).fill(targetMonthly), type: 'line', borderColor: '#ff4081', borderDash: [5, 5], fill: false, pointRadius: 3 }
           ]
         },
         options: { 
           responsive: true, 
           maintainAspectRatio: false,
-          scales: { y: { beginAtZero: true } }
+          scales: { 
+            y: { beginAtZero: true },
+            x: {
+              ticks: {
+                font: {
+                  size: 11
+                }
+              }
+            }
+          }
         }
       });
     }
