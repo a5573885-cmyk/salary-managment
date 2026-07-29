@@ -852,20 +852,21 @@
         </div>
       </div>
 
+      <!-- 改為使用資料屬性 data-target 綁定事件，避免 onclick 報錯 -->
       <nav class="sidebar-nav">
-        <button class="nav-btn active" onclick="switchTab('inputTab', this)">
+        <button class="nav-btn active" data-target="inputTab">
           <span class="material-icons">edit_note</span>
           <span class="nav-btn-text">新增薪資紀錄</span>
         </button>
-        <button class="nav-btn" onclick="switchTab('listTab', this)">
+        <button class="nav-btn" data-target="listTab">
           <span class="material-icons">receipt_long</span>
           <span class="nav-btn-text">歷史薪資明細</span>
         </button>
-        <button class="nav-btn" onclick="switchTab('trendTab', this)">
+        <button class="nav-btn" data-target="trendTab">
           <span class="material-icons">show_chart</span>
           <span class="nav-btn-text">每月收入趨勢圖</span>
         </button>
-        <button class="nav-btn" onclick="switchTab('pieTab', this)">
+        <button class="nav-btn" data-target="pieTab">
           <span class="material-icons">pie_chart</span>
           <span class="nav-btn-text">收入佔比圖表分析</span>
         </button>
@@ -889,12 +890,12 @@
     <div class="content-container">
       <div class="rate-bar">
         <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-          <input type="checkbox" id="enableTwd" onchange="toggleTwdConversion()">
+          <input type="checkbox" id="enableTwd">
           <b>啟用台幣（TWD）換算顯示</b>
         </label>
         <div id="rateInputGroup" style="display: none; align-items: center; gap: 8px;">
           <span>匯率（1 外幣 = </span>
-          <input type="number" id="audToTwdRate" value="20.5" step="0.1" style="width: 80px; padding: 4px 8px;" onchange="updateView()">
+          <input type="number" id="audToTwdRate" value="20.5" step="0.1" style="width: 80px; padding: 4px 8px;">
           <span>TWD）</span>
         </div>
       </div>
@@ -903,7 +904,7 @@
       <section id="inputTab" class="tab-content active">
         <div class="card">
           <h3 class="card-title"><span class="material-icons">add_circle_outline</span> 新增薪資紀錄</h3>
-          <form id="salaryForm" onsubmit="handleFormSubmit(event)">
+          <form id="salaryForm">
             <div class="form-grid">
               <div class="form-group">
                 <label>薪資歸屬月份</label>
@@ -996,14 +997,14 @@
             <div class="form-group">
               <label>起始日期 (歸屬)</label>
               <div class="input-icon-wrapper">
-                <input type="date" id="filterStartDate" onchange="renderTable()">
+                <input type="date" id="filterStartDate">
                 <span class="material-icons field-icon">calendar_month</span>
               </div>
             </div>
             <div class="form-group">
               <label>結束日期 (歸屬)</label>
               <div class="input-icon-wrapper">
-                <input type="date" id="filterEndDate" onchange="renderTable()">
+                <input type="date" id="filterEndDate">
                 <span class="material-icons field-icon">calendar_month</span>
               </div>
             </div>
@@ -1011,13 +1012,13 @@
               <label>關鍵字搜尋</label>
               <div class="search-box-wrapper">
                 <span class="material-icons search-icon">search</span>
-                <input type="text" id="searchKeyword" placeholder="搜尋單位、類型、城市、歸屬月份、入帳日期..." oninput="renderTable()">
+                <input type="text" id="searchKeyword" placeholder="搜尋單位、類型、城市、歸屬月份、入帳日期...">
               </div>
             </div>
             <div class="form-group">
               <label>篩選付款單位</label>
               <div class="input-icon-wrapper">
-                <select id="filterUnit" onchange="renderTable()">
+                <select id="filterUnit">
                   <option value="ALL">全部單位</option>
                 </select>
                 <span class="material-icons field-icon">arrow_drop_down</span>
@@ -1026,7 +1027,7 @@
             <div class="form-group">
               <label>篩選工作類型</label>
               <div class="input-icon-wrapper">
-                <select id="filterJobType" onchange="renderTable()">
+                <select id="filterJobType">
                   <option value="ALL">全部類型</option>
                 </select>
                 <span class="material-icons field-icon">arrow_drop_down</span>
@@ -1035,7 +1036,7 @@
             <div class="form-group">
               <label>篩選工作城市</label>
               <div class="input-icon-wrapper">
-                <select id="filterCity" onchange="renderTable()">
+                <select id="filterCity">
                   <option value="ALL">全部城市</option>
                 </select>
                 <span class="material-icons field-icon">arrow_drop_down</span>
@@ -1044,7 +1045,7 @@
             <div class="form-group">
               <label>入帳狀態</label>
               <div class="input-icon-wrapper">
-                <select id="filterStatus" onchange="renderTable()">
+                <select id="filterStatus">
                   <option value="ALL">全部狀態</option>
                   <option value="CURRENT">本月入帳</option>
                   <option value="CROSS">跨月/非本月入帳</option>
@@ -1058,7 +1059,7 @@
             <div style="font-size: 0.9rem; color: var(--text-secondary);">
               已勾選 <strong id="selectedCount" style="color: var(--primary-color);">0</strong> 筆資料
             </div>
-            <button type="button" id="deleteSelectedBtn" class="btn-danger" onclick="deleteSelectedRecords()" disabled>
+            <button type="button" id="deleteSelectedBtn" class="btn-danger" disabled>
               <span class="material-icons" style="font-size: 18px;">delete_sweep</span> 刪除勾選項目
             </button>
           </div>
@@ -1068,7 +1069,7 @@
               <thead>
                 <tr>
                   <th style="width: 40px; text-align: center;">
-                    <input type="checkbox" id="selectAllCheckbox" class="custom-checkbox" onchange="toggleSelectAll(this)">
+                    <input type="checkbox" id="selectAllCheckbox" class="custom-checkbox">
                   </th>
                   <th>薪資月份</th>
                   <th>單位</th>
@@ -1093,24 +1094,24 @@
             <div class="form-group">
               <label>起始日期 (歸屬)</label>
               <div class="input-icon-wrapper">
-                <input type="date" class="stats-start-date" onchange="updateStatsView()">
+                <input type="date" class="stats-start-date">
                 <span class="material-icons field-icon">calendar_month</span>
               </div>
             </div>
             <div class="form-group">
               <label>結束日期 (歸屬)</label>
               <div class="input-icon-wrapper">
-                <input type="date" class="stats-end-date" onchange="updateStatsView()">
+                <input type="date" class="stats-end-date">
                 <span class="material-icons field-icon">calendar_month</span>
               </div>
             </div>
             <div class="form-group">
               <label>設定目標月薪</label>
-              <input type="number" class="target-monthly-input" value="5000" onchange="syncTargetMonthly(this.value)">
+              <input type="number" class="target-monthly-input" value="5000">
             </div>
             <div class="form-group">
               <label>設定目標年薪</label>
-              <input type="number" class="target-yearly-input" value="60000" onchange="syncTargetYearly(this.value)">
+              <input type="number" class="target-yearly-input" value="60000">
             </div>
           </div>
         </div>
@@ -1122,7 +1123,7 @@
               <div class="value statYearTotal">$0</div>
               <small class="statYearTargetProgress" style="color: var(--text-secondary);">目標達成率: 0%</small>
             </div>
-            <button class="btn-open-modal" onclick="openChartModal('trendModal')">
+            <button class="btn-open-modal" data-modal="trendModal">
               <span class="material-icons" style="font-size: 18px;">show_chart</span>
               查看每月趨勢懸浮圖表
             </button>
@@ -1133,7 +1134,7 @@
               <div class="value statMonthAvg">$0</div>
               <small class="statMonthTargetProgress" style="color: var(--text-secondary);">月目標達成率: 0%</small>
             </div>
-            <button class="btn-open-modal" onclick="openChartModal('trendModal')">
+            <button class="btn-open-modal" data-modal="trendModal">
               <span class="material-icons" style="font-size: 18px;">bar_chart</span>
               查看每月趨勢懸浮圖表
             </button>
@@ -1148,14 +1149,14 @@
             <div class="form-group">
               <label>起始日期 (歸屬)</label>
               <div class="input-icon-wrapper">
-                <input type="date" class="stats-start-date" onchange="updateStatsView()">
+                <input type="date" class="stats-start-date">
                 <span class="material-icons field-icon">calendar_month</span>
               </div>
             </div>
             <div class="form-group">
               <label>結束日期 (歸屬)</label>
               <div class="input-icon-wrapper">
-                <input type="date" class="stats-end-date" onchange="updateStatsView()">
+                <input type="date" class="stats-end-date">
                 <span class="material-icons field-icon">calendar_month</span>
               </div>
             </div>
@@ -1168,7 +1169,7 @@
               <h4><span>入帳狀態統計</span></h4>
               <div class="value statPayStatusSummary" style="font-size: 0.9rem; font-weight: normal; margin-top: 4px;">無資料</div>
             </div>
-            <button class="btn-open-modal" onclick="openChartModal('statusModal')">
+            <button class="btn-open-modal" data-modal="statusModal">
               <span class="material-icons" style="font-size: 18px;">pie_chart</span>
               查看懸浮圖表
             </button>
@@ -1179,7 +1180,7 @@
               <h4><span>Top 3 主要單位</span></h4>
               <div class="value statTopUnits" style="font-size: 0.9rem; font-weight: normal; margin-top: 4px;">無資料</div>
             </div>
-            <button class="btn-open-modal" onclick="openChartModal('unitModal')">
+            <button class="btn-open-modal" data-modal="unitModal">
               <span class="material-icons" style="font-size: 18px;">pie_chart</span>
               查看懸浮圖表
             </button>
@@ -1190,7 +1191,7 @@
               <h4><span>Top 3 工作類型</span></h4>
               <div class="value statTopJobTypes" style="font-size: 0.9rem; font-weight: normal; margin-top: 4px;">無資料</div>
             </div>
-            <button class="btn-open-modal" onclick="openChartModal('jobTypeModal')">
+            <button class="btn-open-modal" data-modal="jobTypeModal">
               <span class="material-icons" style="font-size: 18px;">pie_chart</span>
               查看懸浮圖表
             </button>
@@ -1201,7 +1202,7 @@
               <h4><span>Top 3 工作城市</span></h4>
               <div class="value statTopCities" style="font-size: 0.9rem; font-weight: normal; margin-top: 4px;">無資料</div>
             </div>
-            <button class="btn-open-modal" onclick="openChartModal('cityModal')">
+            <button class="btn-open-modal" data-modal="cityModal">
               <span class="material-icons" style="font-size: 18px;">pie_chart</span>
               查看懸浮圖表
             </button>
@@ -1212,14 +1213,14 @@
   </main>
 
   <!-- Modals -->
-  <div class="modal-overlay" id="trendModal" onclick="closeChartModalOnOverlay(event, 'trendModal')">
+  <div class="modal-overlay" id="trendModal">
     <div class="modal-container large-modal">
       <div class="modal-header">
         <div class="modal-title">
           <span class="material-icons">bar_chart</span>
           <span>每月收入與目標趨勢圖</span>
         </div>
-        <button class="modal-close-btn" onclick="closeChartModal('trendModal')">
+        <button class="modal-close-btn" data-close="trendModal">
           <span class="material-icons">close</span>
         </button>
       </div>
@@ -1237,14 +1238,14 @@
     </div>
   </div>
 
-  <div class="modal-overlay" id="statusModal" onclick="closeChartModalOnOverlay(event, 'statusModal')">
+  <div class="modal-overlay" id="statusModal">
     <div class="modal-container">
       <div class="modal-header">
         <div class="modal-title">
           <span class="material-icons">donut_small</span>
           <span>入帳狀態佔比分析</span>
         </div>
-        <button class="modal-close-btn" onclick="closeChartModal('statusModal')">
+        <button class="modal-close-btn" data-close="statusModal">
           <span class="material-icons">close</span>
         </button>
       </div>
@@ -1256,14 +1257,14 @@
     </div>
   </div>
 
-  <div class="modal-overlay" id="unitModal" onclick="closeChartModalOnOverlay(event, 'unitModal')">
+  <div class="modal-overlay" id="unitModal">
     <div class="modal-container">
       <div class="modal-header">
         <div class="modal-title">
           <span class="material-icons">pie_chart</span>
           <span>付款單位佔比分析</span>
         </div>
-        <button class="modal-close-btn" onclick="closeChartModal('unitModal')">
+        <button class="modal-close-btn" data-close="unitModal">
           <span class="material-icons">close</span>
         </button>
       </div>
@@ -1275,14 +1276,14 @@
     </div>
   </div>
 
-  <div class="modal-overlay" id="jobTypeModal" onclick="closeChartModalOnOverlay(event, 'jobTypeModal')">
+  <div class="modal-overlay" id="jobTypeModal">
     <div class="modal-container">
       <div class="modal-header">
         <div class="modal-title">
           <span class="material-icons">donut_small</span>
           <span>工作類型佔比分析</span>
         </div>
-        <button class="modal-close-btn" onclick="closeChartModal('jobTypeModal')">
+        <button class="modal-close-btn" data-close="jobTypeModal">
           <span class="material-icons">close</span>
         </button>
       </div>
@@ -1294,14 +1295,14 @@
     </div>
   </div>
 
-  <div class="modal-overlay" id="cityModal" onclick="closeChartModalOnOverlay(event, 'cityModal')">
+  <div class="modal-overlay" id="cityModal">
     <div class="modal-container">
       <div class="modal-header">
         <div class="modal-title">
           <span class="material-icons">pie_chart</span>
           <span>工作城市佔比分析</span>
         </div>
-        <button class="modal-close-btn" onclick="closeChartModal('cityModal')">
+        <button class="modal-close-btn" data-close="cityModal">
           <span class="material-icons">close</span>
         </button>
       </div>
@@ -1325,19 +1326,11 @@
     const commonPieOptions = {
       responsive: true,
       maintainAspectRatio: false,
-      layout: {
-        padding: 10
-      },
+      layout: { padding: 10 },
       plugins: {
         legend: {
           position: 'bottom',
-          labels: {
-            boxWidth: 12,
-            padding: 12,
-            font: {
-              size: 12
-            }
-          }
+          labels: { boxWidth: 12, padding: 12, font: { size: 12 } }
         }
       }
     };
@@ -1350,58 +1343,93 @@
     const themeIcon = document.getElementById('theme-icon');
     const themeText = document.getElementById('theme-text');
 
+    // 頁面載入完成後統一初始化事件與監聽
     document.addEventListener('DOMContentLoaded', () => {
       initDateInputs();
       document.getElementById('enableTwd').checked = isTwdEnabled;
       document.getElementById('rateInputGroup').style.display = isTwdEnabled ? 'flex' : 'none';
+      
+      // 綁定分頁切換事件
+      document.querySelectorAll('.nav-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const targetId = btn.getAttribute('data-target');
+          switchTab(targetId, btn);
+        });
+      });
+
+      // 綁定開啟 Modal 按鈕事件
+      document.querySelectorAll('.btn-open-modal').forEach(btn => {
+        btn.addEventListener('click', () => {
+          openChartModal(btn.getAttribute('data-modal'));
+        });
+      });
+
+      // 綁定關閉 Modal 按鈕事件
+      document.querySelectorAll('.modal-close-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          closeChartModal(btn.getAttribute('data-close'));
+        });
+      });
+
+      // 綁定點擊遮罩關閉 Modal
+      document.querySelectorAll('.modal-overlay').forEach(overlay => {
+        overlay.addEventListener('click', (e) => {
+          if (e.target === overlay) {
+            closeChartModal(overlay.id);
+          }
+        });
+      });
+
+      // 綁定其他動態控制項
+      document.getElementById('enableTwd').addEventListener('change', toggleTwdConversion);
+      document.getElementById('audToTwdRate').addEventListener('input', updateView);
+      document.getElementById('salaryForm').addEventListener('submit', handleFormSubmit);
+      document.getElementById('selectAllCheckbox').addEventListener('change', function() { toggleSelectAll(this); });
+      document.getElementById('deleteSelectedBtn').addEventListener('click', deleteSelectedRecords);
+
+      document.getElementById('filterStartDate').addEventListener('change', renderTable);
+      document.getElementById('filterEndDate').addEventListener('change', renderTable);
+      document.getElementById('searchKeyword').addEventListener('input', renderTable);
+      document.getElementById('filterUnit').addEventListener('change', renderTable);
+      document.getElementById('filterJobType').addEventListener('change', renderTable);
+      document.getElementById('filterCity').addEventListener('change', renderTable);
+      document.getElementById('filterStatus').addEventListener('change', renderTable);
+
+      document.querySelectorAll('.target-monthly-input').forEach(input => {
+        input.addEventListener('input', (e) => syncTargetMonthly(e.target.value));
+      });
+      document.querySelectorAll('.target-yearly-input').forEach(input => {
+        input.addEventListener('input', (e) => syncTargetYearly(e.target.value));
+      });
+
       updateView();
     });
 
     themeToggleBtn.addEventListener('click', () => {
       document.body.classList.toggle('dark-mode');
       const isDark = document.body.classList.contains('dark-mode');
-      
       themeIcon.textContent = isDark ? 'light_mode' : 'dark_mode';
       themeText.textContent = isDark ? '切換明亮模式' : '切換暗黑模式';
-      
       updateStatsView();
     });
 
     function openChartModal(modalId) {
       const modal = document.getElementById(modalId);
       if (!modal) return;
-      
       modal.classList.add('active');
 
       setTimeout(() => {
-        if (modalId === 'trendModal' && monthlyChartInstance) {
-          monthlyChartInstance.resize();
-          monthlyChartInstance.update();
-        } else if (modalId === 'statusModal' && statusChartInstance) {
-          statusChartInstance.resize();
-          statusChartInstance.update();
-        } else if (modalId === 'unitModal' && pieChartInstance) {
-          pieChartInstance.resize();
-          pieChartInstance.update();
-        } else if (modalId === 'jobTypeModal' && jobTypeChartInstance) {
-          jobTypeChartInstance.resize();
-          jobTypeChartInstance.update();
-        } else if (modalId === 'cityModal' && cityChartInstance) {
-          cityChartInstance.resize();
-          cityChartInstance.update();
-        }
+        if (modalId === 'trendModal' && monthlyChartInstance) { monthlyChartInstance.resize(); monthlyChartInstance.update(); }
+        else if (modalId === 'statusModal' && statusChartInstance) { statusChartInstance.resize(); statusChartInstance.update(); }
+        else if (modalId === 'unitModal' && pieChartInstance) { pieChartInstance.resize(); pieChartInstance.update(); }
+        else if (modalId === 'jobTypeModal' && jobTypeChartInstance) { jobTypeChartInstance.resize(); jobTypeChartInstance.update(); }
+        else if (modalId === 'cityModal' && cityChartInstance) { cityChartInstance.resize(); cityChartInstance.update(); }
       }, 50);
     }
 
     function closeChartModal(modalId) {
       const modal = document.getElementById(modalId);
       if (modal) modal.classList.remove('active');
-    }
-
-    function closeChartModalOnOverlay(event, modalId) {
-      if (event.target.classList.contains('modal-overlay')) {
-        closeChartModal(modalId);
-      }
     }
 
     toggleSidebarBtn.addEventListener('click', () => {
@@ -1412,9 +1440,7 @@
         const isCollapsed = sidebar.classList.contains('collapsed');
         document.getElementById('toggleIcon').textContent = isCollapsed ? 'chevron_right' : 'chevron_left';
       }
-      setTimeout(() => {
-        if (monthlyChartInstance) monthlyChartInstance.resize();
-      }, 300);
+      setTimeout(() => { if (monthlyChartInstance) monthlyChartInstance.resize(); }, 300);
     });
 
     openMobileMenuBtn.addEventListener('click', () => {
@@ -1435,7 +1461,6 @@
       document.getElementById(tabId).classList.add('active');
       btnEl.classList.add('active');
 
-      // 同步更新標題
       const titles = {
         'inputTab': '新增薪資紀錄',
         'listTab': '歷史薪資明細',
@@ -1457,15 +1482,11 @@
     document.addEventListener('input', (e) => {
       if (e.target.classList.contains('stats-start-date')) {
         const val = e.target.value;
-        document.querySelectorAll('.stats-start-date').forEach(el => {
-          if (el !== e.target) el.value = val;
-        });
+        document.querySelectorAll('.stats-start-date').forEach(el => { if (el !== e.target) el.value = val; });
         updateStatsView();
       } else if (e.target.classList.contains('stats-end-date')) {
         const val = e.target.value;
-        document.querySelectorAll('.stats-end-date').forEach(el => {
-          if (el !== e.target) el.value = val;
-        });
+        document.querySelectorAll('.stats-end-date').forEach(el => { if (el !== e.target) el.value = val; });
         updateStatsView();
       }
     });
@@ -1531,7 +1552,7 @@
       saveRecords();
       document.getElementById('salaryForm').reset();
       updateView();
-      alert("薪資紀錄儲存成功！可切換至「歷史薪資明細」查看紀錄。");
+      alert("薪資紀錄儲存成功！");
     }
 
     function saveRecords() {
@@ -1604,23 +1625,16 @@
 
       let filtered = records.slice().sort((a, b) => b.salaryMonth.localeCompare(a.salaryMonth));
 
-      if (startDate) {
-        filtered = filtered.filter(r => `${r.salaryMonth}-01` >= startDate || r.salaryMonth >= startDate.substring(0, 7));
-      }
-      if (endDate) {
-        filtered = filtered.filter(r => `${r.salaryMonth}-31` <= endDate || r.salaryMonth <= endDate.substring(0, 7));
-      }
+      if (startDate) filtered = filtered.filter(r => `${r.salaryMonth}-01` >= startDate || r.salaryMonth >= startDate.substring(0, 7));
+      if (endDate) filtered = filtered.filter(r => `${r.salaryMonth}-31` <= endDate || r.salaryMonth <= endDate.substring(0, 7));
 
       if (keyword) {
         filtered = filtered.filter(r => {
-          const matchMonth = r.salaryMonth.toLowerCase().includes(keyword);
-          const matchUnit = r.unit.toLowerCase().includes(keyword);
-          const matchJobType = (r.jobType || '').toLowerCase().includes(keyword);
-          const matchCity = (r.city || '').toLowerCase().includes(keyword);
-          const matchPayDate = r.payDate.toLowerCase().includes(keyword);
-          const matchInfo = `$${r.hourlyRate}/hr × ${r.workDays}天`.toLowerCase().includes(keyword);
-
-          return matchMonth || matchUnit || matchJobType || matchCity || matchPayDate || matchInfo;
+          return r.salaryMonth.toLowerCase().includes(keyword) ||
+                 r.unit.toLowerCase().includes(keyword) ||
+                 (r.jobType || '').toLowerCase().includes(keyword) ||
+                 (r.city || '').toLowerCase().includes(keyword) ||
+                 r.payDate.toLowerCase().includes(keyword);
         });
       }
 
@@ -1628,11 +1642,8 @@
       if (filterJobType !== 'ALL') filtered = filtered.filter(r => (r.jobType || '其他') === filterJobType);
       if (filterCity !== 'ALL') filtered = filtered.filter(r => (r.city || '未標示') === filterCity);
 
-      if (filterStatus === 'CURRENT') {
-        filtered = filtered.filter(r => r.isCurrentMonthPay);
-      } else if (filterStatus === 'CROSS') {
-        filtered = filtered.filter(r => !r.isCurrentMonthPay);
-      }
+      if (filterStatus === 'CURRENT') filtered = filtered.filter(r => r.isCurrentMonthPay);
+      else if (filterStatus === 'CROSS') filtered = filtered.filter(r => !r.isCurrentMonthPay);
 
       if (filtered.length === 0) {
         tbody.innerHTML = '<tr><td colspan="9" style="text-align:center; padding: 24px; color: var(--text-secondary);">尚無相符的紀錄</td></tr>';
@@ -1651,7 +1662,7 @@
 
         tr.innerHTML = `
           <td style="text-align: center;">
-            <input type="checkbox" class="custom-checkbox record-checkbox" value="${r.id}" onchange="updateDeleteButtonState()">
+            <input type="checkbox" class="custom-checkbox record-checkbox" value="${r.id}">
           </td>
           <td><b>${r.salaryMonth}</b></td>
           <td>${r.unit}</td>
@@ -1663,6 +1674,11 @@
           <td>${badge}</td>
         `;
         tbody.appendChild(tr);
+      });
+
+      // 替動態產生的 checkbox 綁定變更事件
+      document.querySelectorAll('.record-checkbox').forEach(cb => {
+        cb.addEventListener('change', updateDeleteButtonState);
       });
 
       updateDeleteButtonState();
@@ -1707,12 +1723,8 @@
       if (filterStart) filterStart.value = firstDay;
       if (filterEnd) filterEnd.value = lastDay;
 
-      document.querySelectorAll('.stats-start-date').forEach(input => {
-        input.value = firstDay;
-      });
-      document.querySelectorAll('.stats-end-date').forEach(input => {
-        input.value = lastDay;
-      });
+      document.querySelectorAll('.stats-start-date').forEach(input => { input.value = firstDay; });
+      document.querySelectorAll('.stats-end-date').forEach(input => { input.value = lastDay; });
     }
 
     function updateStatsView() {
@@ -1726,21 +1738,12 @@
       const targetYearly = parseFloat(document.querySelector('.target-yearly-input').value) || 0;
 
       let periodRecords = records.slice();
-      if (startDate) {
-        periodRecords = periodRecords.filter(r => `${r.salaryMonth}-01` >= startDate || r.salaryMonth >= startDate.substring(0, 7));
-      }
-      if (endDate) {
-        periodRecords = periodRecords.filter(r => `${r.salaryMonth}-31` <= endDate || r.salaryMonth <= endDate.substring(0, 7));
-      }
+      if (startDate) periodRecords = periodRecords.filter(r => `${r.salaryMonth}-01` >= startDate || r.salaryMonth >= startDate.substring(0, 7));
+      if (endDate) periodRecords = periodRecords.filter(r => `${r.salaryMonth}-31` <= endDate || r.salaryMonth <= endDate.substring(0, 7));
 
       const totalIncome = periodRecords.reduce((sum, r) => sum + r.totalPay, 0);
       const monthsCount = new Set(periodRecords.map(r => r.salaryMonth)).size || 1;
       const avgMonthlyIncome = totalIncome / monthsCount;
-
-      const labelTotalTitle = document.getElementById('labelTotalTitle');
-      if (labelTotalTitle) {
-        labelTotalTitle.textContent = '期間累計總收入';
-      }
 
       document.querySelectorAll('.statYearTotal').forEach(el => el.innerHTML = formatMoney(totalIncome));
       document.querySelectorAll('.statMonthAvg').forEach(el => el.innerHTML = formatMoney(avgMonthlyIncome));
@@ -1780,22 +1783,19 @@
       document.querySelectorAll('.statPayStatusSummary').forEach(el => el.innerHTML = statusSummaryHtml);
 
       const sortedUnits = Object.entries(unitSums).sort((a,b) => b[1] - a[1]).slice(0, 3);
-      const topUnitsHtml = sortedUnits.length > 0 
-        ? sortedUnits.map(([u, v], i) => `${i+1}. <b>${u}</b>: $${v.toLocaleString()}`).join('<br>')
-        : "無紀錄";
-      document.querySelectorAll('.statTopUnits').forEach(el => el.innerHTML = topUnitsHtml);
+      document.querySelectorAll('.statTopUnits').forEach(el => {
+        el.innerHTML = sortedUnits.length > 0 ? sortedUnits.map(([u, v], i) => `${i+1}. <b>${u}</b>: $${v.toLocaleString()}`).join('<br>') : "無紀錄";
+      });
 
       const sortedJobTypes = Object.entries(jobTypeSums).sort((a,b) => b[1] - a[1]).slice(0, 3);
-      const topJobTypesHtml = sortedJobTypes.length > 0 
-        ? sortedJobTypes.map(([j, v], i) => `${i+1}. <b>${j}</b>: $${v.toLocaleString()}`).join('<br>')
-        : "無紀錄";
-      document.querySelectorAll('.statTopJobTypes').forEach(el => el.innerHTML = topJobTypesHtml);
+      document.querySelectorAll('.statTopJobTypes').forEach(el => {
+        el.innerHTML = sortedJobTypes.length > 0 ? sortedJobTypes.map(([j, v], i) => `${i+1}. <b>${j}</b>: $${v.toLocaleString()}`).join('<br>') : "無紀錄";
+      });
 
       const sortedCities = Object.entries(citySums).sort((a,b) => b[1] - a[1]).slice(0, 3);
-      const topCitiesHtml = sortedCities.length > 0 
-        ? sortedCities.map(([c, v], i) => `${i+1}. <b>${c}</b>: $${v.toLocaleString()}`).join('<br>')
-        : "無紀錄";
-      document.querySelectorAll('.statTopCities').forEach(el => el.innerHTML = topCitiesHtml);
+      document.querySelectorAll('.statTopCities').forEach(el => {
+        el.innerHTML = sortedCities.length > 0 ? sortedCities.map(([c, v], i) => `${i+1}. <b>${c}</b>: $${v.toLocaleString()}`).join('<br>') : "無紀錄";
+      });
 
       renderMonthlyChart(startDate, endDate, targetMonthly, periodRecords);
       renderStatusPieChart(statusSums);
@@ -1810,7 +1810,6 @@
       if (!canvas || !chartBox) return;
 
       const ctx = canvas.getContext('2d');
-
       let start = startDate ? startDate.substring(0, 7) : '2026-01';
       let end = endDate ? endDate.substring(0, 7) : '2026-12';
       if (start > end) { [start, end] = [end, start]; }
@@ -1834,11 +1833,7 @@
         return periodRecords.filter(r => r.salaryMonth === m).reduce((sum, r) => sum + r.totalPay, 0);
       });
 
-      if (monthsList.length > 6) {
-        chartBox.style.minWidth = `${monthsList.length * 75}px`;
-      } else {
-        chartBox.style.minWidth = '100%';
-      }
+      chartBox.style.minWidth = monthsList.length > 6 ? `${monthsList.length * 75}px` : '100%';
 
       if (monthlyChartInstance) monthlyChartInstance.destroy();
       monthlyChartInstance = new Chart(ctx, {
@@ -1850,20 +1845,7 @@
             { label: '目標月薪', data: Array(chartLabels.length).fill(targetMonthly), type: 'line', borderColor: '#ff4081', borderDash: [5, 5], fill: false, pointRadius: 3 }
           ]
         },
-        options: { 
-          responsive: true, 
-          maintainAspectRatio: false,
-          scales: { 
-            y: { beginAtZero: true },
-            x: {
-              ticks: {
-                font: {
-                  size: 11
-                }
-              }
-            }
-          }
-        }
+        options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }
       });
     }
 
@@ -1871,21 +1853,10 @@
       const canvas = document.getElementById('statusPieChart');
       if (!canvas) return;
       const ctx = canvas.getContext('2d');
-      const labels = Object.keys(statusSums);
-      const data = Object.values(statusSums);
-
       if (statusChartInstance) statusChartInstance.destroy();
-      if (data.every(v => v === 0)) { ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height); return; }
-
       statusChartInstance = new Chart(ctx, {
         type: 'doughnut',
-        data: {
-          labels: labels,
-          datasets: [{
-            data: data,
-            backgroundColor: ['#4caf50', '#ff9800']
-          }]
-        },
+        data: { labels: Object.keys(statusSums), datasets: [{ data: Object.values(statusSums), backgroundColor: ['#4caf50', '#ff9800'] }] },
         options: commonPieOptions
       });
     }
@@ -1894,21 +1865,10 @@
       const canvas = document.getElementById('unitPieChart');
       if (!canvas) return;
       const ctx = canvas.getContext('2d');
-      const labels = Object.keys(unitSums);
-      const data = Object.values(unitSums);
-
       if (pieChartInstance) pieChartInstance.destroy();
-      if (labels.length === 0) { ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height); return; }
-
       pieChartInstance = new Chart(ctx, {
         type: 'pie',
-        data: {
-          labels: labels,
-          datasets: [{
-            data: data,
-            backgroundColor: ['#3f51b5', '#ff4081', '#4caf50', '#ff9800', '#9c27b0', '#00bcd4', '#795548', '#607d8b']
-          }]
-        },
+        data: { labels: Object.keys(unitSums), datasets: [{ data: Object.values(unitSums), backgroundColor: ['#3f51b5', '#ff4081', '#4caf50', '#ff9800', '#9c27b0', '#00bcd4', '#795548', '#607d8b'] }] },
         options: commonPieOptions
       });
     }
@@ -1917,21 +1877,10 @@
       const canvas = document.getElementById('jobTypePieChart');
       if (!canvas) return;
       const ctx = canvas.getContext('2d');
-      const labels = Object.keys(jobTypeSums);
-      const data = Object.values(jobTypeSums);
-
       if (jobTypeChartInstance) jobTypeChartInstance.destroy();
-      if (labels.length === 0) { ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height); return; }
-
       jobTypeChartInstance = new Chart(ctx, {
         type: 'doughnut',
-        data: {
-          labels: labels,
-          datasets: [{
-            data: data,
-            backgroundColor: ['#0288d1', '#26a69a', '#ab47bc', '#ffa726', '#78909c', '#ec407a', '#8d6e63', '#26c6da']
-          }]
-        },
+        data: { labels: Object.keys(jobTypeSums), datasets: [{ data: Object.values(jobTypeSums), backgroundColor: ['#0288d1', '#26a69a', '#ab47bc', '#ffa726', '#78909c', '#ec407a', '#8d6e63', '#26c6da'] }] },
         options: commonPieOptions
       });
     }
@@ -1940,21 +1889,10 @@
       const canvas = document.getElementById('cityPieChart');
       if (!canvas) return;
       const ctx = canvas.getContext('2d');
-      const labels = Object.keys(citySums);
-      const data = Object.values(citySums);
-
       if (cityChartInstance) cityChartInstance.destroy();
-      if (labels.length === 0) { ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height); return; }
-
       cityChartInstance = new Chart(ctx, {
         type: 'pie',
-        data: {
-          labels: labels,
-          datasets: [{
-            data: data,
-            backgroundColor: ['#00bcd4', '#8e24aa', '#ff5722', '#43a047', '#e91e63', '#3f51b5', '#ffb300', '#009688']
-          }]
-        },
+        data: { labels: Object.keys(citySums), datasets: [{ data: Object.values(citySums), backgroundColor: ['#00bcd4', '#8e24aa', '#ff5722', '#43a047', '#e91e63', '#3f51b5', '#ffb300', '#009688'] }] },
         options: commonPieOptions
       });
     }
