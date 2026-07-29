@@ -13,6 +13,8 @@
       --primary-color: #3f51b5;
       --primary-dark: #303f9f;
       --accent-color: #ff4081;
+      --danger-color: #d32f2f;
+      --danger-hover: #b71c1c;
       --bg-color: #f4f6f9;
       --card-bg: #ffffff;
       --text-color: #333333;
@@ -39,7 +41,7 @@
     }
 
     /* -------------------------------------------------------------------------- */
-    /* 側邊欄樣式 Layout Sidebar                                                   */
+    /* 左側邊欄 Layout Sidebar                                                     */
     /* -------------------------------------------------------------------------- */
     .sidebar {
       width: var(--sidebar-width);
@@ -47,7 +49,7 @@
       color: #ffffff;
       display: flex;
       flex-direction: column;
-      transition: width var(--transition-speed) ease;
+      transition: width var(--transition-speed) ease, transform var(--transition-speed) ease;
       position: fixed;
       top: 0;
       bottom: 0;
@@ -156,12 +158,12 @@
     }
 
     /* -------------------------------------------------------------------------- */
-    /* 主內容區域 Main Content                                                    */
+    /* 右側主區域 Main Content                                                    */
     /* -------------------------------------------------------------------------- */
     .main-wrapper {
       flex-grow: 1;
       margin-left: var(--sidebar-width);
-      transition: margin-left var(--transition-speed) ease;
+      transition: margin-left var(--transition-speed) ease, width var(--transition-speed) ease;
       padding: 24px;
       width: calc(100% - var(--sidebar-width));
     }
@@ -171,7 +173,7 @@
       width: calc(100% - var(--sidebar-collapsed-width));
     }
 
-    /* Tab 內容切換 */
+    /* Tab 內容區切換 */
     .tab-content {
       display: none;
       max-width: 1200px;
@@ -189,7 +191,7 @@
     }
 
     /* -------------------------------------------------------------------------- */
-    /* 通用 UI 元件 (卡片、表單、表格)                                            */
+    /* UI 卡片、表單、表格與看板元件                                                */
     /* -------------------------------------------------------------------------- */
     .card {
       background: var(--card-bg);
@@ -254,7 +256,46 @@
       background-color: var(--primary-dark);
     }
 
-    /* 匯率列與開關 */
+    .btn-danger {
+      background-color: var(--danger-color);
+      color: #ffffff;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 4px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: background-color 0.2s;
+    }
+
+    .btn-danger:hover {
+      background-color: var(--danger-hover);
+    }
+
+    /* 批次清除區塊樣式 */
+    .batch-delete-box {
+      background-color: #fff8f8;
+      border: 1px solid #ffcdd2;
+      border-radius: 6px;
+      padding: 12px 16px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .batch-delete-controls {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    /* 匯率與幣別設定 */
     .rate-bar {
       display: flex;
       align-items: center;
@@ -333,7 +374,7 @@
       color: var(--primary-dark);
     }
 
-    /* 手機版適應 Mobile RWD */
+    /* 手機版響應式設計 Mobile RWD */
     @media (max-width: 768px) {
       .sidebar {
         transform: translateX(-100%);
@@ -357,6 +398,11 @@
         background: transparent;
         border: none;
         cursor: pointer;
+      }
+
+      .batch-delete-box {
+        flex-direction: column;
+        align-items: flex-start;
       }
     }
 
@@ -393,13 +439,13 @@
     </nav>
   </aside>
 
-  <!-- 主內容區域 Main Wrapper -->
+  <!-- 右側主內容區域 Main Wrapper -->
   <main class="main-wrapper">
     
     <!-- 手機版浮動選單按鈕 -->
     <button class="mobile-menu-btn" id="mobileMenuBtn">
       <span class="material-icons">menu</span>
-      <span style="margin-left: 8px; font-weight: 600;">開啟主選單</span>
+      <span style="margin-left: 8px; font-weight: 600;">開啟選單</span>
     </button>
 
     <!-- 匯率與幣別設定列 -->
@@ -457,7 +503,22 @@
       <!-- 紀錄篩選與列表 -->
       <div class="card">
         <h3 class="card-title"><span class="material-icons">list_alt</span> 歷史薪資明細</h3>
-        
+
+        <!-- 一鍵清除特定月份資料 -->
+        <div class="batch-delete-box">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span class="material-icons" style="color: var(--danger-color);">delete_sweep</span>
+            <strong style="color: var(--danger-color);">批次清除月份資料</strong>
+          </div>
+          <div class="batch-delete-controls">
+            <label for="deleteMonthSelect" style="font-size: 0.85rem; font-weight: 600; color: var(--text-secondary);">選擇月份：</label>
+            <input type="month" id="deleteMonthSelect" onclick="tryShowPicker(this)">
+            <button type="button" class="btn-danger" onclick="deleteRecordsByMonth()">
+              <span class="material-icons" style="font-size: 18px;">delete_forever</span> 清除該月所有資料
+            </button>
+          </div>
+        </div>
+
         <!-- 篩選列 -->
         <div class="form-grid" style="margin-bottom: 20px;">
           <div class="form-group">
@@ -551,7 +612,7 @@
 
   <script>
     /* -------------------------------------------------------------------------- */
-    /* 應用程式狀態管理 Application State                                           */
+    /* 應用程式狀態管理                                                           */
     /* -------------------------------------------------------------------------- */
     let records = JSON.parse(localStorage.getItem('salary_records')) || [];
     let isTwdEnabled = JSON.parse(localStorage.getItem('salary_twd_enabled')) || false;
@@ -568,7 +629,7 @@
     });
 
     /* -------------------------------------------------------------------------- */
-    /* 側邊欄展開 / 收合控制 Sidebar Controls                                      */
+    /* 側邊欄展開 / 收合與頁面切換邏輯                                              */
     /* -------------------------------------------------------------------------- */
     const sidebar = document.getElementById('sidebar');
     const toggleBtn = document.getElementById('toggleSidebar');
@@ -595,7 +656,7 @@
       document.getElementById(tabId).classList.add('active');
       btnEl.classList.add('active');
 
-      // 手機版選取後自動關閉側邊欄
+      // 手機版切換頁面後自動關閉側邊欄
       if (window.innerWidth <= 768) {
         sidebar.classList.remove('mobile-open');
       }
@@ -606,7 +667,7 @@
     }
 
     /* -------------------------------------------------------------------------- */
-    /* 核心邏輯與計算 Functions                                                    */
+    /* 核心計算邏輯與資料更新                                                     */
     /* -------------------------------------------------------------------------- */
     function tryShowPicker(inputEl) {
       if ('showPicker' in HTMLInputElement.prototype) {
@@ -646,7 +707,6 @@
       const overtimePay = overtimeInput !== "" ? parseFloat(overtimeInput) : 0;
       const totalPay = basePay + overtimePay;
 
-      // 判斷是否為跨月/非本月入帳
       const payMonthStr = payDate.substring(0, 7);
       const isCurrentMonthPay = (salaryMonth === payMonthStr);
 
@@ -682,6 +742,32 @@
       }
     }
 
+    /* 一鍵按月份刪除全部資料 */
+    function deleteRecordsByMonth() {
+      const selectedMonth = document.getElementById('deleteMonthSelect').value;
+      
+      if (!selectedMonth) {
+        alert("請先選擇要清除的月份！");
+        return;
+      }
+
+      const matchRecords = records.filter(r => r.salaryMonth === selectedMonth);
+
+      if (matchRecords.length === 0) {
+        alert(`找不到 ${selectedMonth} 月份的薪資紀錄。`);
+        return;
+      }
+
+      const isConfirmed = confirm(`確定要一次刪除 ${selectedMonth} 月份的所有薪資紀錄嗎？\n（共計 ${matchRecords.length} 筆資料，此操作無法復原）`);
+
+      if (isConfirmed) {
+        records = records.filter(r => r.salaryMonth !== selectedMonth);
+        saveRecords();
+        updateView();
+        alert(`已順利清除 ${selectedMonth} 月份的 ${matchRecords.length} 筆薪資紀錄！`);
+      }
+    }
+
     function updateView() {
       renderTable();
       updateUnitFilterOptions();
@@ -689,7 +775,7 @@
     }
 
     /* -------------------------------------------------------------------------- */
-    /* 資料渲染與 UI 更新                                                         */
+    /* 資料渲染                                                                   */
     /* -------------------------------------------------------------------------- */
     function renderTable() {
       const tbody = document.getElementById('recordsTableBody');
@@ -727,7 +813,7 @@
           <td><b>${formatMoney(r.totalPay)}</b></td>
           <td>${r.payDate}</td>
           <td>${statusBadge}</td>
-          <td><button onclick="deleteRecord(${r.id})" style="color:#d32f2f; background:none; border:none; cursor:pointer;"><span class="material-icons" style="font-size:18px;">delete</span></button></td>
+          <td><button onclick="deleteRecord(${r.id})" style="color:#d32f2f; background:none; border:none; cursor:pointer;" title="刪除單筆"><span class="material-icons" style="font-size:18px;">delete</span></button></td>
         `;
         tbody.appendChild(tr);
       });
@@ -770,10 +856,8 @@
       const targetMonthly = parseFloat(document.getElementById('targetMonthly').value) || 0;
       const targetYearly = parseFloat(document.getElementById('targetYearly').value) || 0;
 
-      // 篩選當年度紀錄
       const yearRecords = records.filter(r => r.salaryMonth.startsWith(selectedYear));
 
-      // 1. 計算年度總金額與平均
       const totalIncome = yearRecords.reduce((sum, r) => sum + r.totalPay, 0);
       const monthsCount = new Set(yearRecords.map(r => r.salaryMonth)).size || 1;
       const avgMonthlyIncome = totalIncome / (monthsCount || 1);
@@ -781,14 +865,12 @@
       document.getElementById('statYearTotal').innerHTML = formatMoney(totalIncome);
       document.getElementById('statMonthAvg').innerHTML = formatMoney(avgMonthlyIncome);
 
-      // 目標達成率
       const yearProgress = targetYearly > 0 ? ((totalIncome / targetYearly) * 100).toFixed(1) : 0;
       const monthProgress = targetMonthly > 0 ? ((avgMonthlyIncome / targetMonthly) * 100).toFixed(1) : 0;
 
       document.getElementById('statYearTargetProgress').textContent = `年目標達成率: ${yearProgress}%`;
       document.getElementById('statMonthTargetProgress').textContent = `月目標達成率: ${monthProgress}%`;
 
-      // 2. 計算 Top 3 付款單位
       const unitSums = {};
       yearRecords.forEach(r => {
         unitSums[r.unit] = (unitSums[r.unit] || 0) + r.totalPay;
@@ -806,7 +888,6 @@
         document.getElementById('statTopUnits').textContent = "該年度無收入紀錄";
       }
 
-      // 3. 繪製圖表
       renderChart(selectedYear, targetMonthly, yearRecords);
     }
 
