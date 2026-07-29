@@ -38,6 +38,51 @@
       display: flex;
       min-height: 100vh;
       overflow-x: hidden;
+      position: relative;
+    }
+
+    /* 手機版頂部 Header 導覽條 */
+    .mobile-header {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 56px;
+      background-color: #1a237e;
+      color: #ffffff;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      z-index: 999;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+
+    .mobile-header-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* 背景遮罩 (手機版側邊欄展開時顯示) */
+    .sidebar-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      opacity: 0;
+      transition: opacity var(--transition-speed) ease;
+    }
+
+    .sidebar-overlay.active {
+      display: block;
+      opacity: 1;
     }
 
     /* 側邊欄 Sidebar */
@@ -47,12 +92,12 @@
       color: #ffffff;
       display: flex;
       flex-direction: column;
-      transition: width var(--transition-speed) ease;
+      transition: width var(--transition-speed) ease, transform var(--transition-speed) ease;
       position: fixed;
       top: 0; 
       bottom: 0; 
       left: 0;
-      z-index: 1000;
+      z-index: 1001;
       box-shadow: 2px 0 8px rgba(0,0,0,0.15);
       overflow-x: hidden;
     }
@@ -143,7 +188,7 @@
     .main-wrapper {
       flex-grow: 1;
       margin-left: var(--sidebar-width);
-      transition: margin-left var(--transition-speed) ease, width var(--transition-speed) ease;
+      transition: margin-left var(--transition-speed) ease, width var(--transition-speed) ease, padding var(--transition-speed) ease;
       padding: 24px;
       width: calc(100% - var(--sidebar-width));
     }
@@ -224,6 +269,13 @@
       font-weight: 600;
       cursor: pointer;
       transition: background-color 0.2s;
+      width: 100%;
+    }
+
+    @media (min-width: 576px) {
+      .btn-submit {
+        width: auto;
+      }
     }
 
     .btn-submit:hover {
@@ -353,9 +405,61 @@
         grid-template-columns: 1fr; 
       }
     }
+
+    /* =========================================================
+       📱 手機與平板響應式優化 (RWD Media Query)
+       ========================================================= */
+    @media (max-width: 768px) {
+      .mobile-header {
+        display: flex; /* 顯示手機版頂部標頭 */
+      }
+
+      .sidebar {
+        transform: translateX(-100%); /* 預設完全收起至螢幕左側外 */
+        width: 260px !important; /* 展開時固定為舒適的抽屜寬度 */
+      }
+
+      .sidebar.mobile-open {
+        transform: translateX(0); /* 展開抽屜選單 */
+      }
+
+      /* 在手機上隱藏側邊欄內部的收合按鈕 */
+      .sidebar-header .toggle-btn {
+        display: none;
+      }
+
+      .main-wrapper {
+        margin-left: 0 !important;
+        width: 100% !important;
+        padding: 16px;
+        padding-top: 72px; /* 留出手機頂部 Header 的高度 */
+      }
+
+      /* 側邊欄裡面的文字在手機版永遠顯示 */
+      .sidebar.collapsed .sidebar-title,
+      .sidebar.collapsed .nav-btn-text {
+        opacity: 1 !important;
+        display: inline-block !important;
+        pointer-events: auto !important;
+      }
+    }
   </style>
 </head>
 <body>
+
+  <!-- 手機版頂部 Header -->
+  <header class="mobile-header">
+    <div class="mobile-header-title">
+      <span class="material-icons">account_balance_wallet</span>
+      <span>薪資管理系統</span>
+    </div>
+    <button class="toggle-btn" id="openMobileMenu" title="開啟選單">
+      <span class="material-icons">menu</span>
+    </button>
+  </header>
+
+  <!-- 手機版側邊欄背景遮罩 -->
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
   <!-- 左側邊欄 -->
   <aside class="sidebar" id="sidebar">
@@ -447,7 +551,7 @@
             <span class="material-icons" style="color: var(--danger-color);">delete_sweep</span>
             <strong style="color: var(--danger-color);">批次清除月份資料</strong>
           </div>
-          <div style="display: flex; align-items: center; gap: 12px;">
+          <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
             <input type="month" id="deleteMonthSelect">
             <button type="button" class="btn-danger" onclick="deleteRecordsByMonth()">
               <span class="material-icons" style="font-size: 18px;">delete_forever</span> 清除該月資料
@@ -558,6 +662,12 @@
     let monthlyChartInstance = null;
     let pieChartInstance = null;
 
+    // DOM 元素引用
+    const sidebar = document.getElementById('sidebar');
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
+    const openMobileMenuBtn = document.getElementById('openMobileMenu');
+    const toggleSidebarBtn = document.getElementById('toggleSidebar');
+
     // 頁面初始化
     document.addEventListener('DOMContentLoaded', () => {
       initYearOptions();
@@ -566,19 +676,37 @@
       updateView();
     });
 
-    // 側邊欄 Toggle
-    const sidebar = document.getElementById('sidebar');
-    document.getElementById('toggleSidebar').addEventListener('click', () => {
+    // 桌面版 側邊欄 Toggle (展開 / 收合)
+    toggleSidebarBtn.addEventListener('click', () => {
       sidebar.classList.toggle('collapsed');
       document.getElementById('toggleIcon').textContent = sidebar.classList.contains('collapsed') ? 'chevron_right' : 'chevron_left';
     });
 
-    // 分頁切換
+    // 手機版 開啟側邊欄抽屜
+    openMobileMenuBtn.addEventListener('click', () => {
+      sidebar.classList.add('mobile-open');
+      sidebarOverlay.classList.add('active');
+    });
+
+    // 手機版 關閉側邊欄抽屜 (點擊背景遮罩)
+    sidebarOverlay.addEventListener('click', closeMobileMenu);
+
+    function closeMobileMenu() {
+      sidebar.classList.remove('mobile-open');
+      sidebarOverlay.classList.remove('active');
+    }
+
+    // 分頁切換 (手機版點擊功能項目後自動收起側邊欄)
     function switchTab(tabId, btnEl) {
       document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
       document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
       document.getElementById(tabId).classList.add('active');
       btnEl.classList.add('active');
+
+      if (window.innerWidth <= 768) {
+        closeMobileMenu();
+      }
+
       if (tabId === 'statsTab') updateStatsView();
     }
 
