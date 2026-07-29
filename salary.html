@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>進階薪資管理系統</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: #f4f6f9;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 12px;
+      color: #333;
+    }
+    .card {
+      background: #ffffff;
+      padding: 16px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+      margin-bottom: 16px;
+    }
+    h2 { margin-top: 0; font-size: 20px; color: #2c3e50; }
+    h3 { font-size: 16px; color: #2c3e50; margin: 16px 0 10px 0; }
+    h4 { font-size: 14px; margin-bottom: 10px; color: #555; }
+    
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .form-group {
+      display: flex;
+      flex-direction: column;
+    }
+    .form-group label {
+      font-size: 12px;
+      font-weight: bold;
+      margin-bottom: 4px;
+      color: #555;
+    }
+    input, select {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 15px;
+      background-color: #fff;
+      -webkit-appearance: none;
+    }
+    input:focus, select:focus {
+      outline: none;
+      border-color: #3498db;
+    }
+    button.btn-primary {
+      width: 100%;
+      padding: 14px;
+      background: #27ae60;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    button.btn-primary:active { background: #219150; }
+    
+    .filter-section {
+      background: #eef2f7;
+      padding: 12px;
+      border-radius: 8px;
+      margin: 16px 0;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .filter-group {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .filter-group label { font-weight: bold; font-size: 13px; white-space: nowrap; }
+    .filter-group input, .filter-group select { flex: 1; padding: 8px; font-size: 13px; }
+    .btn-clear {
+      width: 100%;
+      padding: 10px;
+      background: #7f8c8d;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+    }
+
+    /* 澳幣換算專用樣式 */
+    .currency-toggle-card {
+      background: #f0f7ff;
+      border: 1px solid #bae0ff;
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .toggle-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 44px;
+      height: 24px;
+    }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: #ccc;
+      transition: .3s;
+      border-radius: 24px;
+    }
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: .3s;
+      border-radius: 50%;
+    }
+    input:checked + .slider { background-color: #3498db; }
+    input:checked + .slider:before { transform: translateX(20px); }
+    .sub-currency {
+      font-size: 12px;
+      color: #666;
+      font-weight: normal;
+    }
+
+    /* 狀態標籤 */
+    .tag {
+      padding: 3px 8px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: bold;
+      display: inline-block;
+    }
+    .tag-same { background: #e8f8f5; color: #27ae60; border: 1px solid #a3e4d7; }
+    .tag-diff { background: #fef9e7; color: #d35400; border: 1px solid #f9e79f; }
+
+    /* 目標與設定區塊 */
+    .target-header {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 12px;
+      background: #f8f9fa;
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid #e9ecef;
+    }
+    .target-input-group {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .target-input-group input {
+      width: 130px;
+      padding: 6px 8px;
+      font-size: 14px;
+    }
+
+    /* 全年度總累計看板 */
+    .annual-box {
+      background: linear-gradient(135deg, #1e3c72, #2a5298);
+      color: #ffffff;
+      padding: 16px;
+      border-radius: 10px;
+      margin-bottom: 16px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    .annual-title-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .annual-title {
+      font-size: 15px;
+      font-weight: bold;
+      color: #ecf0f1;
+    }
+    .annual-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .annual-item {
+      background: rgba(255, 255, 255, 0.12);
+      padding: 10px 12px;
+      border-radius: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .annual-value {
+      font-size: 18px;
+      font-weight: bold;
+      color: #2ecc71;
+      text-align: right;
+    }
+
+    /* 紀錄清單 */
+    .record-card {
+      background: #fdfdfd;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 10px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+    }
+    .record-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #edf2f7;
+      padding-bottom: 8px;
+      margin-bottom: 8px;
+    }
+    .record-title { font-weight: bold; font-size: 16px; color: #2d3748; }
+    .record-body {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+      font-size: 13px;
+      color: #4a5568;
+    }
+    .record-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px dashed #edf2f7;
+    }
+    .total-price { font-size: 16px; font-weight: bold; color: #27ae60; }
+    .btn-del {
+      background: #e74c3c;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    /* 單月明細卡片 */
+    .summary-card {
+      background: #ffffff;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 10px;
+    }
+    .summary-title {
+      font-size: 15px;
+      font-weight: bold;
+      color: #2c3e50;
+      border-bottom: 1px solid #ecf0f1;
+      padding-bottom: 4px;
+      margin-bottom: 8px;
+    }
+    .summary-detail {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      font-size: 13px;
+    }
+    .status-pass { color: #27ae60; font-weight: bold; }
+    .status-fail { color: #e74c3c; font-weight: bold; }
+
+    /* 桌機適應 */
+    @media (min-width: 600px) {
+      .filter-section { flex-direction: row; }
+      .target-header { flex-direction: row; }
+      .currency-toggle-card { flex-direction: row; align-items: center; justify-content: space-between; }
+      .annual-grid { display: grid; grid-template-columns: repeat(3, 1fr); }
+      .annual-item { flex-direction: column; align-items: flex-start; }
+      .annual-value { text-align: left; margin-top: 4px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <h2>薪資管理系統</h2>
+
+  <!-- 澳幣換算功能設定卡片 -->
+  <div class="currency-toggle-card">
+    <div class="toggle-row" style="gap: 10px;">
+      <label for="enableAudToggle" style="font-weight: bold; font-size: 14px; cursor: pointer;">💱 啟用澳幣 (AUD) 換算台幣 (TWD)</label>
+      <label class="switch">
+        <input type="checkbox" id="enableAudToggle" onchange="toggleAudConversion()">
+        <span class="slider"></span>
+      </label>
+    </div>
+    <div id="audRateConfig" style="display: none; align-items: center; gap: 8px;">
+      <label for="audRate" style="font-size: 13px; font-weight: bold; white-space: nowrap;">匯率 (1 AUD =）：</label>
+      <input id="audRate" type="number" step="0.1" value="21.5" style="width: 90px; padding: 6px 8px; font-size: 13px;" onchange="updateAudRate()">
+      <span style="font-size: 13px;">TWD</span>
+    </div>
+  </div>
+
+  <!-- 新增薪資表單 -->
+  <div class="form-grid">
+    <div class="form-group">
+      <label for="month">薪資月份 (如 2026/07)</label>
+      <input id="month" placeholder="2026/07">
+    </div>
+    <div class="form-group">
+      <label for="payDate">實際領錢日期</label>
+      <input id="payDate" type="date">
+    </div>
+    <div class="form-group">
+      <label for="wage">時薪 <span class="currency-label">(元)</span></label>
+      <input id="wage" type="number" placeholder="時薪">
+    </div>
+    <div class="form-group">
+      <label for="days">工作天數</label>
+      <input id="days" type="number" placeholder="天數">
+    </div>
+    <div class="form-group">
+      <label for="hours">每日正常工時</label>
+      <input id="hours" type="number" placeholder="小時">
+    </div>
+    <div class="form-group">
+      <label for="overtime">每日加班時數 (選填)</label>
+      <input id="overtime" type="number" placeholder="小時">
+    </div>
+    <div class="form-group">
+      <label for="customOvertimePay">加班費自訂金額 (選填)</label>
+      <input id="customOvertimePay" type="number" placeholder="留空自動算">
+    </div>
+    <div class="form-group">
+      <label for="insurance">扣除勞健保/雜費</label>
+      <input id="insurance" type="number" placeholder="預設 0" value="0">
+    </div>
+  </div>
+
+  <button class="btn-primary" onclick="addRecord()">＋ 新增薪資紀錄</button>
+
+  <!-- 篩選區塊 -->
+  <div class="filter-section">
+    <div class="filter-group">
+      <label for="filterPayDate">按領錢日期：</label>
+      <input id="filterPayDate" type="date" onchange="render()">
+    </div>
+    <div class="filter-group">
+      <label for="filterType">入帳狀態：</label>
+      <select id="filterType" onchange="render()">
+        <option value="ALL">全部顯示</option>
+        <option value="SAME">僅顯示本月入帳</option>
+        <option value="DIFF">僅顯示跨月/非本月入帳</option>
+      </select>
+    </div>
+    <button class="btn-clear" onclick="clearFilter()">清除篩選條件</button>
+  </div>
+
+  <!-- 薪資紀錄明細 -->
+  <h3>薪資紀錄明細</h3>
+  <div id="recordList"></div>
+</div>
+
+<!-- 統計與目標卡片 -->
+<div class="card">
+  <h3>薪資目標與統計差距</h3>
+
+  <!-- 目標設定區 -->
+  <div class="target-header">
+    <div class="target-input-group">
+      <label for="targetWage"><strong>每月目標薪資：</strong></label>
+      <input id="targetWage" type="number" value="42000" onchange="updateTarget()"> <span class="currency-label">元</span>
+    </div>
+    <div class="target-input-group">
+      <label for="annualTargetWage"><strong>全年度目標總收入：</strong></label>
+      <input id="annualTargetWage" type="number" value="504000" onchange="updateTarget()"> <span class="currency-label">元</span>
+    </div>
+  </div>
+  
+  <!-- 整年統計大看板 -->
+  <div id="annualSummaryContainer"></div>
+
+  <!-- 單月明細統計 -->
+  <h4>各月份目標比對明細</h4>
+  <div id="summaryContainer"></div>
+</div>
+
+<script>
+  let records = JSON.parse(localStorage.getItem("salaryRecords") || "[]");
+  let targetSalary = +(localStorage.getItem("salaryTarget") || 42000);
+  let annualTargetSalary = +(localStorage.getItem("annualSalaryTarget") || 504000);
+  let selectedYear = localStorage.getItem("selectedAnnualYear") || new Date().getFullYear().toString();
+  
+  // 澳幣匯率相關設定
+  let enableAud = localStorage.getItem("enableAud") === "true";
+  let audRate = +(localStorage.getItem("audRate") || 21.5);
+
+  document.getElementById("targetWage").value = targetSalary;
+  document.getElementById("annualTargetWage").value = annualTargetSalary;
+  document.getElementById("enableAudToggle").checked = enableAud;
+  document.getElementById("audRate").value = audRate;
+
+  function save() {
+    localStorage.setItem("salaryRecords", JSON.stringify(records));
+    localStorage.setItem("salaryTarget", targetSalary);
+    localStorage.setItem("annualSalaryTarget", annualTargetSalary);
+    localStorage.setItem("selectedAnnualYear", selectedYear);
+    localStorage.setItem("enableAud", enableAud);
+    localStorage.setItem("audRate", audRate);
+  }
+
+  function toggleAudConversion() {
+    enableAud = document.getElementById("enableAudToggle").checked;
+    save();
+    render();
+  }
+
+  function updateAudRate() {
+    let rate = +document.getElementById("audRate").value;
+    if (rate > 0) {
+      audRate = rate;
+      save();
+      render();
+    }
+  }
+
+  function formatMoney(amount) {
+    let formattedNum = amount.toLocaleString();
+    if (!enableAud) {
+      return `${formattedNum} 元`;
+    }
+    let twdVal = Math.round(amount * audRate).toLocaleString();
+    return `AUD $${formattedNum} <span class="sub-currency">(約 NT$ ${twdVal})</span>`;
+  }
+
+  function updateTarget() {
+    let valM = +document.getElementById("targetWage").value;
+    let valA = +document.getElementById("annualTargetWage").value;
+
+    if (valM >= 0) targetSalary = valM;
+    if (valA >= 0) annualTargetSalary = valA;
+
+    save();
+    render();
+  }
+
+  function checkEntryType(monthStr, payDateStr) {
+    if (!payDateStr || payDateStr === "未設定") return { text: "未設定", code: "UNKNOWN" };
+    let formattedMonth = monthStr.replace('/', '-');
+    let payMonth = payDateStr.substring(0, 7);
+    return formattedMonth === payMonth ? { text: "本月入帳", code: "SAME" } : { text: "跨月/非本月入帳", code: "DIFF" };
+  }
+
+  function addRecord() {
+    let m = month.value.trim();
+    let pDate = payDate.value;
+    let w = +wage.value;
+    let d = +days.value;
+    let h = +hours.value;
+    let o = +overtime.value || 0;
+    let customOt = customOvertimePay.value !== "" ? +customOvertimePay.value : null;
+    let ins = +insurance.value || 0;
+
+    if (!m || !w || !d || !h) {
+      alert("請完整輸入：薪資月份、時薪、工作天數與每日工時");
+      return;
+    }
+
+    let normal = h * w * d;
+    let otPay = 0;
+    if (customOt !== null) {
+      otPay = customOt;
+    } else if (o > 0) {
+      otPay = (Math.min(o, 2) * 1.34 + Math.max(0, o - 2) * 1.67) * w * d;
+    }
+
+    let total = normal + otPay - ins;
+
+    records.push({
+      id: Date.now(),
+      month: m,
+      payDate: pDate || "未設定",
+      normal: Math.round(normal),
+      overtimePay: Math.round(otPay),
+      insurance: Math.round(ins),
+      total: Math.round(total)
+    });
+
+    save();
+    render();
+
+    month.value = "";
+    payDate.value = "";
+    hours.value = "";
+    overtime.value = "";
+    customOvertimePay.value = "";
+    wage.value = "";
+    days.value = "";
+    insurance.value = "0";
+  }
+
+  function del(id) {
+    if (confirm("確定要刪除這筆紀錄嗎？")) {
+      records = records.filter(r => r.id !== id);
+      save();
+      render();
+    }
+  }
+
+  function clearFilter() {
+    document.getElementById("filterPayDate").value = "";
+    document.getElementById("filterType").value = "ALL";
+    render();
+  }
+
+  function changeAnnualYear(year) {
+    selectedYear = year;
+    save();
+    render();
+  }
+
+  function render() {
+    // 依據開關更新畫面幣別標示
+    document.getElementById("audRateConfig").style.display = enableAud ? "flex" : "none";
+    let labels = document.querySelectorAll(".currency-label");
+    labels.forEach(el => el.textContent = enableAud ? "AUD" : "元");
+
+    let recordList = document.getElementById("recordList");
+    let summaryContainer = document.getElementById("summaryContainer");
+    let annualSummaryContainer = document.getElementById("annualSummaryContainer");
+    let filterDate = document.getElementById("filterPayDate").value;
+    let filterType = document.getElementById("filterType").value;
+
+    recordList.innerHTML = "";
+    let monthTotals = {}; 
+    let availableYears = new Set();
+
+    let filteredRecords = records.filter(r => {
+      let entryInfo = checkEntryType(r.month, r.payDate);
+      if (filterDate && r.payDate !== filterDate) return false;
+      if (filterType !== "ALL" && entryInfo.code !== filterType) return false;
+      return true;
+    });
+
+    if (filteredRecords.length === 0) {
+      recordList.innerHTML = `<div style="text-align:center; color:#888; padding: 20px 0;">尚無符合條件的紀錄</div>`;
+    } else {
+      filteredRecords.forEach((r) => {
+        let entryInfo = checkEntryType(r.month, r.payDate);
+        let tagClass = entryInfo.code === "SAME" ? "tag-same" : (entryInfo.code === "DIFF" ? "tag-diff" : "");
+
+        recordList.innerHTML += `
+          <div class="record-card">
+            <div class="record-header">
+              <span class="record-title">${r.month} 薪資</span>
+              <span class="tag ${tagClass}">${entryInfo.text}</span>
+            </div>
+            <div class="record-body">
+              <div>領錢日期：${r.payDate}</div>
+              <div>本薪：${formatMoney(r.normal)}</div>
+              <div>加班費：${formatMoney(r.overtimePay)}</div>
+              <div style="color:#c0392b;">扣勞健保：-${formatMoney(r.insurance)}</div>
+            </div>
+            <div class="record-footer">
+              <div>實領：<span class="total-price">${formatMoney(r.total)}</span></div>
+              <button class="btn-del" onclick="del(${r.id})">刪除</button>
+            </div>
+          </div>
+        `;
+      });
+    }
+
+    records.forEach(r => {
+      monthTotals[r.month] = (monthTotals[r.month] || 0) + r.total;
+      let y = r.month.split('/')[0].split('-')[0].trim();
+      if (y) availableYears.add(y);
+    });
+
+    let sortedMonths = Object.keys(monthTotals).sort();
+    let yearList = Array.from(availableYears).sort();
+
+    if (yearList.length > 0 && !yearList.includes(selectedYear)) {
+      selectedYear = yearList[yearList.length - 1];
+    }
+
+    let yearMonths = sortedMonths.filter(m => m.startsWith(selectedYear));
+    let totalYearIncome = yearMonths.reduce((sum, m) => sum + monthTotals[m], 0);
+    let avgYearIncome = yearMonths.length > 0 ? Math.round(totalYearIncome / yearMonths.length) : 0;
+    let annualDiff = totalYearIncome - annualTargetSalary;
+
+    if (sortedMonths.length === 0) {
+      annualSummaryContainer.innerHTML = "";
+    } else {
+      let yearOptions = yearList.map(y => `<option value="${y}" ${y === selectedYear ? 'selected' : ''}>${y} 年</option>`).join('');
+
+      annualSummaryContainer.innerHTML = `
+        <div class="annual-box">
+          <div class="annual-title-row">
+            <div class="annual-title">📊 年度統計看板 ${enableAud ? '(AUD / TWD 換算模式)' : ''}</div>
+            <select style="width:auto; padding:4px 8px; color:#333; font-size:12px; border-radius:6px;" onchange="changeAnnualYear(this.value)">
+              ${yearOptions}
+            </select>
+          </div>
+          <div class="annual-grid">
+            <div class="annual-item">
+              <span>${selectedYear} 總收入</span>
+              <span class="annual-value">${formatMoney(totalYearIncome)}</span>
+            </div>
+            <div class="annual-item">
+              <span>平均月薪</span>
+              <span class="annual-value" style="color: #3498db;">${formatMoney(avgYearIncome)}</span>
+            </div>
+            <div class="annual-item">
+              <span>年度目標差距</span>
+              <span class="annual-value" style="color: ${annualDiff >= 0 ? '#2ecc71' : '#ff7675'};">
+                ${annualDiff >= 0 ? `+${formatMoney(annualDiff)}` : `-${formatMoney(Math.abs(annualDiff))}`}
+              </span>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    summaryContainer.innerHTML = "";
+    if (sortedMonths.length === 0) {
+      summaryContainer.innerHTML = "<div style='color:#777;'>尚無月份資料</div>";
+    } else {
+      sortedMonths.forEach(m => {
+        let actual = monthTotals[m];
+        let diff = actual - targetSalary;
+        let isPass = diff >= 0;
+
+        summaryContainer.innerHTML += `
+          <div class="summary-card">
+            <div class="summary-title">📅 月份：${m}</div>
+            <div class="summary-detail">
+              <div>實領薪資：<strong>${formatMoney(actual)}</strong>（目標：${formatMoney(targetSalary)}）</div>
+              <div>
+                差距：
+                <span class="${isPass ? 'status-pass' : 'status-fail'}">
+                  ${isPass ? `+${formatMoney(diff)} (達標 🎉)` : `-${formatMoney(Math.abs(diff))} (未達標)`}
+                </span>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+    }
+  }
+
+  render();
+</script>
+
+</body>
+</html>
