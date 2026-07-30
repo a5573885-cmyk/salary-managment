@@ -1113,7 +1113,7 @@
         </div>
       </section>
 
-      <!-- TAB 3: 收入趨勢圖 (支援年與月篩選) -->
+      <!-- TAB 3: 收入趨勢圖 (支援年、月與自訂義區間篩選) -->
       <section id="trendTab" class="tab-content">
         <div class="card">
           <div class="form-grid" style="align-items: flex-end;">
@@ -1148,6 +1148,20 @@
               </div>
             </div>
             <div class="form-group">
+              <label>自訂起始月份 (選填)</label>
+              <div class="input-icon-wrapper">
+                <input type="month" class="stats-custom-start" onchange="syncCustomStart(this.value)">
+                <span class="material-icons field-icon">event</span>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>自訂結束月份 (選填)</label>
+              <div class="input-icon-wrapper">
+                <input type="month" class="stats-custom-end" onchange="syncCustomEnd(this.value)">
+                <span class="material-icons field-icon">event</span>
+              </div>
+            </div>
+            <div class="form-group">
               <label>設定目標月薪</label>
               <input type="number" class="target-monthly-input" value="5000" onchange="syncTargetMonthly(this.value)">
             </div>
@@ -1155,6 +1169,10 @@
               <label>設定目標年薪</label>
               <input type="number" class="target-yearly-input" value="60000" onchange="syncTargetYearly(this.value)">
             </div>
+          </div>
+          <!-- 清除自訂區間按鈕 -->
+          <div style="margin-top: 10px; display: flex; justify-content: flex-end;">
+            <button type="button" class="btn-open-modal" style="width: auto; padding: 6px 12px; margin-top: 0;" onclick="clearCustomRange()">清除自訂區間</button>
           </div>
         </div>
 
@@ -1185,7 +1203,7 @@
         </div>
       </section>
 
-      <!-- TAB 4: 收入佔比圖表分析 (支援年與月篩選) -->
+      <!-- TAB 4: 收入佔比圖表分析 (支援年、月與自訂義區間篩選) -->
       <section id="pieTab" class="tab-content">
         <div class="card">
           <div class="form-grid" style="align-items: flex-end;">
@@ -1219,6 +1237,24 @@
                 <span class="material-icons field-icon">arrow_drop_down</span>
               </div>
             </div>
+            <div class="form-group">
+              <label>自訂起始月份 (選填)</label>
+              <div class="input-icon-wrapper">
+                <input type="month" class="stats-custom-start" onchange="syncCustomStart(this.value)">
+                <span class="material-icons field-icon">event</span>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>自訂結束月份 (選填)</label>
+              <div class="input-icon-wrapper">
+                <input type="month" class="stats-custom-end" onchange="syncCustomEnd(this.value)">
+                <span class="material-icons field-icon">event</span>
+              </div>
+            </div>
+          </div>
+          <!-- 清除自訂區間按鈕 -->
+          <div style="margin-top: 10px; display: flex; justify-content: flex-end;">
+            <button type="button" class="btn-open-modal" style="width: auto; padding: 6px 12px; margin-top: 0;" onclick="clearCustomRange()">清除自訂區間</button>
           </div>
         </div>
 
@@ -1540,6 +1576,29 @@
       updateStatsView();
     }
 
+    // 同步自訂起始月份
+    function syncCustomStart(val) {
+      document.querySelectorAll('.stats-custom-start').forEach(input => {
+        input.value = val;
+      });
+      updateStatsView();
+    }
+
+    // 同步自訂結束月份
+    function syncCustomEnd(val) {
+      document.querySelectorAll('.stats-custom-end').forEach(input => {
+        input.value = val;
+      });
+      updateStatsView();
+    }
+
+    // 清除自訂區間
+    function clearCustomRange() {
+      document.querySelectorAll('.stats-custom-start').forEach(input => input.value = '');
+      document.querySelectorAll('.stats-custom-end').forEach(input => input.value = '');
+      updateStatsView();
+    }
+
     function syncTargetMonthly(val) {
       document.querySelectorAll('.target-monthly-input').forEach(i => i.value = val);
       updateStatsView();
@@ -1800,28 +1859,52 @@
     function updateStatsView() {
       const yearSelect = document.querySelector('.stats-year-select');
       const monthSelect = document.querySelector('.stats-month-select');
+      const customStartInput = document.querySelector('.stats-custom-start');
+      const customEndInput = document.querySelector('.stats-custom-end');
       if (!yearSelect || !monthSelect) return;
 
       const selectedYear = yearSelect.value || String(new Date().getFullYear());
       const selectedMonth = monthSelect.value; 
+      const customStart = customStartInput ? customStartInput.value : '';
+      const customEnd = customEndInput ? customEndInput.value : '';
+
       const targetMonthly = parseFloat(document.querySelector('.target-monthly-input').value) || 0;
       const targetYearly = parseFloat(document.querySelector('.target-yearly-input').value) || 0;
 
-      let periodRecords = records.filter(r => r.salaryMonth.startsWith(selectedYear));
-      if (selectedMonth !== 'ALL') {
-        const targetPeriod = `${selectedYear}-${selectedMonth}`;
-        periodRecords = periodRecords.filter(r => r.salaryMonth === targetPeriod);
+      let periodRecords = [];
+      let isCustomRangeActive = (customStart !== '' || customEnd !== '');
+
+      if (isCustomRangeActive) {
+        // 如果有填寫自訂義時間區間，優先以自訂區間篩選
+        periodRecords = records.filter(r => {
+          let match = true;
+          if (customStart && r.salaryMonth < customStart) match = false;
+          if (customEnd && r.salaryMonth > customEnd) match = false;
+          return match;
+        });
+      } else {
+        // 否則依照原有的 年份 + 月份 篩選
+        periodRecords = records.filter(r => r.salaryMonth.startsWith(selectedYear));
+        if (selectedMonth !== 'ALL') {
+          const targetPeriod = `${selectedYear}-${selectedMonth}`;
+          periodRecords = periodRecords.filter(r => r.salaryMonth === targetPeriod);
+        }
       }
 
       const totalIncome = periodRecords.reduce((sum, r) => sum + r.totalPay, 0);
-      const monthsCount = selectedMonth === 'ALL' 
-        ? (new Set(periodRecords.map(r => r.salaryMonth)).size || 1) 
-        : 1;
+      const monthsCount = isCustomRangeActive 
+        ? (new Set(periodRecords.map(r => r.salaryMonth)).size || 1)
+        : (selectedMonth === 'ALL' ? (new Set(periodRecords.map(r => r.salaryMonth)).size || 1) : 1);
+      
       const avgMonthlyIncome = totalIncome / monthsCount;
 
       const labelTotalTitle = document.getElementById('labelTotalTitle');
       if (labelTotalTitle) {
-        labelTotalTitle.textContent = selectedMonth === 'ALL' ? `${selectedYear} 年度累計總收入` : `${selectedYear}年${parseInt(selectedMonth)}月累計收入`;
+        if (isCustomRangeActive) {
+          labelTotalTitle.textContent = `自訂區間 (${customStart || '最前'} ~ ${customEnd || '最新'}) 累計總收入`;
+        } else {
+          labelTotalTitle.textContent = selectedMonth === 'ALL' ? `${selectedYear} 年度累計總收入` : `${selectedYear}年${parseInt(selectedMonth)}月累計收入`;
+        }
       }
 
       document.querySelectorAll('.statYearTotal').forEach(el => el.innerHTML = formatMoney(totalIncome));
@@ -1879,15 +1962,15 @@
         : "無紀錄";
       document.querySelectorAll('.statTopCities').forEach(el => el.innerHTML = topCitiesHtml);
 
-      renderMonthlyChart(selectedYear, selectedMonth, targetMonthly, periodRecords);
+      renderMonthlyChart(selectedYear, selectedMonth, targetMonthly, periodRecords, isCustomRangeActive, customStart, customEnd);
       renderStatusPieChart(statusSums);
       renderUnitPieChart(unitSums);
       renderJobTypePieChart(jobTypeSums);
       renderCityPieChart(citySums);
     }
 
-    // 每月趨勢圖
-    function renderMonthlyChart(year, month, targetMonthly, periodRecords) {
+    // 每月趨勢圖（支援自訂區間動態展開月份標籤）
+    function renderMonthlyChart(year, month, targetMonthly, periodRecords, isCustomRangeActive, customStart, customEnd) {
       const canvas = document.getElementById('monthlyChart');
       const chartBox = document.getElementById('trendChartBox');
       if (!canvas || !chartBox) return;
@@ -1897,7 +1980,18 @@
       let chartLabels = [];
       let monthlyTotals = [];
 
-      if (month === 'ALL') {
+      if (isCustomRangeActive) {
+        // 如果有自訂區間，自動列出該區間內涵蓋的所有月份
+        let allMonths = [...new Set(periodRecords.map(r => r.salaryMonth))].sort();
+        if (allMonths.length === 0 && customStart && customEnd) {
+          // 若無資料但有指定起訖，簡單建立一個範圍
+          allMonths = [customStart];
+        }
+        chartLabels = allMonths.map(m => `${m.replace('-', '年')}月`);
+        monthlyTotals = allMonths.map(m => periodRecords.filter(r => r.salaryMonth === m).reduce((sum, r) => sum + r.totalPay, 0));
+        
+        chartBox.style.minWidth = allMonths.length > 6 ? `${allMonths.length * 90}px` : '100%';
+      } else if (month === 'ALL') {
         chartLabels = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
         const months = Array.from({ length: 12 }, (_, i) => `${year}-${String(i + 1).padStart(2, '0')}`);
         monthlyTotals = months.map(m => periodRecords.filter(r => r.salaryMonth === m).reduce((sum, r) => sum + r.totalPay, 0));
@@ -1919,7 +2013,7 @@
         data: {
           labels: chartLabels,
           datasets: [
-            { label: `${year} 實際收入`, data: monthlyTotals, backgroundColor: '#3f51b5', borderRadius: 4 },
+            { label: '實際收入', data: monthlyTotals, backgroundColor: '#3f51b5', borderRadius: 4 },
             { label: '目標月薪', data: Array(chartLabels.length).fill(targetMonthly), type: 'line', borderColor: '#ff4081', borderDash: [5, 5], fill: false, pointRadius: 3 }
           ]
         },
