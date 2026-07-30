@@ -260,13 +260,16 @@
       display: none !important; 
     }
 
-    /* 側邊欄底部黑夜模式切換按鈕 */
+    /* 側邊欄底部黑夜模式與登出按鈕 */
     .sidebar-footer {
       padding: 12px;
       border-top: 1px solid rgba(255, 255, 255, 0.1);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
     }
 
-    .theme-toggle-btn {
+    .theme-toggle-btn, .logout-btn-sidebar {
       width: 100%;
       padding: 10px;
       background-color: var(--sidebar-hover);
@@ -283,11 +286,20 @@
       white-space: nowrap;
     }
 
-    .theme-toggle-btn:hover {
+    .theme-toggle-btn:hover, .logout-btn-sidebar:hover {
       background-color: rgba(255, 255, 255, 0.2);
     }
 
-    .sidebar.collapsed .theme-toggle-btn span:not(.material-icons) {
+    .logout-btn-sidebar {
+      background-color: rgba(211, 47, 47, 0.3);
+      display: none; /* 預設未登入時隱藏 */
+    }
+
+    .logout-btn-sidebar:hover {
+      background-color: rgba(211, 47, 47, 0.5);
+    }
+
+    .sidebar.collapsed .sidebar-footer span:not(.material-icons) {
       display: none !important;
     }
 
@@ -328,16 +340,14 @@
       color: var(--text-color);
     }
 
-    /* 登入按鈕擺放樣式 */
+    /* 登入與登出按鈕區塊 */
     .login-container {
       display: flex;
       align-items: center;
       gap: 12px;
     }
 
-    #loginBtn {
-      background-color: #4285F4;
-      color: white;
+    #loginBtn, #logoutBtn {
       border: none;
       padding: 8px 16px;
       border-radius: 4px;
@@ -347,8 +357,23 @@
       transition: background-color 0.2s;
     }
 
+    #loginBtn {
+      background-color: #4285F4;
+      color: white;
+    }
+
     #loginBtn:hover {
       background-color: #357ae8;
+    }
+
+    #logoutBtn {
+      background-color: #d32f2f;
+      color: white;
+      display: none; /* 預設未登入時隱藏 */
+    }
+
+    #logoutBtn:hover {
+      background-color: #b71c1c;
     }
 
     .content-container {
@@ -837,7 +862,7 @@
         display: block !important;
       }
 
-      .sidebar .theme-toggle-btn span:not(.material-icons) {
+      .sidebar .sidebar-footer span:not(.material-icons) {
         display: inline !important;
       }
 
@@ -912,11 +937,15 @@
       </nav>
     </div>
 
-    <!-- 側邊欄底部黑夜模式切換按鈕 -->
+    <!-- 側邊欄底部控制區（黑夜模式與登出按鈕） -->
     <div class="sidebar-footer">
       <button id="theme-toggle" class="theme-toggle-btn">
         <span class="material-icons" id="theme-icon">dark_mode</span>
         <span id="theme-text">切換暗黑模式</span>
+      </button>
+      <button id="sidebarLogoutBtn" class="logout-btn-sidebar">
+        <span class="material-icons">logout</span>
+        <span>登出帳號</span>
       </button>
     </div>
   </aside>
@@ -927,9 +956,10 @@
     <!-- 頂部導航列 (Top Header) -->
     <header class="top-header">
       <div class="top-header-title">儀表板總覽</div>
-      <!-- 整合的 Google 登入按鈕區塊 -->
+      <!-- 整合的 Google 登入與登出按鈕區塊 -->
       <div class="login-container">
         <button id="loginBtn">使用 Google 帳號登入</button>
+        <button id="logoutBtn">登出</button>
       </div>
     </header>
     
@@ -1428,12 +1458,12 @@
     </div>
   </div>
 
-  <!-- Firebase SDK 與雲端即時同步及 Google 登入邏輯 -->
+  <!-- Firebase SDK 與雲端即時同步及 Google 登入/登出邏輯（加入白屏防呆保護） -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-analytics.js";
     import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
-    import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDYMvAeQLZceVt4n0jgOsL78L45qIA06Xo",
@@ -1459,29 +1489,51 @@
     window.dbSet = set;
     window.dbOnValue = onValue;
 
-    // 處理 Google 登入按鈕點擊事件
+    // 處理 Google 登入按鈕點擊事件（加入 try-catch 防止手機彈窗或授權失敗導致頁面白屏）
     const loginBtn = document.getElementById("loginBtn");
     if (loginBtn) {
-      loginBtn.addEventListener("click", () => {
-        signInWithPopup(auth, provider)
-          .then((result) => {
-            const user = result.user;
-            console.log("歡迎,", user.displayName);
-            alert(`歡迎回來，${user.displayName}！`);
-          })
-          .catch((error) => {
-            console.error("登入失敗", error);
-            alert("登入失敗，請稍後再試。");
-          });
+      loginBtn.addEventListener("click", async () => {
+        try {
+          const result = await signInWithPopup(auth, provider);
+          const user = result.user;
+          console.log("歡迎,", user.displayName);
+          alert(`歡迎回來，${user.displayName}！`);
+        } catch (error) {
+          console.error("登入失敗", error);
+          if (error.code === 'auth/unauthorized-domain') {
+            alert("登入失敗：此網域未被授權。請至 Firebase Console -> Authentication -> Settings -> 授權網域 (Authorized domains) 加入您目前的網域或 IP。");
+          } else {
+            alert(`登入失敗 (${error.code || 'unknown'})，請確認網路連線或稍後再試。`);
+          }
+        }
       });
     }
 
-    // 監聽登入狀態來自動更新側邊欄的使用者頭像與名稱
+    // 處理登出按鈕點擊事件（頂部與側邊欄）
+    const handleLogout = async () => {
+      try {
+        await signOut(auth);
+        alert("已成功登出");
+      } catch (error) {
+        console.error("登出失敗", error);
+        alert("登出失敗，請稍後再試。");
+      }
+    };
+
+    const logoutBtn = document.getElementById("logoutBtn");
+    if (logoutBtn) logoutBtn.addEventListener("click", handleLogout);
+
+    const sidebarLogoutBtn = document.getElementById("sidebarLogoutBtn");
+    if (sidebarLogoutBtn) sidebarLogoutBtn.addEventListener("click", handleLogout);
+
+    // 監聽登入狀態來自動更新介面
     onAuthStateChanged(auth, (user) => {
       const avatarEl = document.getElementById('sidebarAvatar');
       const nameEl = document.getElementById('sidebarUserName');
       const roleEl = document.getElementById('sidebarUserRole');
       const loginBtnEl = document.getElementById('loginBtn');
+      const logoutBtnEl = document.getElementById('logoutBtn');
+      const sidebarLogoutEl = document.getElementById('sidebarLogoutBtn');
 
       if (user) {
         if (nameEl) nameEl.textContent = user.displayName || 'Google 使用者';
@@ -1493,12 +1545,16 @@
             avatarEl.textContent = (user.displayName || 'U').charAt(0).toUpperCase();
           }
         }
-        if (loginBtnEl) loginBtnEl.style.display = 'none'; // 登入後隱藏登入按鈕
+        if (loginBtnEl) loginBtnEl.style.display = 'none';       // 登入後隱藏登入按鈕
+        if (logoutBtnEl) logoutBtnEl.style.display = 'block';     // 顯示頂部登出按鈕
+        if (sidebarLogoutEl) sidebarLogoutEl.style.display = 'flex'; // 顯示側邊欄登出按鈕
       } else {
         if (nameEl) nameEl.textContent = 'Admin User';
         if (roleEl) roleEl.textContent = '系統管理員';
         if (avatarEl) avatarEl.textContent = 'A';
-        if (loginBtnEl) loginBtnEl.style.display = 'block';
+        if (loginBtnEl) loginBtnEl.style.display = 'block';       // 顯示登入按鈕
+        if (logoutBtnEl) logoutBtnEl.style.display = 'none';      // 隱藏頂部登出按鈕
+        if (sidebarLogoutEl) sidebarLogoutEl.style.display = 'none'; // 隱藏側邊欄登出按鈕
       }
     });
   </script>
