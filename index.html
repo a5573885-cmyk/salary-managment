@@ -1422,6 +1422,32 @@
     </div>
   </div>
 
+  <!-- Firebase SDKs & 系統主程式 -->
+  <script type="module">
+    // Import the functions you need from the SDKs you need
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-analytics.js";
+    // TODO: Add SDKs for Firebase products that you want to use
+    // https://firebase.google.com/docs/web/setup#available-libraries
+
+    // Your web app's Firebase configuration
+    // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+    const firebaseConfig = {
+      apiKey: "AIzaSyDYMvAeQLZceVt4n0jgOsL78L45qIA06Xo",
+      authDomain: "salary-9080f.firebaseapp.com",
+      databaseURL: "https://salary-9080f-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "salary-9080f",
+      storageBucket: "salary-9080f.firebasestorage.app",
+      messagingSenderId: "1071957222884",
+      appId: "1:1071957222884:web:78250a5e707db2a0ca13f1",
+      measurementId: "G-SXS98S7G2S"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const analytics = getAnalytics(app);
+  </script>
+
   <script>
     // 資料狀態管理
     let records = JSON.parse(localStorage.getItem('salary_records')) || [];
