@@ -1422,12 +1422,12 @@
     </div>
   </div>
 
-  <!-- Firebase SDK 與主程式邏輯 -->
+  <!-- Firebase SDK 初始化 (採用瀏覽器 ES 模組化 CDN 導入) -->
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, deleteDoc, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-analytics.js";
 
-    // Firebase 配置資訊
+    // 您的 Firebase 設定
     const firebaseConfig = {
       apiKey: "AIzaSyDYMvAeQLZceVt4n0jgOsL78L45qIA06Xo",
       authDomain: "salary-9080f.firebaseapp.com",
@@ -1439,12 +1439,15 @@
       measurementId: "G-SXS98S7G2S"
     };
 
-    // 初始化 Firebase 與 Firestore
+    // 初始化 Firebase
     const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+    const analytics = getAnalytics(app);
+    window.firebaseApp = app;
+  </script>
 
+  <script>
     // 資料狀態管理
-    let records = [];
+    let records = JSON.parse(localStorage.getItem('salary_records')) || [];
     let isTwdEnabled = JSON.parse(localStorage.getItem('salary_twd_enabled')) || false;
     let monthlyChartInstance = null;
     let pieChartInstance = null;
@@ -1482,25 +1485,12 @@
     const themeIcon = document.getElementById('theme-icon');
     const themeText = document.getElementById('theme-text');
 
-    // 初始化與即時監聽 Firestore 資料
+    // 初始化
     document.addEventListener('DOMContentLoaded', () => {
       initYearSelectOptions();
       document.getElementById('enableTwd').checked = isTwdEnabled;
       document.getElementById('rateInputGroup').style.display = isTwdEnabled ? 'flex' : 'none';
-      
-      // 使用 onSnapshot 實現即時雲端同步
-      onSnapshot(collection(db, "salary_records"), (snapshot) => {
-        records = [];
-        snapshot.forEach((docSnap) => {
-          records.push({
-            firebaseId: docSnap.id, // Firestore 專屬文件 ID 用於刪除
-            ...docSnap.data()
-          });
-        });
-        updateView();
-      }, (error) => {
-        console.error("Firebase 讀取錯誤: ", error);
-      });
+      updateView();
     });
 
     // 暗黑模式切換邏輯
@@ -1515,7 +1505,7 @@
     });
 
     // 懸浮對話框 控制邏輯
-    window.openChartModal = function(modalId) {
+    function openChartModal(modalId) {
       const modal = document.getElementById(modalId);
       if (!modal) return;
       
@@ -1541,12 +1531,12 @@
       }, 50);
     }
 
-    window.closeChartModal = function(modalId) {
+    function closeChartModal(modalId) {
       const modal = document.getElementById(modalId);
       if (modal) modal.classList.remove('active');
     }
 
-    window.closeChartModalOnOverlay = function(event, modalId) {
+    function closeChartModalOnOverlay(event, modalId) {
       if (event.target.classList.contains('modal-overlay')) {
         closeChartModal(modalId);
       }
@@ -1580,7 +1570,7 @@
     }
 
     // 分頁切換
-    window.switchTab = function(tabId, btnEl) {
+    function switchTab(tabId, btnEl) {
       document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
       document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
       document.getElementById(tabId).classList.add('active');
@@ -1594,7 +1584,7 @@
     }
 
     // 同步統計年份
-    window.syncStatsYear = function(val) {
+    function syncStatsYear(val) {
       document.querySelectorAll('.stats-year-select').forEach(select => {
         select.value = val;
       });
@@ -1602,7 +1592,7 @@
     }
 
     // 同步統計月份
-    window.syncStatsMonth = function(val) {
+    function syncStatsMonth(val) {
       document.querySelectorAll('.stats-month-select').forEach(select => {
         select.value = val;
       });
@@ -1610,7 +1600,7 @@
     }
 
     // 同步自訂起始月份
-    window.syncCustomStart = function(val) {
+    function syncCustomStart(val) {
       document.querySelectorAll('.stats-custom-start').forEach(input => {
         input.value = val;
       });
@@ -1618,7 +1608,7 @@
     }
 
     // 同步自訂結束月份
-    window.syncCustomEnd = function(val) {
+    function syncCustomEnd(val) {
       document.querySelectorAll('.stats-custom-end').forEach(input => {
         input.value = val;
       });
@@ -1626,24 +1616,24 @@
     }
 
     // 清除自訂區間
-    window.clearCustomRange = function() {
+    function clearCustomRange() {
       document.querySelectorAll('.stats-custom-start').forEach(input => input.value = '');
       document.querySelectorAll('.stats-custom-end').forEach(input => input.value = '');
       updateStatsView();
     }
 
-    window.syncTargetMonthly = function(val) {
+    function syncTargetMonthly(val) {
       document.querySelectorAll('.target-monthly-input').forEach(i => i.value = val);
       updateStatsView();
     }
 
-    window.syncTargetYearly = function(val) {
+    function syncTargetYearly(val) {
       document.querySelectorAll('.target-yearly-input').forEach(i => i.value = val);
       updateStatsView();
     }
 
     // 切換台幣換算顯示
-    window.toggleTwdConversion = function() {
+    function toggleTwdConversion() {
       isTwdEnabled = document.getElementById('enableTwd').checked;
       localStorage.setItem('salary_twd_enabled', JSON.stringify(isTwdEnabled));
       document.getElementById('rateInputGroup').style.display = isTwdEnabled ? 'flex' : 'none';
@@ -1661,8 +1651,8 @@
       return `${formattedBase} <small style="color: var(--text-secondary);">(約 ${formattedTwd})</small>`;
     }
 
-    // 表單提交（寫入 Firebase）
-    window.handleFormSubmit = async function(event) {
+    // 表單提交
+    function handleFormSubmit(event) {
       event.preventDefault();
       const salaryMonth = document.getElementById('salaryMonth').value;
       const unit = document.getElementById('unit').value.trim();
@@ -1678,55 +1668,63 @@
       const totalPay = (hourlyRate * workDays * dailyHours) + overtimePay;
       const isCurrentMonthPay = (salaryMonth === payDate.substring(0, 7));
 
-      try {
-        await addDoc(collection(db, "salary_records"), {
-          salaryMonth,
-          unit,
-          jobType: jobType || '其他',
-          city: city || '未標示',
-          hourlyRate,
-          workDays,
-          dailyHours,
-          overtimePay,
-          totalPay,
-          payDate,
-          isCurrentMonthPay,
-          createdAt: Date.now()
-        });
+      records.push({
+        id: Date.now(),
+        salaryMonth,
+        unit,
+        jobType: jobType || '其他',
+        city: city || '未標示',
+        hourlyRate,
+        workDays,
+        dailyHours,
+        overtimePay,
+        totalPay,
+        payDate,
+        isCurrentMonthPay
+      });
 
-        document.getElementById('salaryForm').reset();
-        alert("薪資紀錄已成功儲存至雲端！");
-      } catch (e) {
-        console.error("寫入錯誤: ", e);
-        alert("儲存失敗，請檢查網路連線或 Firebase 權限。");
-      }
+      saveRecords();
+      document.getElementById('salaryForm').reset();
+      updateView();
+      alert("薪資紀錄儲存成功！可切換至「歷史薪資明細」查看紀錄。");
+    }
+
+    function saveRecords() {
+      localStorage.setItem('salary_records', JSON.stringify(records));
     }
 
     // 全選 / 反選控制
-    window.toggleSelectAll = function(masterCheckbox) {
+    function toggleSelectAll(masterCheckbox) {
       const rowCheckboxes = document.querySelectorAll('.record-checkbox');
       rowCheckboxes.forEach(cb => cb.checked = masterCheckbox.checked);
       updateDeleteButtonState();
     }
 
     // 更新刪除按鈕狀態與計數
-    window.updateDeleteButtonState = function() {
-      const checkedBoxes = document.querySelectorAll('.record-checkbox:checked');
+    function updateDeleteButtonState() {
+      const checkboxes = document.querySelectorAll('.record-checkbox');
+      const selectedCheckboxes = document.querySelectorAll('.record-checkbox:checked');
       const deleteBtn = document.getElementById('deleteSelectedBtn');
       const selectedCountEl = document.getElementById('selectedCount');
+      const masterCheckbox = document.getElementById('selectAllCheckbox');
+      
       if (!deleteBtn || !selectedCountEl) return;
 
-      const count = checkedBoxes.length;
-      selectedCountEl.textContent = count;
-      deleteBtn.disabled = (count === 0);
+      selectedCountEl.textContent = selectedCheckboxes.length;
+      
+      // 當有勾選項目時解鎖刪除按鈕
+      if (selectedCheckboxes.length > 0) {
+        deleteBtn.removeAttribute('disabled');
+      } else {
+        deleteBtn.setAttribute('disabled', 'true');
+      }
 
-      const allBoxes = document.querySelectorAll('.record-checkbox');
-      const masterCheckbox = document.getElementById('selectAllCheckbox');
+      // 同步全選框狀態
       if (masterCheckbox) {
-        if (allBoxes.length > 0 && checkedBoxes.length === allBoxes.length) {
+        if (checkboxes.length > 0 && selectedCheckboxes.length === checkboxes.length) {
           masterCheckbox.checked = true;
           masterCheckbox.indeterminate = false;
-        } else if (checkedBoxes.length > 0) {
+        } else if (selectedCheckboxes.length > 0) {
           masterCheckbox.checked = false;
           masterCheckbox.indeterminate = true;
         } else {
@@ -1736,23 +1734,17 @@
       }
     }
 
-    // 刪除勾選項目（從 Firebase 刪除）
-    window.deleteSelectedRecords = async function() {
-      const checkedBoxes = document.querySelectorAll('.record-checkbox:checked');
-      const firebaseIdsToDelete = Array.from(checkedBoxes).map(cb => cb.value);
+    // 刪除勾選項目
+    function deleteSelectedRecords() {
+      const selectedCheckboxes = document.querySelectorAll('.record-checkbox:checked');
+      const idsToDelete = Array.from(selectedCheckboxes).map(cb => Number(cb.value));
 
-      if (firebaseIdsToDelete.length === 0) return;
+      if (idsToDelete.length === 0) return;
 
-      if (confirm(`確定要從雲端刪除已勾選的 ${firebaseIdsToDelete.length} 筆資料嗎？`)) {
-        try {
-          for (const firebaseId of firebaseIdsToDelete) {
-            await deleteDoc(doc(db, "salary_records", firebaseId));
-          }
-          alert("刪除成功！");
-        } catch (e) {
-          console.error("刪除錯誤: ", e);
-          alert("刪除失敗，請檢查 Firebase 權限設定。");
-        }
+      if (confirm(`確定要刪除已勾選的 ${idsToDelete.length} 筆資料嗎？`)) {
+        records = records.filter(r => !idsToDelete.includes(r.id));
+        saveRecords();
+        updateView();
       }
     }
 
@@ -1765,7 +1757,7 @@
     }
 
     // 渲染明細表格
-    window.renderTable = function() {
+    function renderTable() {
       const tbody = document.getElementById('recordsTableBody');
       if (!tbody) return;
 
@@ -1827,7 +1819,7 @@
 
         tr.innerHTML = `
           <td style="text-align: center;">
-            <input type="checkbox" class="custom-checkbox record-checkbox" value="${r.firebaseId}" onchange="updateDeleteButtonState()">
+            <input type="checkbox" class="custom-checkbox record-checkbox" value="${r.id}" onchange="updateDeleteButtonState()">
           </td>
           <td><b>${r.salaryMonth}</b></td>
           <td>${r.unit}</td>
@@ -1870,7 +1862,7 @@
       selectCity.value = currentCityVal;
     }
 
-    // 初始化動態年份選項
+    // 初始化動態年份選項（自動抓取現有紀錄的年份，若無則包含當前年份）
     function initYearSelectOptions() {
       const currentYear = new Date().getFullYear();
       const recordYears = records.map(r => r.salaryMonth ? r.salaryMonth.substring(0, 4) : '').filter(Boolean);
@@ -2166,3 +2158,4 @@
   </script>
 </body>
 </html>
+```[cite: 7]
