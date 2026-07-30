@@ -307,7 +307,6 @@
       width: calc(100% - var(--sidebar-collapsed-width));
     }
 
-    /* 頂部導航列 (Top Header) */
     .top-header {
       height: 64px;
       background-color: var(--header-bg);
@@ -346,7 +345,6 @@
       display: block; 
     }
 
-    /* UI 卡片區塊 */
     .card {
       background: var(--card-bg);
       border-radius: 8px;
@@ -401,7 +399,6 @@
       border-color: var(--primary-color);
     }
 
-    /* 附帶圖示的外框包裝 */
     .input-icon-wrapper {
       position: relative;
       display: flex;
@@ -1113,16 +1110,14 @@
         </div>
       </section>
 
-      <!-- TAB 3: 收入趨勢圖 (支援年、月與自訂義區間篩選) -->
+      <!-- TAB 3: 收入趨勢圖 -->
       <section id="trendTab" class="tab-content">
         <div class="card">
           <div class="form-grid" style="align-items: flex-end;">
             <div class="form-group">
               <label>統計年份篩選</label>
               <div class="input-icon-wrapper">
-                <select class="stats-year-select" onchange="syncStatsYear(this.value)">
-                  <!-- 動態產生年份選項 -->
-                </select>
+                <select class="stats-year-select" onchange="syncStatsYear(this.value)"></select>
                 <span class="material-icons field-icon">arrow_drop_down</span>
               </div>
             </div>
@@ -1170,13 +1165,11 @@
               <input type="number" class="target-yearly-input" value="60000" onchange="syncTargetYearly(this.value)">
             </div>
           </div>
-          <!-- 清除自訂區間按鈕 -->
           <div style="margin-top: 10px; display: flex; justify-content: flex-end;">
             <button type="button" class="btn-open-modal" style="width: auto; padding: 6px 12px; margin-top: 0;" onclick="clearCustomRange()">清除自訂區間</button>
           </div>
         </div>
 
-        <!-- 看板數據卡片（含懸浮趨勢圖按鈕） -->
         <div class="stats-grid-2">
           <div class="stat-card">
             <div>
@@ -1203,16 +1196,14 @@
         </div>
       </section>
 
-      <!-- TAB 4: 收入佔比圖表分析 (支援年、月與自訂義區間篩選) -->
+      <!-- TAB 4: 收入佔比圖表分析 -->
       <section id="pieTab" class="tab-content">
         <div class="card">
           <div class="form-grid" style="align-items: flex-end;">
             <div class="form-group">
               <label>統計年份篩選</label>
               <div class="input-icon-wrapper">
-                <select class="stats-year-select" onchange="syncStatsYear(this.value)">
-                  <!-- 動態產生年份選項 -->
-                </select>
+                <select class="stats-year-select" onchange="syncStatsYear(this.value)"></select>
                 <span class="material-icons field-icon">arrow_drop_down</span>
               </div>
             </div>
@@ -1252,15 +1243,12 @@
               </div>
             </div>
           </div>
-          <!-- 清除自訂區間按鈕 -->
           <div style="margin-top: 10px; display: flex; justify-content: flex-end;">
             <button type="button" class="btn-open-modal" style="width: auto; padding: 6px 12px; margin-top: 0;" onclick="clearCustomRange()">清除自訂區間</button>
           </div>
         </div>
 
-        <!-- 4 個看板卡片（含彈出對話框按鈕） -->
         <div class="stats-grid-4">
-          <!-- 1. 入帳狀態 -->
           <div class="stat-card" style="border-left-color: #4caf50;">
             <div>
               <h4><span>入帳狀態統計</span></h4>
@@ -1272,7 +1260,6 @@
             </button>
           </div>
 
-          <!-- 2. 付款單位 -->
           <div class="stat-card" style="border-left-color: #ff9800;">
             <div>
               <h4><span>Top 3 主要單位</span></h4>
@@ -1284,7 +1271,6 @@
             </button>
           </div>
 
-          <!-- 3. 工作類型 -->
           <div class="stat-card" style="border-left-color: #9c27b0;">
             <div>
               <h4><span>Top 3 工作類型</span></h4>
@@ -1296,7 +1282,6 @@
             </button>
           </div>
 
-          <!-- 4. 工作城市 -->
           <div class="stat-card" style="border-left-color: #00bcd4;">
             <div>
               <h4><span>Top 3 工作城市</span></h4>
@@ -1315,8 +1300,6 @@
   <!-- ==========================================
        懸浮對話框元件 (Modals)
        ========================================== -->
-
-  <!-- 0. 收入與目標趨勢對話框 -->
   <div class="modal-overlay" id="trendModal" onclick="closeChartModalOnOverlay(event, 'trendModal')">
     <div class="modal-container large-modal">
       <div class="modal-header">
@@ -1342,7 +1325,6 @@
     </div>
   </div>
 
-  <!-- 1. 入帳狀態對話框 -->
   <div class="modal-overlay" id="statusModal" onclick="closeChartModalOnOverlay(event, 'statusModal')">
     <div class="modal-container">
       <div class="modal-header">
@@ -1362,7 +1344,6 @@
     </div>
   </div>
 
-  <!-- 2. 付款單位對話框 -->
   <div class="modal-overlay" id="unitModal" onclick="closeChartModalOnOverlay(event, 'unitModal')">
     <div class="modal-container">
       <div class="modal-header">
@@ -1382,7 +1363,6 @@
     </div>
   </div>
 
-  <!-- 3. 工作類型對話框 -->
   <div class="modal-overlay" id="jobTypeModal" onclick="closeChartModalOnOverlay(event, 'jobTypeModal')">
     <div class="modal-container">
       <div class="modal-header">
@@ -1402,7 +1382,6 @@
     </div>
   </div>
 
-  <!-- 4. 工作城市對話框 -->
   <div class="modal-overlay" id="cityModal" onclick="closeChartModalOnOverlay(event, 'cityModal')">
     <div class="modal-container">
       <div class="modal-header">
@@ -1422,12 +1401,12 @@
     </div>
   </div>
 
-  <!-- Firebase SDK 初始化 (採用瀏覽器 ES 模組化 CDN 導入) -->
+  <!-- Firebase SDK 與雲端即時同步邏輯 -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-analytics.js";
+    import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
-    // 您的 Firebase 設定
     const firebaseConfig = {
       apiKey: "AIzaSyDYMvAeQLZceVt4n0jgOsL78L45qIA06Xo",
       authDomain: "salary-9080f.firebaseapp.com",
@@ -1439,15 +1418,20 @@
       measurementId: "G-SXS98S7G2S"
     };
 
-    // 初始化 Firebase
     const app = initializeApp(firebaseConfig);
     const analytics = getAnalytics(app);
+    const database = getDatabase(app);
+
+    // 掛載至全域
     window.firebaseApp = app;
+    window.db = database;
+    window.dbRef = ref;
+    window.dbSet = set;
+    window.dbOnValue = onValue;
   </script>
 
   <script>
-    // 資料狀態管理
-    let records = JSON.parse(localStorage.getItem('salary_records')) || [];
+    let records = [];
     let isTwdEnabled = JSON.parse(localStorage.getItem('salary_twd_enabled')) || false;
     let monthlyChartInstance = null;
     let pieChartInstance = null;
@@ -1455,28 +1439,18 @@
     let cityChartInstance = null;
     let statusChartInstance = null;
 
-    // 共用圓餅圖預設設定
     const commonPieOptions = {
       responsive: true,
       maintainAspectRatio: false,
-      layout: {
-        padding: 10
-      },
+      layout: { padding: 10 },
       plugins: {
         legend: {
           position: 'bottom',
-          labels: {
-            boxWidth: 12,
-            padding: 12,
-            font: {
-              size: 12
-            }
-          }
+          labels: { boxWidth: 12, padding: 12, font: { size: 12 } }
         }
       }
     };
 
-    // DOM 元素引用
     const sidebar = document.getElementById('sidebar');
     const sidebarOverlay = document.getElementById('sidebarOverlay');
     const openMobileMenuBtn = document.getElementById('openMobileMenu');
@@ -1485,49 +1459,69 @@
     const themeIcon = document.getElementById('theme-icon');
     const themeText = document.getElementById('theme-text');
 
-    // 初始化
     document.addEventListener('DOMContentLoaded', () => {
       initYearSelectOptions();
       document.getElementById('enableTwd').checked = isTwdEnabled;
       document.getElementById('rateInputGroup').style.display = isTwdEnabled ? 'flex' : 'none';
-      updateView();
+
+      // 檢查並啟動 Firebase 雲端資料監聽
+      const checkFirebase = setInterval(() => {
+        if (window.db && window.dbOnValue) {
+          clearInterval(checkFirebase);
+          initFirebaseSync();
+        }
+      }, 100);
     });
 
-    // 暗黑模式切換邏輯
+    function initFirebaseSync() {
+      const recordsRef = window.dbRef(window.db, 'salary_records');
+      window.dbOnValue(recordsRef, (snapshot) => {
+        const data = snapshot.val();
+        if (data) {
+          records = Object.keys(data).map(key => ({
+            dbKey: key,
+            ...data[key]
+          }));
+        } else {
+          records = [];
+        }
+        updateView();
+      });
+    }
+
+    function saveRecordsToCloud() {
+      const recordsRef = window.dbRef(window.db, 'salary_records');
+      const dataToSave = {};
+      records.forEach((r, index) => {
+        const cleanRecord = { ...r };
+        delete cleanRecord.dbKey;
+        dataToSave['rec_' + (cleanRecord.id || index)] = cleanRecord;
+      });
+
+      window.dbSet(recordsRef, dataToSave).catch((error) => {
+        console.error("雲端同步失敗：", error);
+        alert("雲端同步失敗，請檢查網路連線。");
+      });
+    }
+
     themeToggleBtn.addEventListener('click', () => {
       document.body.classList.toggle('dark-mode');
       const isDark = document.body.classList.contains('dark-mode');
-      
       themeIcon.textContent = isDark ? 'light_mode' : 'dark_mode';
       themeText.textContent = isDark ? '切換明亮模式' : '切換暗黑模式';
-      
       updateStatsView();
     });
 
-    // 懸浮對話框 控制邏輯
     function openChartModal(modalId) {
       const modal = document.getElementById(modalId);
       if (!modal) return;
-      
       modal.classList.add('active');
-
       setTimeout(() => {
-        if (modalId === 'trendModal' && monthlyChartInstance) {
-          monthlyChartInstance.resize();
-          monthlyChartInstance.update();
-        } else if (modalId === 'statusModal' && statusChartInstance) {
-          statusChartInstance.resize();
-          statusChartInstance.update();
-        } else if (modalId === 'unitModal' && pieChartInstance) {
-          pieChartInstance.resize();
-          pieChartInstance.update();
-        } else if (modalId === 'jobTypeModal' && jobTypeChartInstance) {
-          jobTypeChartInstance.resize();
-          jobTypeChartInstance.update();
-        } else if (modalId === 'cityModal' && cityChartInstance) {
-          cityChartInstance.resize();
-          cityChartInstance.update();
-        }
+        if (modalId === 'trendModal' && monthlyChartInstance) { monthlyChartInstance.resize(); monthlyChartInstance.update(); }
+        else if (modalId === 'statusModal' && statusChartInstance) { statusChartInstance.resize(); statusChartInstance.update(); }
+        else if (modalId === 'unitModal' && pieChartInstance) { pieChartInstance.resize(); pieChartInstance.update(); }
+        else if (modalId === 'jobTypeModal' && jobTypeChartInstance) { jobTypeChartInstance.resize(); jobTypeChartInstance.update(); }
+        else if (modalId === 'cityModal' && cityChartInstance) { cityChartInstance.resize(); cityChartInstance.update(); }
       }, 50);
     }
 
@@ -1537,12 +1531,9 @@
     }
 
     function closeChartModalOnOverlay(event, modalId) {
-      if (event.target.classList.contains('modal-overlay')) {
-        closeChartModal(modalId);
-      }
+      if (event.target.classList.contains('modal-overlay')) closeChartModal(modalId);
     }
 
-    // 側邊欄 Toggle
     toggleSidebarBtn.addEventListener('click', () => {
       if (window.innerWidth <= 768) {
         closeMobileMenu();
@@ -1551,12 +1542,9 @@
         const isCollapsed = sidebar.classList.contains('collapsed');
         document.getElementById('toggleIcon').textContent = isCollapsed ? 'chevron_right' : 'chevron_left';
       }
-      setTimeout(() => {
-        if (monthlyChartInstance) monthlyChartInstance.resize();
-      }, 300);
+      setTimeout(() => { if (monthlyChartInstance) monthlyChartInstance.resize(); }, 300);
     });
 
-    // 手機版選單控制
     openMobileMenuBtn.addEventListener('click', () => {
       sidebar.classList.add('mobile-open');
       sidebarOverlay.classList.add('active');
@@ -1569,7 +1557,6 @@
       sidebarOverlay.classList.remove('active');
     }
 
-    // 分頁切換
     function switchTab(tabId, btnEl) {
       document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
       document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
@@ -1577,45 +1564,29 @@
       btnEl.classList.add('active');
 
       if (window.innerWidth <= 768) closeMobileMenu();
-
-      if (tabId === 'trendTab' || tabId === 'pieTab') {
-        updateStatsView();
-      }
+      if (tabId === 'trendTab' || tabId === 'pieTab') updateStatsView();
     }
 
-    // 同步統計年份
     function syncStatsYear(val) {
-      document.querySelectorAll('.stats-year-select').forEach(select => {
-        select.value = val;
-      });
+      document.querySelectorAll('.stats-year-select').forEach(select => { select.value = val; });
       updateStatsView();
     }
 
-    // 同步統計月份
     function syncStatsMonth(val) {
-      document.querySelectorAll('.stats-month-select').forEach(select => {
-        select.value = val;
-      });
+      document.querySelectorAll('.stats-month-select').forEach(select => { select.value = val; });
       updateStatsView();
     }
 
-    // 同步自訂起始月份
     function syncCustomStart(val) {
-      document.querySelectorAll('.stats-custom-start').forEach(input => {
-        input.value = val;
-      });
+      document.querySelectorAll('.stats-custom-start').forEach(input => { input.value = val; });
       updateStatsView();
     }
 
-    // 同步自訂結束月份
     function syncCustomEnd(val) {
-      document.querySelectorAll('.stats-custom-end').forEach(input => {
-        input.value = val;
-      });
+      document.querySelectorAll('.stats-custom-end').forEach(input => { input.value = val; });
       updateStatsView();
     }
 
-    // 清除自訂區間
     function clearCustomRange() {
       document.querySelectorAll('.stats-custom-start').forEach(input => input.value = '');
       document.querySelectorAll('.stats-custom-end').forEach(input => input.value = '');
@@ -1632,7 +1603,6 @@
       updateStatsView();
     }
 
-    // 切換台幣換算顯示
     function toggleTwdConversion() {
       isTwdEnabled = document.getElementById('enableTwd').checked;
       localStorage.setItem('salary_twd_enabled', JSON.stringify(isTwdEnabled));
@@ -1640,18 +1610,15 @@
       updateView();
     }
 
-    // 格式化金額顯示
     function formatMoney(amount) {
       const formattedBase = `$${amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
       if (!isTwdEnabled) return formattedBase;
-
       const rate = parseFloat(document.getElementById('audToTwdRate').value) || 20.5;
       const twdVal = amount * rate;
       const formattedTwd = `NT$ ${twdVal.toLocaleString('zh-TW', { maximumFractionDigits: 0 })}`;
       return `${formattedBase} <small style="color: var(--text-secondary);">(約 ${formattedTwd})</small>`;
     }
 
-    // 表單提交
     function handleFormSubmit(event) {
       event.preventDefault();
       const salaryMonth = document.getElementById('salaryMonth').value;
@@ -1683,24 +1650,18 @@
         isCurrentMonthPay
       });
 
-      saveRecords();
+      saveRecordsToCloud();
       document.getElementById('salaryForm').reset();
       updateView();
-      alert("薪資紀錄儲存成功！可切換至「歷史薪資明細」查看紀錄。");
+      alert("薪資紀錄已儲存並同步至雲端！");
     }
 
-    function saveRecords() {
-      localStorage.setItem('salary_records', JSON.stringify(records));
-    }
-
-    // 全選 / 反選控制
     function toggleSelectAll(masterCheckbox) {
       const rowCheckboxes = document.querySelectorAll('.record-checkbox');
       rowCheckboxes.forEach(cb => cb.checked = masterCheckbox.checked);
       updateDeleteButtonState();
     }
 
-    // 更新刪除按鈕狀態與計數
     function updateDeleteButtonState() {
       const checkboxes = document.querySelectorAll('.record-checkbox');
       const selectedCheckboxes = document.querySelectorAll('.record-checkbox:checked');
@@ -1709,17 +1670,14 @@
       const masterCheckbox = document.getElementById('selectAllCheckbox');
       
       if (!deleteBtn || !selectedCountEl) return;
-
       selectedCountEl.textContent = selectedCheckboxes.length;
       
-      // 當有勾選項目時解鎖刪除按鈕
       if (selectedCheckboxes.length > 0) {
         deleteBtn.removeAttribute('disabled');
       } else {
         deleteBtn.setAttribute('disabled', 'true');
       }
 
-      // 同步全選框狀態
       if (masterCheckbox) {
         if (checkboxes.length > 0 && selectedCheckboxes.length === checkboxes.length) {
           masterCheckbox.checked = true;
@@ -1734,7 +1692,6 @@
       }
     }
 
-    // 刪除勾選項目
     function deleteSelectedRecords() {
       const selectedCheckboxes = document.querySelectorAll('.record-checkbox:checked');
       const idsToDelete = Array.from(selectedCheckboxes).map(cb => Number(cb.value));
@@ -1743,12 +1700,11 @@
 
       if (confirm(`確定要刪除已勾選的 ${idsToDelete.length} 筆資料嗎？`)) {
         records = records.filter(r => !idsToDelete.includes(r.id));
-        saveRecords();
+        saveRecordsToCloud();
         updateView();
       }
     }
 
-    // 全域畫面更新
     function updateView() {
       initYearSelectOptions();
       renderTable();
@@ -1756,7 +1712,6 @@
       updateStatsView();
     }
 
-    // 渲染明細表格
     function renderTable() {
       const tbody = document.getElementById('recordsTableBody');
       if (!tbody) return;
@@ -1772,12 +1727,8 @@
 
       let filtered = records.slice().sort((a, b) => b.salaryMonth.localeCompare(a.salaryMonth));
 
-      if (startDate) {
-        filtered = filtered.filter(r => r.salaryMonth >= startDate);
-      }
-      if (endDate) {
-        filtered = filtered.filter(r => r.salaryMonth <= endDate);
-      }
+      if (startDate) filtered = filtered.filter(r => r.salaryMonth >= startDate);
+      if (endDate) filtered = filtered.filter(r => r.salaryMonth <= endDate);
 
       if (keyword) {
         filtered = filtered.filter(r => {
@@ -1787,7 +1738,6 @@
           const matchCity = (r.city || '').toLowerCase().includes(keyword);
           const matchPayDate = r.payDate.toLowerCase().includes(keyword);
           const matchInfo = `$${r.hourlyRate}/hr × ${r.workDays}天`.toLowerCase().includes(keyword);
-
           return matchMonth || matchUnit || matchJobType || matchCity || matchPayDate || matchInfo;
         });
       }
@@ -1796,11 +1746,8 @@
       if (filterJobType !== 'ALL') filtered = filtered.filter(r => (r.jobType || '其他') === filterJobType);
       if (filterCity !== 'ALL') filtered = filtered.filter(r => (r.city || '未標示') === filterCity);
 
-      if (filterStatus === 'CURRENT') {
-        filtered = filtered.filter(r => r.isCurrentMonthPay);
-      } else if (filterStatus === 'CROSS') {
-        filtered = filtered.filter(r => !r.isCurrentMonthPay);
-      }
+      if (filterStatus === 'CURRENT') filtered = filtered.filter(r => r.isCurrentMonthPay);
+      else if (filterStatus === 'CROSS') filtered = filtered.filter(r => !r.isCurrentMonthPay);
 
       if (filtered.length === 0) {
         tbody.innerHTML = '<tr><td colspan="9" style="text-align:center; padding: 24px; color: var(--text-secondary);">尚無相符的紀錄</td></tr>';
@@ -1836,7 +1783,6 @@
       updateDeleteButtonState();
     }
 
-    // 動態更新篩選選單
     function updateFilterOptions() {
       const selectUnit = document.getElementById('filterUnit');
       if (!selectUnit) return;
@@ -1862,7 +1808,6 @@
       selectCity.value = currentCityVal;
     }
 
-    // 初始化動態年份選項（自動抓取現有紀錄的年份，若無則包含當前年份）
     function initYearSelectOptions() {
       const currentYear = new Date().getFullYear();
       const recordYears = records.map(r => r.salaryMonth ? r.salaryMonth.substring(0, 4) : '').filter(Boolean);
@@ -1877,15 +1822,11 @@
           opt.textContent = `${y} 年`;
           select.appendChild(opt);
         });
-        if (years.includes(currentValue)) {
-          select.value = currentValue;
-        } else if (years.length > 0) {
-          select.value = years[0];
-        }
+        if (years.includes(currentValue)) select.value = currentValue;
+        else if (years.length > 0) select.value = years[0];
       });
     }
 
-    // 更新統計看板與圖表
     function updateStatsView() {
       const yearSelect = document.querySelector('.stats-year-select');
       const monthSelect = document.querySelector('.stats-month-select');
@@ -1997,36 +1938,26 @@
       renderCityPieChart(citySums);
     }
 
-    // 每月趨勢圖
     function renderMonthlyChart(year, month, targetMonthly, periodRecords, isCustomRangeActive, customStart, customEnd) {
       const canvas = document.getElementById('monthlyChart');
       const chartBox = document.getElementById('trendChartBox');
       if (!canvas || !chartBox) return;
 
       const ctx = canvas.getContext('2d');
-
       let chartLabels = [];
       let monthlyTotals = [];
 
       if (isCustomRangeActive) {
         let allMonths = [...new Set(periodRecords.map(r => r.salaryMonth))].sort();
-        if (allMonths.length === 0 && customStart && customEnd) {
-          allMonths = [customStart];
-        }
+        if (allMonths.length === 0 && customStart && customEnd) allMonths = [customStart];
         chartLabels = allMonths.map(m => `${m.replace('-', '年')}月`);
         monthlyTotals = allMonths.map(m => periodRecords.filter(r => r.salaryMonth === m).reduce((sum, r) => sum + r.totalPay, 0));
-        
         chartBox.style.minWidth = allMonths.length > 6 ? `${allMonths.length * 90}px` : '100%';
       } else if (month === 'ALL') {
         chartLabels = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
         const months = Array.from({ length: 12 }, (_, i) => `${year}-${String(i + 1).padStart(2, '0')}`);
         monthlyTotals = months.map(m => periodRecords.filter(r => r.salaryMonth === m).reduce((sum, r) => sum + r.totalPay, 0));
-        
-        if (window.innerWidth <= 768) {
-          chartBox.style.minWidth = '650px';
-        } else {
-          chartBox.style.minWidth = '100%';
-        }
+        chartBox.style.minWidth = window.innerWidth <= 768 ? '650px' : '100%';
       } else {
         chartLabels = [`${parseInt(month)}月`];
         monthlyTotals = [periodRecords.reduce((sum, r) => sum + r.totalPay, 0)];
@@ -2048,19 +1979,12 @@
           maintainAspectRatio: false,
           scales: { 
             y: { beginAtZero: true },
-            x: {
-              ticks: {
-                font: {
-                  size: 11
-                }
-              }
-            }
+            x: { ticks: { font: { size: 11 } } }
           }
         }
       });
     }
 
-    // 入帳狀態佔比圖
     function renderStatusPieChart(statusSums) {
       const canvas = document.getElementById('statusPieChart');
       if (!canvas) return;
@@ -2073,18 +1997,11 @@
 
       statusChartInstance = new Chart(ctx, {
         type: 'doughnut',
-        data: {
-          labels: labels,
-          datasets: [{
-            data: data,
-            backgroundColor: ['#4caf50', '#ff9800']
-          }]
-        },
+        data: { labels: labels, datasets: [{ data: data, backgroundColor: ['#4caf50', '#ff9800'] }] },
         options: commonPieOptions
       });
     }
 
-    // 單位佔比圖
     function renderUnitPieChart(unitSums) {
       const canvas = document.getElementById('unitPieChart');
       if (!canvas) return;
@@ -2099,16 +2016,12 @@
         type: 'pie',
         data: {
           labels: labels,
-          datasets: [{
-            data: data,
-            backgroundColor: ['#3f51b5', '#ff4081', '#4caf50', '#ff9800', '#9c27b0', '#00bcd4', '#795548', '#607d8b']
-          }]
+          datasets: [{ data: data, backgroundColor: ['#3f51b5', '#ff4081', '#4caf50', '#ff9800', '#9c27b0', '#00bcd4', '#795548', '#607d8b'] }]
         },
         options: commonPieOptions
       });
     }
 
-    // 工作類型佔比圖
     function renderJobTypePieChart(jobTypeSums) {
       const canvas = document.getElementById('jobTypePieChart');
       if (!canvas) return;
@@ -2123,16 +2036,12 @@
         type: 'doughnut',
         data: {
           labels: labels,
-          datasets: [{
-            data: data,
-            backgroundColor: ['#0288d1', '#26a69a', '#ab47bc', '#ffa726', '#78909c', '#ec407a', '#8d6e63', '#26c6da']
-          }]
+          datasets: [{ data: data, backgroundColor: ['#0288d1', '#26a69a', '#ab47bc', '#ffa726', '#78909c', '#ec407a', '#8d6e63', '#26c6da'] }]
         },
         options: commonPieOptions
       });
     }
 
-    // 工作城市佔比圖
     function renderCityPieChart(citySums) {
       const canvas = document.getElementById('cityPieChart');
       if (!canvas) return;
@@ -2147,10 +2056,7 @@
         type: 'pie',
         data: {
           labels: labels,
-          datasets: [{
-            data: data,
-            backgroundColor: ['#00bcd4', '#8e24aa', '#ff5722', '#43a047', '#e91e63', '#3f51b5', '#ffb300', '#009688']
-          }]
+          datasets: [{ data: data, backgroundColor: ['#00bcd4', '#8e24aa', '#ff5722', '#43a047', '#e91e63', '#3f51b5', '#ffb300', '#009688'] }]
         },
         options: commonPieOptions
       });
@@ -2158,4 +2064,3 @@
   </script>
 </body>
 </html>
-```[cite: 7]
