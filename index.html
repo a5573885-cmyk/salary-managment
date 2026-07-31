@@ -345,6 +345,15 @@
     .scrollable-chart-container { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
     .modal-trend-chart-box { position: relative; height: 350px; width: 100%; min-width: 100%; }
     
+    /* 區間日期工時細項清單區 */
+    #rangeConfigContainer {
+      background: var(--bg-color); border: 1px solid var(--border-color); padding: 16px; border-radius: 6px; margin-bottom: 16px;
+    }
+    .date-row-item {
+      display: flex; align-items: center; gap: 12px; margin-bottom: 10px; background: var(--card-bg); padding: 10px; border-radius: 6px; border: 1px solid var(--border-color); flex-wrap: wrap;
+    }
+    .date-row-item label { font-size: 0.9rem; font-weight: 600; min-width: 110px; color: var(--text-color); }
+
     /* 試算預覽區域 */
     #stagingArea {
       margin-top: 24px; padding-top: 20px; border-top: 2px dashed var(--border-color);
@@ -453,7 +462,7 @@
       <!-- TAB 1: 新增薪資紀錄 -->
       <section id="inputTab" class="tab-content active">
         <div class="card">
-          <h3 class="card-title"><span class="material-icons">add_circle_outline</span> 新增薪資紀錄 (支援區間批次建立)</h3>
+          <h3 class="card-title"><span class="material-icons">add_circle_outline</span> 新增薪資紀錄 (支援區間、休假日與自訂工時)</h3>
           <form id="salaryForm" onsubmit="previewSalary(event)">
             <div class="form-grid">
               <div class="form-group">
@@ -494,7 +503,7 @@
                 </datalist>
               </div>
               
-              <!-- 新增：計薪方式與規則 -->
+              <!-- 計薪方式與規則 -->
               <div class="form-group">
                 <label>計薪方式</label>
                 <div class="input-icon-wrapper">
@@ -510,36 +519,23 @@
                 <input type="number" id="baseWage" step="0.1" placeholder="例如: 30" required>
               </div>
               
-              <!-- 新增：日期區間 -->
+              <!-- 日期區間 -->
               <div class="form-group">
                 <label>工作起始日期</label>
                 <div class="input-icon-wrapper">
-                  <input type="date" id="workDateStart" required>
+                  <input type="date" id="workDateStart" onchange="generateDateRangeRows()" required>
                   <span class="material-icons field-icon">event</span>
                 </div>
               </div>
               <div class="form-group">
                 <label>工作結束日期 (單日請選同天)</label>
                 <div class="input-icon-wrapper">
-                  <input type="date" id="workDateEnd" required>
+                  <input type="date" id="workDateEnd" onchange="generateDateRangeRows()" required>
                   <span class="material-icons field-icon">event</span>
                 </div>
               </div>
               
-              <!-- 新增：時數與分鐘合併 -->
-              <div class="form-group">
-                <label>每日實際總工時 (不含休息)</label>
-                <div style="display: flex; gap: 8px;">
-                  <div class="input-icon-wrapper" style="width: 50%;">
-                    <input type="number" id="workHours" placeholder="小時" value="8" min="0" required>
-                  </div>
-                  <div class="input-icon-wrapper" style="width: 50%;">
-                    <input type="number" id="workMinutes" placeholder="分鐘" value="0" min="0" max="59" required>
-                  </div>
-                </div>
-              </div>
-              
-              <!-- 新增：加班規則切換 -->
+              <!-- 加班規則切換 -->
               <div class="form-group">
                 <label>加班費計算規則</label>
                 <div class="input-icon-wrapper">
@@ -558,6 +554,29 @@
                   <input type="date" id="payDate" required>
                   <span class="material-icons field-icon">event</span>
                 </div>
+              </div>
+            </div>
+
+            <!-- 區間各日休假與工時細項設定區 -->
+            <div class="form-group" style="margin-bottom: 20px;">
+              <label style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 8px;">
+                <span>📅 區間每日工時與休假設定 (可勾選休假或調整每日工時)</span>
+                <button type="button" class="btn-open-modal" style="width:auto; margin:0; padding:4px 10px; font-size:0.8rem;" onclick="applyDefaultHoursToAll()">套用預設工時到所有天數</button>
+              </label>
+              
+              <div style="display:flex; gap:12px; margin-bottom:10px;">
+                <div class="form-group" style="flex:1;">
+                  <label style="font-size:0.8rem;">預設每日小時</label>
+                  <input type="number" id="defaultHours" value="8" min="0" max="24">
+                </div>
+                <div class="form-group" style="flex:1;">
+                  <label style="font-size:0.8rem;">預設每日分鐘</label>
+                  <input type="number" id="defaultMinutes" value="0" min="0" max="59">
+                </div>
+              </div>
+
+              <div id="rangeConfigContainer">
+                <div style="color:var(--text-secondary); text-align:center; padding:10px;">請先選擇「起始日期」與「結束日期」以展開每日明細</div>
               </div>
             </div>
             
@@ -665,16 +684,53 @@
 
       <!-- TAB 3: 收入趨勢圖 -->
       <section id="trendTab" class="tab-content">
-        <!-- 內容保留原有過濾器 -->
         <div class="card">
           <div class="form-grid" style="align-items: flex-end;">
             <div class="form-group"><label>統計年份篩選</label><div class="input-icon-wrapper"><select class="stats-year-select" onchange="syncStatsYear(this.value)"></select><span class="material-icons field-icon">arrow_drop_down</span></div></div>
-            <div class="form-group"><label>統計月份篩選</label><div class="input-icon-wrapper">
-              <select class="stats-month-select" onchange="syncStatsMonth(this.value)">
-                <option value="ALL">全年 (1-12月)</option><option value="01">1月</option><option value="02">2月</option>
-                <option value="03">3月</option><option value="04">4月</option><option value="05">5月</option><option value="06">6月</option>
-                <option value="07">7月</option><option value="08">8月</option><option value="09">9月</option><option value="10">10月</option><option value="11">11月</option><option value="12">12月</option>
-              </select><span class="material-icons field-icon">arrow_drop_down</span></div>
+            <div class="form-group">
+              <label>區間篩選模式</label>
+              <div class="input-icon-wrapper">
+                <select class="stats-mode-select" onchange="toggleStatsMode(this.value)">
+                  <option value="month">單月 / 全年篩選</option>
+                  <option value="range">自訂月份區間 (例: 6-8月)</option>
+                </select>
+                <span class="material-icons field-icon">arrow_drop_down</span>
+              </div>
+            </div>
+            <!-- 單月/全年選單群組 -->
+            <div class="form-group single-mode-group">
+              <label>統計月份篩選</label>
+              <div class="input-icon-wrapper">
+                <select class="stats-month-select" onchange="syncStatsMonth(this.value)">
+                  <option value="ALL">全年 (1-12月)</option><option value="01">1月</option><option value="02">2月</option>
+                  <option value="03">3月</option><option value="04">4月</option><option value="05">5月</option><option value="06">6月</option>
+                  <option value="07">7月</option><option value="08">8月</option><option value="09">9月</option><option value="10">10月</option><option value="11">11月</option><option value="12">12月</option>
+                </select>
+                <span class="material-icons field-icon">arrow_drop_down</span>
+              </div>
+            </div>
+            <!-- 自訂區間選單群組 -->
+            <div class="form-group range-mode-group" style="display: none;">
+              <label>起始月份</label>
+              <div class="input-icon-wrapper">
+                <select class="stats-range-start" onchange="syncRangeStart(this.value)">
+                  <option value="01">1月</option><option value="02">2月</option><option value="03">3月</option><option value="04">4月</option>
+                  <option value="05">5月</option><option value="06" selected>6月</option><option value="07">7月</option><option value="08">8月</option>
+                  <option value="09">9月</option><option value="10">10月</option><option value="11">11月</option><option value="12">12月</option>
+                </select>
+                <span class="material-icons field-icon">arrow_drop_down</span>
+              </div>
+            </div>
+            <div class="form-group range-mode-group" style="display: none;">
+              <label>結束月份</label>
+              <div class="input-icon-wrapper">
+                <select class="stats-range-end" onchange="syncRangeEnd(this.value)">
+                  <option value="01">1月</option><option value="02">2月</option><option value="03">3月</option><option value="04">4月</option>
+                  <option value="05">5月</option><option value="06">6月</option><option value="07">7月</option><option value="08" selected>8月</option>
+                  <option value="09">9月</option><option value="10">10月</option><option value="11">11月</option><option value="12">12月</option>
+                </select>
+                <span class="material-icons field-icon">arrow_drop_down</span>
+              </div>
             </div>
             <div class="form-group"><label>目標月薪</label><input type="number" class="target-monthly-input" value="5000" onchange="syncTargetMonthly(this.value)"></div>
             <div class="form-group"><label>目標年薪</label><input type="number" class="target-yearly-input" value="60000" onchange="syncTargetYearly(this.value)"></div>
@@ -705,12 +761,48 @@
         <div class="card">
           <div class="form-grid" style="align-items: flex-end;">
             <div class="form-group"><label>統計年份篩選</label><div class="input-icon-wrapper"><select class="stats-year-select" onchange="syncStatsYear(this.value)"></select><span class="material-icons field-icon">arrow_drop_down</span></div></div>
-            <div class="form-group"><label>統計月份篩選</label><div class="input-icon-wrapper">
-              <select class="stats-month-select" onchange="syncStatsMonth(this.value)">
-                <option value="ALL">全年 (1-12月)</option><option value="01">1月</option><option value="02">2月</option>
-                <option value="03">3月</option><option value="04">4月</option><option value="05">5月</option><option value="06">6月</option>
-                <option value="07">7月</option><option value="08">8月</option><option value="09">9月</option><option value="10">10月</option><option value="11">11月</option><option value="12">12月</option>
-              </select><span class="material-icons field-icon">arrow_drop_down</span></div>
+            <div class="form-group">
+              <label>區間篩選模式</label>
+              <div class="input-icon-wrapper">
+                <select class="stats-mode-select" onchange="toggleStatsMode(this.value)">
+                  <option value="month">單月 / 全年篩選</option>
+                  <option value="range">自訂月份區間 (例: 6-8月)</option>
+                </select>
+                <span class="material-icons field-icon">arrow_drop_down</span>
+              </div>
+            </div>
+            <div class="form-group single-mode-group">
+              <label>統計月份篩選</label>
+              <div class="input-icon-wrapper">
+                <select class="stats-month-select" onchange="syncStatsMonth(this.value)">
+                  <option value="ALL">全年 (1-12月)</option><option value="01">1月</option><option value="02">2月</option>
+                  <option value="03">3月</option><option value="04">4月</option><option value="05">5月</option><option value="06">6月</option>
+                  <option value="07">7月</option><option value="08">8月</option><option value="09">9月</option><option value="10">10月</option><option value="11">11月</option><option value="12">12月</option>
+                </select>
+                <span class="material-icons field-icon">arrow_drop_down</span>
+              </div>
+            </div>
+            <div class="form-group range-mode-group" style="display: none;">
+              <label>起始月份</label>
+              <div class="input-icon-wrapper">
+                <select class="stats-range-start" onchange="syncRangeStart(this.value)">
+                  <option value="01">1月</option><option value="02">2月</option><option value="03">3月</option><option value="04">4月</option>
+                  <option value="05">5月</option><option value="06" selected>6月</option><option value="07">7月</option><option value="08">8月</option>
+                  <option value="09">9月</option><option value="10">10月</option><option value="11">11月</option><option value="12">12月</option>
+                </select>
+                <span class="material-icons field-icon">arrow_drop_down</span>
+              </div>
+            </div>
+            <div class="form-group range-mode-group" style="display: none;">
+              <label>結束月份</label>
+              <div class="input-icon-wrapper">
+                <select class="stats-range-end" onchange="syncRangeEnd(this.value)">
+                  <option value="01">1月</option><option value="02">2月</option><option value="03">3月</option><option value="04">4月</option>
+                  <option value="05">5月</option><option value="06">6月</option><option value="07">7月</option><option value="08" selected>8月</option>
+                  <option value="09">9月</option><option value="10">10月</option><option value="11">11月</option><option value="12">12月</option>
+                </select>
+                <span class="material-icons field-icon">arrow_drop_down</span>
+              </div>
             </div>
           </div>
         </div>
@@ -728,7 +820,6 @@
             <div><h4>工作類型</h4><div class="value statTopJobTypes" style="font-size: 0.9rem; font-weight: normal; margin-top: 4px;"></div></div>
             <button class="btn-open-modal" onclick="openChartModal('jobTypeModal')"><span class="material-icons" style="font-size: 18px;">pie_chart</span> 查看</button>
           </div>
-          <!-- 新增計薪方式分析卡片 -->
           <div class="stat-card" style="border-left-color: #e91e63;">
             <div><h4>計薪方式 (時薪/日薪)</h4><div class="value statWageTypes" style="font-size: 0.9rem; font-weight: normal; margin-top: 4px;"></div></div>
             <button class="btn-open-modal" onclick="openChartModal('wageTypeModal')"><span class="material-icons" style="font-size: 18px;">pie_chart</span> 查看</button>
@@ -761,7 +852,6 @@
     <div class="modal-container"><div class="modal-header"><div class="modal-title"><span class="material-icons">donut_small</span><span>工作類型佔比</span></div><button class="modal-close-btn" onclick="closeChartModal('jobTypeModal')"><span class="material-icons">close</span></button></div><div class="modal-body"><div class="modal-pie-chart-box"><canvas id="jobTypePieChart"></canvas></div></div></div>
   </div>
   
-  <!-- 新增計薪方式 Modal -->
   <div class="modal-overlay" id="wageTypeModal" onclick="closeChartModalOnOverlay(event, 'wageTypeModal')">
     <div class="modal-container">
       <div class="modal-header">
@@ -829,10 +919,9 @@
 
   <script>
     let records = [];
-    let stagedRecords = []; // 存放試算資料
+    let stagedRecords = []; 
     let isTwdEnabled = JSON.parse(localStorage.getItem('salary_twd_enabled')) || false;
     
-    // 圖表實例
     let monthlyChartInstance = null, pieChartInstance = null, jobTypeChartInstance = null;
     let statusChartInstance = null, wageTypeChartInstance = null;
 
@@ -843,6 +932,10 @@
       document.getElementById('enableTwd').checked = isTwdEnabled;
       document.getElementById('rateInputGroup').style.display = isTwdEnabled ? 'flex' : 'none';
       
+      // 綁定日期變更事件以動態生成區間明細
+      document.getElementById('workDateStart').addEventListener('change', generateDateRangeRows);
+      document.getElementById('workDateEnd').addEventListener('change', generateDateRangeRows);
+
       const checkFirebase = setInterval(() => {
         if (window.db && window.dbOnValue) {
           clearInterval(checkFirebase);
@@ -873,13 +966,11 @@
       document.getElementById('baseWageLabel').textContent = type === 'hourly' ? '時薪金額' : '日薪金額';
     }
 
-    // 將日期字串轉換為所有天數陣列
     function getDatesInRange(startDate, endDate) {
       const dates = [];
       let current = new Date(startDate);
       const end = new Date(endDate);
       while (current <= end) {
-        // 使用本地時間格式化 YYYY-MM-DD
         const y = current.getFullYear();
         const m = String(current.getMonth() + 1).padStart(2, '0');
         const d = String(current.getDate()).padStart(2, '0');
@@ -889,7 +980,73 @@
       return dates;
     }
 
-    // 試算預覽功能
+    // 動態產生日期區間內的每日工時與休假設定列
+    function generateDateRangeRows() {
+      const startStr = document.getElementById('workDateStart').value;
+      const endStr = document.getElementById('workDateEnd').value;
+      const container = document.getElementById('rangeConfigContainer');
+      
+      if (!startStr || !endStr) {
+        container.innerHTML = '<div style="color:var(--text-secondary); text-align:center; padding:10px;">請先選擇「起始日期」與「結束日期」以展開每日明細</div>';
+        return;
+      }
+
+      const dates = getDatesInRange(startStr, endStr);
+      if (dates.length === 0 || dates.length > 90) {
+        if (dates.length > 90) {
+          container.innerHTML = '<div style="color:var(--danger-color); text-align:center; padding:10px;">日期區間不可超過 90 天，請縮短區間。</div>';
+        }
+        return;
+      }
+
+      const defH = document.getElementById('defaultHours').value || 8;
+      const defM = document.getElementById('defaultMinutes').value || 0;
+
+      let html = '';
+      dates.forEach((dateStr, idx) => {
+        html += `
+          <div class="date-row-item" data-date="${dateStr}">
+            <label>${dateStr}</label>
+            <label style="font-weight:normal; display:flex; align-items:center; gap:4px; cursor:pointer; color:var(--danger-color);">
+              <input type="checkbox" class="rest-checkbox custom-checkbox" onchange="toggleDayRest(this, '${dateStr}')"> 休假日 (不上班)
+            </label>
+            <div style="display:flex; align-items:center; gap:6px; flex:1;" class="hours-input-group">
+              <span>時:</span>
+              <input type="number" class="day-hours" value="${defH}" min="0" max="24" style="width:70px; padding:6px;">
+              <span>分:</span>
+              <input type="number" class="day-minutes" value="${defM}" min="0" max="59" style="width:70px; padding:6px;">
+            </div>
+          </div>
+        `;
+      });
+      container.innerHTML = html;
+    }
+
+    function toggleDayRest(checkbox, dateStr) {
+      const item = checkbox.closest('.date-row-item');
+      const group = item.querySelector('.hours-input-group');
+      if (checkbox.checked) {
+        group.style.opacity = '0.3';
+        group.querySelectorAll('input').forEach(i => i.disabled = true);
+      } else {
+        group.style.opacity = '1';
+        group.querySelectorAll('input').forEach(i => i.disabled = false);
+      }
+    }
+
+    function applyDefaultHoursToAll() {
+      const defH = document.getElementById('defaultHours').value || 8;
+      const defM = document.getElementById('defaultMinutes').value || 0;
+      document.querySelectorAll('.date-row-item').forEach(item => {
+        const restCb = item.querySelector('.rest-checkbox');
+        if (!restCb.checked) {
+          item.querySelector('.day-hours').value = defH;
+          item.querySelector('.day-minutes').value = defM;
+        }
+      });
+    }
+
+    // 試算預覽功能 (支援每日獨立工時與休假日略過)
     function previewSalary(event) {
       event.preventDefault();
       
@@ -899,24 +1056,27 @@
       const city = document.getElementById('city').value.trim() || '未標示';
       const wageType = document.getElementById('wageType').value;
       const baseWage = parseFloat(document.getElementById('baseWage').value) || 0;
-      const startDateStr = document.getElementById('workDateStart').value;
-      const endDateStr = document.getElementById('workDateEnd').value;
-      const hours = parseInt(document.getElementById('workHours').value) || 0;
-      const minutes = parseInt(document.getElementById('workMinutes').value) || 0;
       const otRule = document.getElementById('otRule').value;
       const payDate = document.getElementById('payDate').value;
       
-      if (new Date(startDateStr) > new Date(endDateStr)) {
-        alert("結束日期不能早於起始日期！");
+      const dateRows = document.querySelectorAll('.date-row-item');
+      if (dateRows.length === 0) {
+        alert("請先設定工作日期區間！");
         return;
       }
 
-      const totalWorkHours = hours + (minutes / 60);
-      const dates = getDatesInRange(startDateStr, endDateStr);
-      const isCurrentMonthPay = (salaryMonth === payDate.substring(0, 7));
+      stagedRecords = [];
 
-      dates.forEach(dateStr => {
-        // 時薪計算基準（如果是日薪，則除以8小時計算加班費基準）
+      dateRows.forEach(item => {
+        const dateStr = item.getAttribute('data-date');
+        const isRest = item.querySelector('.rest-checkbox').checked;
+        if (isRest) return; // 若為休假日則跳過不計入
+
+        const hours = parseInt(item.querySelector('.day-hours').value) || 0;
+        const minutes = parseInt(item.querySelector('.day-minutes').value) || 0;
+        const totalWorkHours = hours + (minutes / 60);
+        if (totalWorkHours <= 0) return; // 沒工時也跳過
+
         const baseRateHourly = wageType === 'hourly' ? baseWage : (baseWage / 8);
         
         let basicHrs = Math.min(8, totalWorkHours);
@@ -924,13 +1084,8 @@
         let ot1Hrs = Math.min(2, otHrs);
         let ot2Hrs = Math.max(0, otHrs - 2);
 
-        // 基本薪資
-        let basicPay = 0;
-        if (totalWorkHours > 0) {
-          basicPay = (wageType === 'daily') ? baseWage : (basicHrs * baseRateHourly);
-        }
+        let basicPay = (wageType === 'daily') ? baseWage : (basicHrs * baseRateHourly);
 
-        // 加班費
         let otPay = 0;
         if (otRule === 'TW') {
           otPay = (ot1Hrs * baseRateHourly * 1.34) + (ot2Hrs * baseRateHourly * 1.67);
@@ -940,8 +1095,10 @@
           otPay = otHrs * baseRateHourly;
         }
 
+        const isCurrentMonthPay = (salaryMonth === payDate.substring(0, 7));
+
         stagedRecords.push({
-          id: Date.now() + Math.floor(Math.random() * 1000), // 確保批次ID唯一
+          id: Date.now() + Math.floor(Math.random() * 10000),
           salaryMonth, unit, jobType, city,
           wageType, baseWage,
           workDate: dateStr,
@@ -951,9 +1108,13 @@
         });
       });
 
+      if (stagedRecords.length === 0) {
+        alert("所有選定日期皆設定為休假或工時為 0，無法產生紀錄！");
+        return;
+      }
+
       renderStagingTable();
       document.getElementById('stagingArea').style.display = 'block';
-      // 滾動到預覽區
       document.getElementById('stagingArea').scrollIntoView({ behavior: 'smooth' });
     }
 
@@ -995,12 +1156,12 @@
       stagedRecords = [];
       document.getElementById('stagingArea').style.display = 'none';
       document.getElementById('salaryForm').reset();
+      document.getElementById('rangeConfigContainer').innerHTML = '<div style="color:var(--text-secondary); text-align:center; padding:10px;">請先選擇「起始日期」與「結束日期」以展開每日明細</div>';
       saveRecordsToCloud();
       updateView();
       alert("薪資紀錄已儲存並成功加入！");
     }
 
-    // 格式化金額
     function formatMoney(amount) {
       const formattedBase = `$${amount.toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}`;
       if (!isTwdEnabled) return formattedBase;
@@ -1016,7 +1177,6 @@
       updateView();
     }
 
-    // Tab 2 表格渲染
     function renderTable() {
       const tbody = document.getElementById('recordsTableBody');
       if (!tbody) return;
@@ -1055,7 +1215,6 @@
       }
 
       filtered.forEach(r => {
-        // 相容舊資料格式
         const displayDate = r.workDate ? r.workDate : '-';
         const timeInfo = r.workHours !== undefined ? `${r.workHours}h ${r.workMinutes}m` : `${r.workDays}天 x ${r.dailyHours}h`;
         const wageInfo = r.wageType === 'daily' ? `日薪 $${r.baseWage}` : (r.wageType === 'hourly' ? `時薪 $${r.baseWage}` : `時薪 $${r.hourlyRate}`);
@@ -1100,7 +1259,6 @@
       }
     }
 
-    // 介面與統計更新
     function updateView() { renderTable(); updateFilterOptions(); updateStatsView(); }
     
     function updateFilterOptions() {
@@ -1131,19 +1289,58 @@
     
     function syncStatsYear(val) { document.querySelectorAll('.stats-year-select').forEach(s => s.value = val); updateStatsView(); }
     function syncStatsMonth(val) { document.querySelectorAll('.stats-month-select').forEach(s => s.value = val); updateStatsView(); }
+    function syncRangeStart(val) { document.querySelectorAll('.stats-range-start').forEach(s => s.value = val); updateStatsView(); }
+    function syncRangeEnd(val) { document.querySelectorAll('.stats-range-end').forEach(s => s.value = val); updateStatsView(); }
     function syncTargetMonthly(val) { document.querySelectorAll('.target-monthly-input').forEach(i => i.value = val); updateStatsView(); }
     function syncTargetYearly(val) { document.querySelectorAll('.target-yearly-input').forEach(i => i.value = val); updateStatsView(); }
 
+    function toggleStatsMode(mode) {
+      const isRange = (mode === 'range');
+      document.querySelectorAll('.single-mode-group').forEach(el => el.style.display = isRange ? 'none' : 'flex');
+      document.querySelectorAll('.range-mode-group').forEach(el => el.style.display = isRange ? 'flex' : 'none');
+      document.querySelectorAll('.stats-mode-select').forEach(el => el.value = mode);
+      updateStatsView();
+    }
+
     function updateStatsView() {
       const year = document.querySelector('.stats-year-select')?.value || String(new Date().getFullYear());
+      const mode = document.querySelector('.stats-mode-select')?.value || 'month';
       const month = document.querySelector('.stats-month-select')?.value || 'ALL';
+      const rangeStart = document.querySelector('.stats-range-start')?.value || '01';
+      const rangeEnd = document.querySelector('.stats-range-end')?.value || '12';
       
-      let periodRecords = records.filter(r => r.salaryMonth.startsWith(year));
-      if (month !== 'ALL') periodRecords = periodRecords.filter(r => r.salaryMonth === `${year}-${month}`);
+      let periodRecords = [];
+      let activeMonthsCount = 1;
+      let chartLabels = [];
+
+      if (mode === 'range') {
+        const startM = parseInt(rangeStart, 10);
+        const endM = parseInt(rangeEnd, 10);
+        const validMonths = [];
+        for (let m = Math.min(startM, endM); m <= Math.max(startM, endM); m++) {
+          validMonths.push(String(m).padStart(2, '0'));
+        }
+        periodRecords = records.filter(r => {
+          if (!r.salaryMonth.startsWith(year)) return false;
+          const mPart = r.salaryMonth.substring(5, 7);
+          return validMonths.includes(mPart);
+        });
+        activeMonthsCount = validMonths.length || 1;
+        chartLabels = validMonths.map(m => `${parseInt(m, 10)}月`);
+      } else {
+        periodRecords = records.filter(r => r.salaryMonth.startsWith(year));
+        if (month !== 'ALL') {
+          periodRecords = periodRecords.filter(r => r.salaryMonth === `${year}-${month}`);
+          activeMonthsCount = 1;
+          chartLabels = [`${parseInt(month, 10)}月`];
+        } else {
+          activeMonthsCount = 12;
+          chartLabels = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+        }
+      }
 
       const totalIncome = periodRecords.reduce((s, r) => s + r.totalPay, 0);
-      const monthsCount = month === 'ALL' ? (new Set(periodRecords.map(r => r.salaryMonth)).size || 1) : 1;
-      const avgIncome = totalIncome / monthsCount;
+      const avgIncome = totalIncome / activeMonthsCount;
       
       const targetMonthly = parseFloat(document.querySelector('.target-monthly-input').value) || 0;
       const targetYearly = parseFloat(document.querySelector('.target-yearly-input').value) || 0;
@@ -1172,27 +1369,38 @@
       document.querySelectorAll('.statPayStatusSummary').forEach(el => el.innerHTML = `🟢 <b>本月</b>: $${statusSums['本月入帳'].toLocaleString()}<br>🟠 <b>跨月</b>: $${statusSums['跨月入帳'].toLocaleString()}`);
       document.querySelectorAll('.statTopUnits').forEach(el => el.innerHTML = topUnits);
       document.querySelectorAll('.statTopJobTypes').forEach(el => el.innerHTML = topJobs);
-      document.querySelectorAll('.statWageTypes').forEach(el => el.innerHTML = topWages); // 新增的時薪日薪卡片
+      document.querySelectorAll('.statWageTypes').forEach(el => el.innerHTML = topWages);
 
-      renderMonthlyChart(year, month, targetMonthly, periodRecords);
+      renderMonthlyChart(year, mode, month, rangeStart, rangeEnd, targetMonthly, periodRecords, chartLabels);
       renderPieChart('statusPieChart', statusSums, statusChartInstance, 'doughnut', ['#4caf50', '#ff9800']);
       renderPieChart('unitPieChart', unitSums, pieChartInstance, 'pie');
       renderPieChart('jobTypePieChart', jobTypeSums, jobTypeChartInstance, 'doughnut');
       renderPieChart('wageTypePieChart', wageTypeSums, wageTypeChartInstance, 'pie', ['#3f51b5', '#ff9800', '#9e9e9e']);
     }
 
-    function renderMonthlyChart(year, month, targetMonthly, periodRecords) {
+    function renderMonthlyChart(year, mode, month, rangeStart, rangeEnd, targetMonthly, periodRecords, labels) {
       const ctx = document.getElementById('monthlyChart')?.getContext('2d');
       if (!ctx) return;
       
-      let labels = [], data = [];
-      if (month === 'ALL') {
-        labels = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
-        const mStr = Array.from({length:12}, (_,i) => `${year}-${String(i+1).padStart(2,'0')}`);
-        data = mStr.map(m => periodRecords.filter(r => r.salaryMonth === m).reduce((s,r) => s+r.totalPay, 0));
+      let data = [];
+      if (mode === 'range') {
+        const startM = parseInt(rangeStart, 10);
+        const endM = parseInt(rangeEnd, 10);
+        const validMonths = [];
+        for (let m = Math.min(startM, endM); m <= Math.max(startM, endM); m++) {
+          validMonths.push(String(m).padStart(2, '0'));
+        }
+        data = validMonths.map(mStr => {
+          const fullM = `${year}-${mStr}`;
+          return periodRecords.filter(r => r.salaryMonth === fullM).reduce((s,r) => s + r.totalPay, 0);
+        });
       } else {
-        labels = [`${parseInt(month)}月`];
-        data = [periodRecords.reduce((s,r) => s+r.totalPay, 0)];
+        if (month === 'ALL') {
+          const mStrs = Array.from({length:12}, (_,i) => `${year}-${String(i+1).padStart(2,'0')}`);
+          data = mStrs.map(m => periodRecords.filter(r => r.salaryMonth === m).reduce((s,r) => s+r.totalPay, 0));
+        } else {
+          data = [periodRecords.reduce((s,r) => s+r.totalPay, 0)];
+        }
       }
 
       if (monthlyChartInstance) monthlyChartInstance.destroy();
@@ -1214,7 +1422,6 @@
       
       const defaultColors = ['#00bcd4', '#8e24aa', '#ff5722', '#43a047', '#e91e63', '#3f51b5', '#ffb300', '#009688'];
       
-      // Destroy existing chart via global variable assigning
       let existingChart = Chart.getChart(canvasId);
       if (existingChart) existingChart.destroy();
       
@@ -1227,12 +1434,10 @@
       });
     }
 
-    // Modal UI Logic
     function openChartModal(id) { const m = document.getElementById(id); if(m) m.classList.add('active'); }
     function closeChartModal(id) { const m = document.getElementById(id); if(m) m.classList.remove('active'); }
     function closeChartModalOnOverlay(e, id) { if(e.target.classList.contains('modal-overlay')) closeChartModal(id); }
 
-    // Sidebar Logic
     function switchTab(id, el) {
       document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
       document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
