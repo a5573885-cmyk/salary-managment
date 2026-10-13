@@ -313,4 +313,1260 @@
     .stats-grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 24px; }
     .stats-grid-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px; }
     
-    @media (max-width: 768px) { .stats-grid-2 { grid-template-columns: 1
+    @media (max-width: 768px) { .stats-grid-2 { grid-template-columns: 1fr; } }
+
+    .stat-card {
+      background: var(--card-bg); padding: 20px; border-radius: 8px; border: 1px solid var(--border-color);
+      border-left: 4px solid var(--primary-color); box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      display: flex; flex-direction: column; justify-content: space-between;
+    }
+    .stat-card h4 { color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; }
+    .stat-card .value { font-size: 1.5rem; font-weight: bold; color: var(--primary-color); }
+
+    /* Modals */
+    .modal-overlay {
+      display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background-color: rgba(0, 0, 0, 0.6); z-index: 2000; align-items: center; justify-content: center;
+      padding: 16px; opacity: 0; transition: opacity 0.25s ease; backdrop-filter: blur(2px);
+    }
+    .modal-overlay.active { display: flex; opacity: 1; }
+    .modal-container {
+      background-color: var(--modal-bg); color: var(--text-color); border-radius: 12px; width: 100%; max-width: 550px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.3); border: 1px solid var(--border-color); transform: scale(0.9); transition: transform 0.25s ease; display: flex; flex-direction: column;
+    }
+    .modal-container.large-modal { max-width: 850px; }
+    .modal-overlay.active .modal-container { transform: scale(1); }
+    .modal-header { padding: 16px 20px; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; }
+    .modal-title { font-size: 1.1rem; font-weight: 600; color: var(--primary-color); display: flex; align-items: center; gap: 8px; }
+    .modal-close-btn { background: transparent; border: none; color: var(--text-secondary); cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 4px; border-radius: 50%; }
+    .modal-close-btn:hover { background-color: rgba(0, 0, 0, 0.1); color: var(--text-color); }
+    .modal-body { padding: 20px; position: relative; }
+    .modal-pie-chart-box { position: relative; height: 320px; width: 100%; }
+    .scrollable-chart-container { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .modal-trend-chart-box { position: relative; height: 350px; width: 100%; min-width: 100%; }
+    
+    /* 區間日期工時細項清單區 */
+    #rangeConfigContainer {
+      background: var(--bg-color); border: 1px solid var(--border-color); padding: 16px; border-radius: 6px; margin-bottom: 16px;
+    }
+    .date-row-item {
+      display: flex; align-items: center; gap: 12px; margin-bottom: 10px; background: var(--card-bg); padding: 10px; border-radius: 6px; border: 1px solid var(--border-color); flex-wrap: wrap;
+    }
+    .date-row-item label { font-size: 0.9rem; font-weight: 600; min-width: 110px; color: var(--text-color); }
+
+    /* 試算預覽區域 */
+    #stagingArea {
+      margin-top: 24px; padding-top: 20px; border-top: 2px dashed var(--border-color);
+      display: none; animation: fadeIn 0.4s ease;
+    }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
+    @media (max-width: 768px) {
+      .top-header { padding-left: 16px; padding-right: 16px; }
+      .mobile-header { display: flex; }
+      .sidebar { transform: translateX(-100%); width: 260px !important; }
+      .sidebar.mobile-open { transform: translateX(0); }
+      .main-wrapper { margin-left: 0 !important; width: 100% !important; padding-top: 56px; }
+      .content-container { padding: 12px; }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="mobile-header">
+    <div class="mobile-header-title">
+      <span class="material-icons">account_balance_wallet</span>
+      <span>薪資管理系統</span>
+    </div>
+    <button class="toggle-btn" id="openMobileMenu" title="開啟選單">
+      <span class="material-icons">menu</span>
+    </button>
+  </header>
+
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <aside class="sidebar" id="sidebar">
+    <div>
+      <div class="sidebar-header">
+        <div class="sidebar-title">
+          <span class="material-icons">account_balance_wallet</span>
+          <span>薪資管理系統</span>
+        </div>
+        <button class="toggle-btn" id="toggleSidebar" title="展開/收合選單">
+          <span class="material-icons" id="toggleIcon">chevron_left</span>
+        </button>
+      </div>
+
+      <div class="user-profile">
+        <div class="avatar" id="sidebarAvatar">A</div>
+        <div class="user-info">
+          <div class="name" id="sidebarUserName">Admin User</div>
+          <div class="role" id="sidebarUserRole">系統管理員</div>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <button class="nav-btn active" onclick="switchTab('inputTab', this)">
+          <span class="material-icons">edit_note</span>
+          <span class="nav-btn-text">新增薪資紀錄</span>
+        </button>
+        <button class="nav-btn" onclick="switchTab('listTab', this)">
+          <span class="material-icons">receipt_long</span>
+          <span class="nav-btn-text">歷史薪資明細</span>
+        </button>
+        <button class="nav-btn" onclick="switchTab('trendTab', this)">
+          <span class="material-icons">show_chart</span>
+          <span class="nav-btn-text">收入趨勢圖</span>
+        </button>
+        <button class="nav-btn" onclick="switchTab('pieTab', this)">
+          <span class="material-icons">pie_chart</span>
+          <span class="nav-btn-text">收入佔比圖表分析</span>
+        </button>
+      </nav>
+    </div>
+
+    <div class="sidebar-footer">
+      <button id="theme-toggle" class="theme-toggle-btn">
+        <span class="material-icons" id="theme-icon">dark_mode</span>
+        <span id="theme-text">切換暗黑模式</span>
+      </button>
+      <button id="sidebarLogoutBtn" class="logout-btn-sidebar">
+        <span class="material-icons">logout</span>
+        <span>登出帳號</span>
+      </button>
+    </div>
+  </aside>
+
+  <main class="main-wrapper">
+    <header class="top-header">
+      <div class="top-header-title">儀表板總覽</div>
+      <div class="login-container">
+        <button id="loginBtn">使用 Google 帳號登入</button>
+        <button id="logoutBtn">登出</button>
+      </div>
+    </header>
+    
+    <div class="content-container">
+      <div class="rate-bar">
+        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+          <input type="checkbox" id="enableTwd" onchange="toggleTwdConversion()">
+          <b>啟用台幣（TWD）換算顯示</b>
+        </label>
+        <div id="rateInputGroup" style="display: none; align-items: center; gap: 8px;">
+          <span>匯率（1 外幣 = </span>
+          <input type="number" id="audToTwdRate" value="20.5" step="0.1" style="width: 80px; padding: 4px 8px;" onchange="updateView()">
+          <span>TWD）</span>
+        </div>
+      </div>
+
+      <!-- TAB 1: 新增薪資紀錄 -->
+      <section id="inputTab" class="tab-content active">
+        <div class="card">
+          <h3 class="card-title"><span class="material-icons">add_circle_outline</span> 新增薪資紀錄 (支援活動名稱、自訂加減項與單天模式)</h3>
+          <form id="salaryForm" onsubmit="previewSalary(event)">
+            <div class="form-grid">
+              <div class="form-group">
+                <label>薪資歸屬月份 (用於統計)</label>
+                <div class="input-icon-wrapper">
+                  <input type="month" id="salaryMonth" required>
+                  <span class="material-icons field-icon">event</span>
+                </div>
+              </div>
+              <div class="form-group">
+                <label>付款單位 / 公司</label>
+                <input type="text" id="unit" placeholder="例如：主合約、A廠商" required>
+              </div>
+              <!-- 需求1：新增欄位：活動名稱 -->
+              <div class="form-group">
+                <label>活動名稱</label>
+                <input type="text" id="activityName" placeholder="例如：春酒活動、展覽專案">
+              </div>
+              <div class="form-group">
+                <label>工作類型</label>
+                <div class="input-icon-wrapper">
+                  <input type="text" id="jobType" list="jobTypeOptions" placeholder="請輸入或選擇類別" required>
+                  <span class="material-icons field-icon">arrow_drop_down</span>
+                </div>
+                <datalist id="jobTypeOptions">
+                  <option value="正職"></option><option value="兼職"></option><option value="接案"></option>
+                  <option value="派遣"></option><option value="農場"></option><option value="肉廠"></option>
+                  <option value="餐飲"></option><option value="其他"></option>
+                </datalist>
+              </div>
+              <div class="form-group">
+                <label>工作城市 / 地點</label>
+                <div class="input-icon-wrapper">
+                  <input type="text" id="city" list="cityOptions" placeholder="選擇或直接輸入城市名稱" required>
+                  <span class="material-icons field-icon">arrow_drop_down</span>
+                </div>
+                <datalist id="cityOptions">
+                  <option value="Sydney (雪梨)"></option><option value="Melbourne (墨爾本)"></option>
+                  <option value="Brisbane (布里斯本)"></option><option value="Perth (伯斯)"></option>
+                  <option value="Adelaide (阿德雷德)"></option><option value="Gold Coast (黃金海岸)"></option>
+                  <option value="臺北市"></option><option value="新北市"></option>
+                  <option value="臺中市"></option><option value="高雄市"></option>
+                </datalist>
+              </div>
+              
+              <!-- 計薪方式與規則 -->
+              <div class="form-group">
+                <label>計薪方式</label>
+                <div class="input-icon-wrapper">
+                  <select id="wageType" required onchange="updateBaseWageLabel()">
+                    <option value="hourly">時薪 (Hourly)</option>
+                    <option value="daily">日薪 (Daily)</option>
+                  </select>
+                  <span class="material-icons field-icon">arrow_drop_down</span>
+                </div>
+              </div>
+              <div class="form-group">
+                <label id="baseWageLabel">時薪金額</label>
+                <input type="number" id="baseWage" step="0.1" placeholder="例如: 30" required>
+              </div>
+              
+              <!-- 需求3：工作日期新增按鈕：單天(單天不要選結束時間) -->
+              <div class="form-group" style="grid-column: 1 / -1; display: flex; align-items: center; gap: 12px; margin-bottom: 4px;">
+                <label style="margin-bottom:0;">工作日期模式：</label>
+                <button type="button" class="btn-open-modal" style="width: auto; margin: 0; padding: 4px 12px;" onclick="setSingleDayMode()">📌 設為單天模式</button>
+                <button type="button" class="btn-open-modal" style="width: auto; margin: 0; padding: 4px 12px; background: transparent; border-color: var(--text-secondary); color: var(--text-secondary);" onclick="setRangeMode()">📅 區間模式</button>
+              </div>
+
+              <!-- 日期區間 -->
+              <div class="form-group">
+                <label id="startDateLabel">工作起始日期</label>
+                <div class="input-icon-wrapper">
+                  <input type="date" id="workDateStart" onchange="generateDateRangeRows()" required>
+                  <span class="material-icons field-icon">event</span>
+                </div>
+              </div>
+              <div class="form-group" id="endDateGroup">
+                <label>工作結束日期</label>
+                <div class="input-icon-wrapper">
+                  <input type="date" id="workDateEnd" onchange="generateDateRangeRows()" required>
+                  <span class="material-icons field-icon">event</span>
+                </div>
+              </div>
+              
+              <!-- 加班規則切換 -->
+              <div class="form-group">
+                <label>加班費計算規則</label>
+                <div class="input-icon-wrapper">
+                  <select id="otRule">
+                    <option value="TW">台灣 (前2h 1.34x, 後 1.67x)</option>
+                    <option value="AU">澳洲 (前2h 1.5x, 後 2.0x)</option>
+                    <option value="NONE">無加班加倍 (1.0x)</option>
+                  </select>
+                  <span class="material-icons field-icon">arrow_drop_down</span>
+                </div>
+              </div>
+
+              <!-- 需求4：入帳日期改成下拉式選單 -->
+              <div class="form-group">
+                <label>實際領錢 / 入帳日期</label>
+                <div class="input-icon-wrapper">
+                  <select id="payDate" required>
+                    <option value="當天領現">當天領現</option>
+                    <option value="隔月10號">隔月10號</option>
+                    <option value="隔月15號">隔月15號</option>
+                    <option value="25號">25號</option>
+                  </select>
+                  <span class="material-icons field-icon">arrow_drop_down</span>
+                </div>
+              </div>
+
+              <!-- 需求5：新增津貼、餐費、業績獎金的欄位(可編輯加其他的) -->
+              <div class="form-group">
+                <label>津貼金額 (加項)</label>
+                <input type="number" id="allowance" value="0" step="0.1" placeholder="0">
+              </div>
+              <div class="form-group">
+                <label>餐費金額 (加項)</label>
+                <input type="number" id="mealAllowance" value="0" step="0.1" placeholder="0">
+              </div>
+              <div class="form-group">
+                <label>業績獎金 (加項)</label>
+                <input type="number" id="performanceBonus" value="0" step="0.1" placeholder="0">
+              </div>
+
+              <!-- 需求2：新增扣項：勞保、健保、轉帳手續費 -->
+              <div class="form-group">
+                <label style="color: var(--danger-color);">勞保扣項</label>
+                <input type="number" id="laborInsurance" value="0" step="0.1" placeholder="0">
+              </div>
+              <div class="form-group">
+                <label style="color: var(--danger-color);">健保扣項</label>
+                <input type="number" id="healthInsurance" value="0" step="0.1" placeholder="0">
+              </div>
+              <div class="form-group">
+                <label style="color: var(--danger-color);">轉帳手續費扣項</label>
+                <input type="number" id="transferFee" value="0" step="0.1" placeholder="0">
+              </div>
+            </div>
+
+            <!-- 區間各日休假與工時細項設定區 -->
+            <div class="form-group" style="margin-bottom: 20px;">
+              <label style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 8px;">
+                <span>📅 每日工時與休假設定 (可勾選休假或調整每日工時)</span>
+                <button type="button" class="btn-open-modal" style="width:auto; margin:0; padding:4px 10px; font-size:0.8rem;" onclick="applyDefaultHoursToAll()">套用預設工時到所有天數</button>
+              </label>
+              
+              <div style="display:flex; gap:12px; margin-bottom:10px;">
+                <div class="form-group" style="flex:1;">
+                  <label style="font-size:0.8rem;">預設每日小時</label>
+                  <input type="number" id="defaultHours" value="8" min="0" max="24">
+                </div>
+                <div class="form-group" style="flex:1;">
+                  <label style="font-size:0.8rem;">預設每日分鐘</label>
+                  <input type="number" id="defaultMinutes" value="0" min="0" max="59">
+                </div>
+              </div>
+
+              <div id="rangeConfigContainer">
+                <div style="color:var(--text-secondary); text-align:center; padding:10px;">請先選擇工作日期以展開每日明細</div>
+              </div>
+            </div>
+            
+            <button type="submit" class="btn-submit">
+              <span class="material-icons">calculate</span> 試算並預覽結果
+            </button>
+          </form>
+
+          <!-- 試算結果暫存區 (Staging Area) -->
+          <div id="stagingArea">
+            <h4 style="color: var(--primary-color); margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
+              <span class="material-icons">playlist_add_check</span> 試算結果預覽 (確認無誤後請點選下方加入)
+            </h4>
+            <div class="table-container" style="max-height: 300px; overflow-y: auto; margin-bottom: 16px;">
+              <table>
+                <thead>
+                  <tr>
+                    <th>工作日期</th>
+                    <th>活動名稱</th>
+                    <th>單日工時</th>
+                    <th>基本薪資</th>
+                    <th>加班費</th>
+                    <th>加項 (津貼/餐/獎)</th>
+                    <th>扣項 (勞健保/手續費)</th>
+                    <th>單日總計</th>
+                    <th>操作</th>
+                  </tr>
+                </thead>
+                <tbody id="stagingTableBody">
+                  <!-- 試算結果會動態顯示在這裡 -->
+                </tbody>
+              </table>
+            </div>
+            <button type="button" class="btn-submit btn-success" onclick="commitStagedRecords()">
+              <span class="material-icons">save_alt</span> 確認儲存這批資料
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 2: 歷史薪資明細 -->
+      <section id="listTab" class="tab-content">
+        <div class="card">
+          <h3 class="card-title"><span class="material-icons">receipt_long</span> 歷史薪資明細</h3>
+          
+          <div class="form-grid" style="margin-bottom: 20px;">
+            <div class="form-group">
+              <label>起始月份 (歸屬)</label>
+              <div class="input-icon-wrapper">
+                <input type="month" id="filterStartDate" onchange="renderTable()">
+                <span class="material-icons field-icon">event</span>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>結束月份 (歸屬)</label>
+              <div class="input-icon-wrapper">
+                <input type="month" id="filterEndDate" onchange="renderTable()">
+                <span class="material-icons field-icon">event</span>
+              </div>
+            </div>
+            <div class="form-group" style="grid-column: 1 / -1;">
+              <label>關鍵字搜尋</label>
+              <div class="search-box-wrapper">
+                <span class="material-icons search-icon">search</span>
+                <input type="text" id="searchKeyword" placeholder="搜尋單位、活動、類型、城市..." oninput="renderTable()">
+              </div>
+            </div>
+            <div class="form-group">
+              <label>篩選付款單位</label>
+              <div class="input-icon-wrapper"><select id="filterUnit" onchange="renderTable()"><option value="ALL">全部單位</option></select><span class="material-icons field-icon">arrow_drop_down</span></div>
+            </div>
+            <div class="form-group">
+              <label>篩選工作類型</label>
+              <div class="input-icon-wrapper"><select id="filterJobType" onchange="renderTable()"><option value="ALL">全部類型</option></select><span class="material-icons field-icon">arrow_drop_down</span></div>
+            </div>
+          </div>
+
+          <div class="action-bar">
+            <div style="font-size: 0.9rem; color: var(--text-secondary);">
+              已勾選 <strong id="selectedCount" style="color: var(--primary-color);">0</strong> 筆資料
+            </div>
+            <button type="button" id="deleteSelectedBtn" class="btn-danger" onclick="deleteSelectedRecords()" disabled>
+              <span class="material-icons" style="font-size: 18px;">delete_sweep</span> 刪除勾選項目
+            </button>
+          </div>
+
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th style="width: 40px; text-align: center;"><input type="checkbox" id="selectAllCheckbox" class="custom-checkbox" onchange="toggleSelectAll(this)"></th>
+                  <th>薪資月份</th>
+                  <th>工作日期</th>
+                  <th>單位 / 活動 / 城市</th>
+                  <th>工時資訊</th>
+                  <th>計薪基準</th>
+                  <th>加項總計</th>
+                  <th>扣項總計</th>
+                  <th>總薪資</th>
+                  <th>入帳方式</th>
+                </tr>
+              </thead>
+              <tbody id="recordsTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 3: 收入趨勢圖 -->
+      <section id="trendTab" class="tab-content">
+        <div class="card">
+          <div class="form-grid" style="align-items: flex-end;">
+            <div class="form-group"><label>統計年份篩選</label><div class="input-icon-wrapper"><select class="stats-year-select" onchange="syncStatsYear(this.value)"></select><span class="material-icons field-icon">arrow_drop_down</span></div></div>
+            <div class="form-group">
+              <label>區間篩選模式</label>
+              <div class="input-icon-wrapper">
+                <select class="stats-mode-select" onchange="toggleStatsMode(this.value)">
+                  <option value="month">單月 / 全年篩選</option>
+                  <option value="range">自訂月份區間 (例: 6-8月)</option>
+                </select>
+                <span class="material-icons field-icon">arrow_drop_down</span>
+              </div>
+            </div>
+            <!-- 單月/全年選單群組 -->
+            <div class="form-group single-mode-group">
+              <label>統計月份篩選</label>
+              <div class="input-icon-wrapper">
+                <select class="stats-month-select" onchange="syncStatsMonth(this.value)">
+                  <option value="ALL">全年 (1-12月)</option><option value="01">1月</option><option value="02">2月</option>
+                  <option value="03">3月</option><option value="04">4月</option><option value="05">5月</option><option value="06">6月</option>
+                  <option value="07">7月</option><option value="08">8月</option><option value="09">9月</option><option value="10">10月</option><option value="11">11月</option><option value="12">12月</option>
+                </select>
+                <span class="material-icons field-icon">arrow_drop_down</span>
+              </div>
+            </div>
+            <!-- 自訂區間選單群組 -->
+            <div class="form-group range-mode-group" style="display: none;">
+              <label>起始月份</label>
+              <div class="input-icon-wrapper">
+                <select class="stats-range-start" onchange="syncRangeStart(this.value)">
+                  <option value="01">1月</option><option value="02">2月</option><option value="03">3月</option><option value="04">4月</option>
+                  <option value="05">5月</option><option value="06" selected>6月</option><option value="07">7月</option><option value="08">8月</option>
+                  <option value="09">9月</option><option value="10">10月</option><option value="11">11月</option><option value="12">12月</option>
+                </select>
+                <span class="material-icons field-icon">arrow_drop_down</span>
+              </div>
+            </div>
+            <div class="form-group range-mode-group" style="display: none;">
+              <label>結束月份</label>
+              <div class="input-icon-wrapper">
+                <select class="stats-range-end" onchange="syncRangeEnd(this.value)">
+                  <option value="01">1月</option><option value="02">2月</option><option value="03">3月</option><option value="04">4月</option>
+                  <option value="05">5月</option><option value="06">6月</option><option value="07">7月</option><option value="08" selected>8月</option>
+                  <option value="09">9月</option><option value="10">10月</option><option value="11">11月</option><option value="12">12月</option>
+                </select>
+                <span class="material-icons field-icon">arrow_drop_down</span>
+              </div>
+            </div>
+            <div class="form-group"><label>目標月薪</label><input type="number" class="target-monthly-input" value="5000" onchange="syncTargetMonthly(this.value)"></div>
+            <div class="form-group"><label>目標年薪</label><input type="number" class="target-yearly-input" value="60000" onchange="syncTargetYearly(this.value)"></div>
+          </div>
+        </div>
+
+        <div class="stats-grid-2">
+          <div class="stat-card">
+            <div>
+              <h4 id="labelTotalTitle">期間累計總收入</h4>
+              <div class="value statYearTotal">$0</div>
+              <small class="statYearTargetProgress" style="color: var(--text-secondary);">年目標達成率: 0%</small>
+            </div>
+            <button class="btn-open-modal" onclick="openChartModal('trendModal')"><span class="material-icons" style="font-size: 18px;">show_chart</span> 查看圖表</button>
+          </div>
+          <div class="stat-card" style="border-left-color: #2196f3;">
+            <div>
+              <h4>平均月收入</h4>
+              <div class="value statMonthAvg">$0</div>
+              <small class="statMonthTargetProgress" style="color: var(--text-secondary);">月目標達成率: 0%</small>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 4: 收入佔比圖表分析 -->
+      <section id="pieTab" class="tab-content">
+        <div class="card">
+          <div class="form-grid" style="align-items: flex-end;">
+            <div class="form-group"><label>統計年份篩選</label><div class="input-icon-wrapper"><select class="stats-year-select" onchange="syncStatsYear(this.value)"></select><span class="material-icons field-icon">arrow_drop_down</span></div></div>
+            <div class="form-group">
+              <label>區間篩選模式</label>
+              <div class="input-icon-wrapper">
+                <select class="stats-mode-select" onchange="toggleStatsMode(this.value)">
+                  <option value="month">單月 / 全年篩選</option>
+                  <option value="range">自訂月份區間 (例: 6-8月)</option>
+                </select>
+                <span class="material-icons field-icon">arrow_drop_down</span>
+              </div>
+            </div>
+            <div class="form-group single-mode-group">
+              <label>統計月份篩選</label>
+              <div class="input-icon-wrapper">
+                <select class="stats-month-select" onchange="syncStatsMonth(this.value)">
+                  <option value="ALL">全年 (1-12月)</option><option value="01">1月</option><option value="02">2月</option>
+                  <option value="03">3月</option><option value="04">4月</option><option value="05">5月</option><option value="06">6月</option>
+                  <option value="07">7月</option><option value="08">8月</option><option value="09">9月</option><option value="10">10月</option><option value="11">11月</option><option value="12">12月</option>
+                </select>
+                <span class="material-icons field-icon">arrow_drop_down</span>
+              </div>
+            </div>
+            <div class="form-group range-mode-group" style="display: none;">
+              <label>起始月份</label>
+              <div class="input-icon-wrapper">
+                <select class="stats-range-start" onchange="syncRangeStart(this.value)">
+                  <option value="01">1月</option><option value="02">2月</option><option value="03">3月</option><option value="04">4月</option>
+                  <option value="05">5月</option><option value="06" selected>6月</option><option value="07">7月</option><option value="08">8月</option>
+                  <option value="09">9月</option><option value="10">10月</option><option value="11">11月</option><option value="12">12月</option>
+                </select>
+                <span class="material-icons field-icon">arrow_drop_down</span>
+              </div>
+            </div>
+            <div class="form-group range-mode-group" style="display: none;">
+              <label>結束月份</label>
+              <div class="input-icon-wrapper">
+                <select class="stats-range-end" onchange="syncRangeEnd(this.value)">
+                  <option value="01">1月</option><option value="02">2月</option><option value="03">3月</option><option value="04">4月</option>
+                  <option value="05">5月</option><option value="06">6月</option><option value="07">7月</option><option value="08" selected>8月</option>
+                  <option value="09">9月</option><option value="10">10月</option><option value="11">11月</option><option value="12">12月</option>
+                </select>
+                <span class="material-icons field-icon">arrow_drop_down</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="stats-grid-4">
+          <div class="stat-card" style="border-left-color: #4caf50;">
+            <div><h4>加減項統計 (津貼/獎金/扣項)</h4><div class="value statAddDeductSummary" style="font-size: 0.9rem; font-weight: normal; margin-top: 4px;"></div></div>
+          </div>
+          <div class="stat-card" style="border-left-color: #ff9800;">
+            <div><h4>主要單位</h4><div class="value statTopUnits" style="font-size: 0.9rem; font-weight: normal; margin-top: 4px;"></div></div>
+            <button class="btn-open-modal" onclick="openChartModal('unitModal')"><span class="material-icons" style="font-size: 18px;">pie_chart</span> 查看</button>
+          </div>
+          <div class="stat-card" style="border-left-color: #9c27b0;">
+            <div><h4>工作類型</h4><div class="value statTopJobTypes" style="font-size: 0.9rem; font-weight: normal; margin-top: 4px;"></div></div>
+            <button class="btn-open-modal" onclick="openChartModal('jobTypeModal')"><span class="material-icons" style="font-size: 18px;">pie_chart</span> 查看</button>
+          </div>
+          <div class="stat-card" style="border-left-color: #e91e63;">
+            <div><h4>計薪方式 (時薪/日薪)</h4><div class="value statWageTypes" style="font-size: 0.9rem; font-weight: normal; margin-top: 4px;"></div></div>
+            <button class="btn-open-modal" onclick="openChartModal('wageTypeModal')"><span class="material-icons" style="font-size: 18px;">pie_chart</span> 查看</button>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <!-- Modals -->
+  <div class="modal-overlay" id="trendModal" onclick="closeChartModalOnOverlay(event, 'trendModal')">
+    <div class="modal-container large-modal">
+      <div class="modal-header">
+        <div class="modal-title"><span class="material-icons">bar_chart</span><span>收入趨勢圖</span></div>
+        <button class="modal-close-btn" onclick="closeChartModal('trendModal')"><span class="material-icons">close</span></button>
+      </div>
+      <div class="modal-body">
+        <div class="scrollable-chart-container"><div class="modal-trend-chart-box" id="trendChartBox"><canvas id="monthlyChart"></canvas></div></div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="modal-overlay" id="unitModal" onclick="closeChartModalOnOverlay(event, 'unitModal')">
+    <div class="modal-container"><div class="modal-header"><div class="modal-title"><span class="material-icons">pie_chart</span><span>付款單位佔比</span></div><button class="modal-close-btn" onclick="closeChartModal('unitModal')"><span class="material-icons">close</span></button></div><div class="modal-body"><div class="modal-pie-chart-box"><canvas id="unitPieChart"></canvas></div></div></div>
+  </div>
+  <div class="modal-overlay" id="jobTypeModal" onclick="closeChartModalOnOverlay(event, 'jobTypeModal')">
+    <div class="modal-container"><div class="modal-header"><div class="modal-title"><span class="material-icons">donut_small</span><span>工作類型佔比</span></div><button class="modal-close-btn" onclick="closeChartModal('jobTypeModal')"><span class="material-icons">close</span></button></div><div class="modal-body"><div class="modal-pie-chart-box"><canvas id="jobTypePieChart"></canvas></div></div></div>
+  </div>
+  
+  <div class="modal-overlay" id="wageTypeModal" onclick="closeChartModalOnOverlay(event, 'wageTypeModal')">
+    <div class="modal-container">
+      <div class="modal-header">
+        <div class="modal-title"><span class="material-icons">donut_small</span><span>計薪方式佔比分析</span></div>
+        <button class="modal-close-btn" onclick="closeChartModal('wageTypeModal')"><span class="material-icons">close</span></button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-pie-chart-box"><canvas id="wageTypePieChart"></canvas></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Firebase SDK -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+    import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDYMvAeQLZceVt4n0jgOsL78L45qIA06Xo",
+      authDomain: "salary-9080f.firebaseapp.com",
+      databaseURL: "https://salary-9080f-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "salary-9080f",
+      storageBucket: "salary-9080f.firebasestorage.app",
+      messagingSenderId: "1071957222884",
+      appId: "1:1071957222884:web:78250a5e707db2a0ca13f1"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    window.db = getDatabase(app);
+    window.dbRef = ref; window.dbSet = set; window.dbOnValue = onValue;
+    const auth = getAuth(app);
+    const provider = new GoogleAuthProvider();
+
+    const loginBtn = document.getElementById("loginBtn");
+    if (loginBtn) {
+      loginBtn.addEventListener("click", async () => {
+        try { await signInWithPopup(auth, provider); } 
+        catch (error) { alert("登入失敗，請確認網路連線或稍後再試。"); }
+      });
+    }
+
+    const handleLogout = async () => { try { await signOut(auth); alert("已登出"); } catch(e) {} };
+    if (document.getElementById("logoutBtn")) document.getElementById("logoutBtn").addEventListener("click", handleLogout);
+    if (document.getElementById("sidebarLogoutBtn")) document.getElementById("sidebarLogoutBtn").addEventListener("click", handleLogout);
+
+    onAuthStateChanged(auth, (user) => {
+      const loginBtnEl = document.getElementById('loginBtn');
+      const logoutBtnEl = document.getElementById('logoutBtn');
+      const sidebarLogoutEl = document.getElementById('sidebarLogoutBtn');
+      if (user) {
+        document.getElementById('sidebarUserName').textContent = user.displayName;
+        document.getElementById('sidebarUserRole').textContent = user.email;
+        if(loginBtnEl) loginBtnEl.style.display = 'none';
+        if(logoutBtnEl) logoutBtnEl.style.display = 'block';
+        if(sidebarLogoutEl) sidebarLogoutEl.style.display = 'flex';
+      } else {
+        document.getElementById('sidebarUserName').textContent = 'Admin User';
+        if(loginBtnEl) loginBtnEl.style.display = 'block';
+        if(logoutBtnEl) logoutBtnEl.style.display = 'none';
+        if(sidebarLogoutEl) sidebarLogoutEl.style.display = 'none';
+      }
+    });
+  </script>
+
+  <script>
+    let records = [];
+    let stagedRecords = []; 
+    let isTwdEnabled = JSON.parse(localStorage.getItem('salary_twd_enabled')) || false;
+    let isSingleDayMode = true; // 預設單天模式
+    
+    let monthlyChartInstance = null, pieChartInstance = null, jobTypeChartInstance = null;
+    let statusChartInstance = null, wageTypeChartInstance = null;
+
+    const commonPieOptions = { responsive: true, maintainAspectRatio: false, layout: { padding: 10 }, plugins: { legend: { position: 'bottom' } } };
+
+    document.addEventListener('DOMContentLoaded', () => {
+      initYearSelectOptions();
+      document.getElementById('enableTwd').checked = isTwdEnabled;
+      document.getElementById('rateInputGroup').style.display = isTwdEnabled ? 'flex' : 'none';
+      
+      // 預設套用單天模式
+      setSingleDayMode();
+
+      // 綁定日期變更事件以動態生成區間明細
+      document.getElementById('workDateStart').addEventListener('change', generateDateRangeRows);
+      document.getElementById('workDateEnd').addEventListener('change', generateDateRangeRows);
+
+      const checkFirebase = setInterval(() => {
+        if (window.db && window.dbOnValue) {
+          clearInterval(checkFirebase);
+          initFirebaseSync();
+        }
+      }, 100);
+    });
+
+    function setSingleDayMode() {
+      isSingleDayMode = true;
+      document.getElementById('endDateGroup').style.display = 'none';
+      document.getElementById('startDateLabel').textContent = '工作日期 (單天)';
+      const startVal = document.getElementById('workDateStart').value || new Date().toISOString().split('T')[0];
+      document.getElementById('workDateStart').value = startVal;
+      document.getElementById('workDateEnd').value = startVal;
+      generateDateRangeRows();
+    }
+
+    function setRangeMode() {
+      isSingleDayMode = false;
+      document.getElementById('endDateGroup').style.display = 'flex';
+      document.getElementById('startDateLabel').textContent = '工作起始日期';
+      generateDateRangeRows();
+    }
+
+    function initFirebaseSync() {
+      window.dbOnValue(window.dbRef(window.db, 'salary_records'), (snapshot) => {
+        const data = snapshot.val();
+        records = data ? Object.keys(data).map(k => ({ dbKey: k, ...data[k] })) : [];
+        updateView();
+      });
+    }
+
+    function saveRecordsToCloud() {
+      const dataToSave = {};
+      records.forEach((r, idx) => {
+        const clean = { ...r }; delete clean.dbKey;
+        dataToSave['rec_' + (clean.id || idx)] = clean;
+      });
+      window.dbSet(window.dbRef(window.db, 'salary_records'), dataToSave);
+    }
+
+    function updateBaseWageLabel() {
+      const type = document.getElementById('wageType').value;
+      document.getElementById('baseWageLabel').textContent = type === 'hourly' ? '時薪金額' : '日薪金額';
+    }
+
+    function getDatesInRange(startDate, endDate) {
+      const dates = [];
+      let current = new Date(startDate);
+      const end = new Date(endDate);
+      while (current <= end) {
+        const y = current.getFullYear();
+        const m = String(current.getMonth() + 1).padStart(2, '0');
+        const d = String(current.getDate()).padStart(2, '0');
+        dates.push(`${y}-${m}-${d}`);
+        current.setDate(current.getDate() + 1);
+      }
+      return dates;
+    }
+
+    // 動態產生日期區間內的每日工時與休假設定列
+    function generateDateRangeRows() {
+      const startStr = document.getElementById('workDateStart').value;
+      const endStr = isSingleDayMode ? startStr : document.getElementById('workDateEnd').value;
+      if (isSingleDayMode) {
+        document.getElementById('workDateEnd').value = startStr;
+      }
+      
+      const container = document.getElementById('rangeConfigContainer');
+      
+      if (!startStr) {
+        container.innerHTML = '<div style="color:var(--text-secondary); text-align:center; padding:10px;">請先選擇工作日期以展開每日明細</div>';
+        return;
+      }
+
+      const dates = getDatesInRange(startStr, endStr);
+      if (dates.length === 0 || dates.length > 90) {
+        if (dates.length > 90) {
+          container.innerHTML = '<div style="color:var(--danger-color); text-align:center; padding:10px;">日期區間不可超過 90 天，請縮短區間。</div>';
+        }
+        return;
+      }
+
+      const defH = document.getElementById('defaultHours').value || 8;
+      const defM = document.getElementById('defaultMinutes').value || 0;
+
+      let html = '';
+      dates.forEach((dateStr) => {
+        html += `
+          <div class="date-row-item" data-date="${dateStr}">
+            <label>${dateStr}</label>
+            <label style="font-weight:normal; display:flex; align-items:center; gap:4px; cursor:pointer; color:var(--danger-color);">
+              <input type="checkbox" class="rest-checkbox custom-checkbox" onchange="toggleDayRest(this, '${dateStr}')"> 休假日 (不上班)
+            </label>
+            <div style="display:flex; align-items:center; gap:6px; flex:1;" class="hours-input-group">
+              <span>時:</span>
+              <input type="number" class="day-hours" value="${defH}" min="0" max="24" style="width:70px; padding:6px;">
+              <span>分:</span>
+              <input type="number" class="day-minutes" value="${defM}" min="0" max="59" style="width:70px; padding:6px;">
+            </div>
+          </div>
+        `;
+      });
+      container.innerHTML = html;
+    }
+
+    function toggleDayRest(checkbox) {
+      const item = checkbox.closest('.date-row-item');
+      const group = item.querySelector('.hours-input-group');
+      if (checkbox.checked) {
+        group.style.opacity = '0.3';
+        group.querySelectorAll('input').forEach(i => i.disabled = true);
+      } else {
+        group.style.opacity = '1';
+        group.querySelectorAll('input').forEach(i => i.disabled = false);
+      }
+    }
+
+    function applyDefaultHoursToAll() {
+      const defH = document.getElementById('defaultHours').value || 8;
+      const defM = document.getElementById('defaultMinutes').value || 0;
+      document.querySelectorAll('.date-row-item').forEach(item => {
+        const restCb = item.querySelector('.rest-checkbox');
+        if (!restCb.checked) {
+          item.querySelector('.day-hours').value = defH;
+          item.querySelector('.day-minutes').value = defM;
+        }
+      });
+    }
+
+    // 試算預覽功能 (支援每日獨立工時與休假日略過)
+    function previewSalary(event) {
+      event.preventDefault();
+      
+      const salaryMonth = document.getElementById('salaryMonth').value;
+      const unit = document.getElementById('unit').value.trim();
+      const activityName = document.getElementById('activityName').value.trim();
+      const jobType = document.getElementById('jobType').value.trim() || '其他';
+      const city = document.getElementById('city').value.trim() || '未標示';
+      const wageType = document.getElementById('wageType').value;
+      const baseWage = parseFloat(document.getElementById('baseWage').value) || 0;
+      const otRule = document.getElementById('otRule').value;
+      const payDate = document.getElementById('payDate').value;
+      
+      // 加減項金額
+      const allowance = parseFloat(document.getElementById('allowance').value) || 0;
+      const mealAllowance = parseFloat(document.getElementById('mealAllowance').value) || 0;
+      const performanceBonus = parseFloat(document.getElementById('performanceBonus').value) || 0;
+      const totalAdditions = allowance + mealAllowance + performanceBonus;
+
+      // 扣項金額
+      const laborInsurance = parseFloat(document.getElementById('laborInsurance').value) || 0;
+      const healthInsurance = parseFloat(document.getElementById('healthInsurance').value) || 0;
+      const transferFee = parseFloat(document.getElementById('transferFee').value) || 0;
+      const totalDeductions = laborInsurance + healthInsurance + transferFee;
+
+      const dateRows = document.querySelectorAll('.date-row-item');
+      if (dateRows.length === 0) {
+        alert("請先設定工作日期！");
+        return;
+      }
+
+      stagedRecords = [];
+      const activeRows = Array.from(dateRows).filter(item => !item.querySelector('.rest-checkbox').checked);
+      const countValidDays = activeRows.length || 1;
+
+      dateRows.forEach(item => {
+        const dateStr = item.getAttribute('data-date');
+        const isRest = item.querySelector('.rest-checkbox').checked;
+        if (isRest) return;
+
+        const hours = parseInt(item.querySelector('.day-hours').value) || 0;
+        const minutes = parseInt(item.querySelector('.day-minutes').value) || 0;
+        const totalWorkHours = hours + (minutes / 60);
+        if (totalWorkHours <= 0) return;
+
+        const baseRateHourly = wageType === 'hourly' ? baseWage : (baseWage / 8);
+        
+        let basicHrs = Math.min(8, totalWorkHours);
+        let otHrs = Math.max(0, totalWorkHours - 8);
+        let ot1Hrs = Math.min(2, otHrs);
+        let ot2Hrs = Math.max(0, otHrs - 2);
+
+        let basicPay = (wageType === 'daily') ? baseWage : (basicHrs * baseRateHourly);
+
+        let otPay = 0;
+        if (otRule === 'TW') {
+          otPay = (ot1Hrs * baseRateHourly * 1.34) + (ot2Hrs * baseRateHourly * 1.67);
+        } else if (otRule === 'AU') {
+          otPay = (ot1Hrs * baseRateHourly * 1.5) + (ot2Hrs * baseRateHourly * 2.0);
+        } else if (otRule === 'NONE') {
+          otPay = otHrs * baseRateHourly;
+        }
+
+        // 依工作天數均分加減項與扣項
+        const dayAddition = totalAdditions / countValidDays;
+        const dayDeduction = totalDeductions / countValidDays;
+        const dayTotal = basicPay + otPay + dayAddition - dayDeduction;
+
+        stagedRecords.push({
+          id: Date.now() + Math.floor(Math.random() * 10000),
+          salaryMonth, unit, activityName, jobType, city,
+          wageType, baseWage,
+          workDate: dateStr,
+          workHours: hours, workMinutes: minutes,
+          otRule, basicPay, otPay,
+          allowance: allowance / countValidDays,
+          mealAllowance: mealAllowance / countValidDays,
+          performanceBonus: performanceBonus / countValidDays,
+          laborInsurance: laborInsurance / countValidDays,
+          healthInsurance: healthInsurance / countValidDays,
+          transferFee: transferFee / countValidDays,
+          totalPay: dayTotal,
+          payDate
+        });
+      });
+
+      if (stagedRecords.length === 0) {
+        alert("所有選定日期皆設定為休假或工時為 0，無法產生紀錄！");
+        return;
+      }
+
+      renderStagingTable();
+      document.getElementById('stagingArea').style.display = 'block';
+      document.getElementById('stagingArea').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function removeStagedRecord(index) {
+      stagedRecords.splice(index, 1);
+      renderStagingTable();
+      if (stagedRecords.length === 0) {
+        document.getElementById('stagingArea').style.display = 'none';
+      }
+    }
+
+    function renderStagingTable() {
+      const tbody = document.getElementById('stagingTableBody');
+      tbody.innerHTML = '';
+      
+      stagedRecords.forEach((r, idx) => {
+        const typeLabel = r.wageType === 'hourly' ? '時薪' : '日薪';
+        const addSum = (r.allowance || 0) + (r.mealAllowance || 0) + (r.performanceBonus || 0);
+        const dedSum = (r.laborInsurance || 0) + (r.healthInsurance || 0) + (r.transferFee || 0);
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${r.workDate}</td>
+          <td>${r.activityName || '-'}</td>
+          <td>${r.workHours}h ${r.workMinutes}m</td>
+          <td>${formatMoney(r.basicPay)}</td>
+          <td style="color:var(--danger-color);">${formatMoney(r.otPay)}</td>
+          <td style="color:var(--success-color);">+${formatMoney(addSum)}</td>
+          <td style="color:var(--danger-color);">-${formatMoney(dedSum)}</td>
+          <td><strong>${formatMoney(r.totalPay)}</strong></td>
+          <td>
+            <button type="button" onclick="removeStagedRecord(${idx})" style="border:none; background:transparent; color:var(--danger-color); cursor:pointer;">
+              <span class="material-icons">delete</span>
+            </button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function commitStagedRecords() {
+      if(stagedRecords.length === 0) return;
+      records.push(...stagedRecords);
+      stagedRecords = [];
+      document.getElementById('stagingArea').style.display = 'none';
+      document.getElementById('salaryForm').reset();
+      setSingleDayMode();
+      saveRecordsToCloud();
+      updateView();
+      alert("薪資紀錄已儲存並成功加入！");
+    }
+
+    function formatMoney(amount) {
+      const formattedBase = `$${amount.toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}`;
+      if (!isTwdEnabled) return formattedBase;
+      const rate = parseFloat(document.getElementById('audToTwdRate').value) || 20.5;
+      const twdVal = amount * rate;
+      return `${formattedBase} <small style="color:var(--text-secondary); font-size:0.75rem;">(NT$ ${twdVal.toLocaleString('zh-TW', { maximumFractionDigits: 0 })})</small>`;
+    }
+
+    function toggleTwdConversion() {
+      isTwdEnabled = document.getElementById('enableTwd').checked;
+      localStorage.setItem('salary_twd_enabled', JSON.stringify(isTwdEnabled));
+      document.getElementById('rateInputGroup').style.display = isTwdEnabled ? 'flex' : 'none';
+      updateView();
+    }
+
+    function renderTable() {
+      const tbody = document.getElementById('recordsTableBody');
+      if (!tbody) return;
+
+      const keyword = (document.getElementById('searchKeyword')?.value || '').trim().toLowerCase();
+      const startDate = document.getElementById('filterStartDate')?.value || '';
+      const endDate = document.getElementById('filterEndDate')?.value || '';
+      const filterUnit = document.getElementById('filterUnit').value;
+      const filterJobType = document.getElementById('filterJobType').value;
+
+      let filtered = records.slice().sort((a, b) => {
+        const dateA = a.workDate || a.salaryMonth;
+        const dateB = b.workDate || b.salaryMonth;
+        return dateB.localeCompare(dateA);
+      });
+
+      if (startDate) filtered = filtered.filter(r => r.salaryMonth >= startDate);
+      if (endDate) filtered = filtered.filter(r => r.salaryMonth <= endDate);
+
+      if (keyword) {
+        filtered = filtered.filter(r => 
+          (r.salaryMonth||'').toLowerCase().includes(keyword) || 
+          (r.unit||'').toLowerCase().includes(keyword) || 
+          (r.activityName||'').toLowerCase().includes(keyword) ||
+          (r.workDate||'').toLowerCase().includes(keyword) ||
+          (r.city||'').toLowerCase().includes(keyword)
+        );
+      }
+
+      if (filterUnit !== 'ALL') filtered = filtered.filter(r => r.unit === filterUnit);
+      if (filterJobType !== 'ALL') filtered = filtered.filter(r => (r.jobType || '其他') === filterJobType);
+
+      tbody.innerHTML = '';
+      if (filtered.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="10" style="text-align:center; padding:24px; color:var(--text-secondary);">尚無相符的紀錄</td></tr>';
+        return;
+      }
+
+      filtered.forEach(r => {
+        const displayDate = r.workDate ? r.workDate : '-';
+        const timeInfo = r.workHours !== undefined ? `${r.workHours}h ${r.workMinutes}m` : `${r.workDays}天 x ${r.dailyHours}h`;
+        const wageInfo = r.wageType === 'daily' ? `日薪 $${r.baseWage}` : `時薪 $${r.baseWage}`;
+        
+        const addSum = (r.allowance || 0) + (r.mealAllowance || 0) + (r.performanceBonus || 0);
+        const dedSum = (r.laborInsurance || 0) + (r.healthInsurance || 0) + (r.transferFee || 0);
+        
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td style="text-align:center;"><input type="checkbox" class="custom-checkbox record-checkbox" value="${r.id}" onchange="updateDeleteButtonState()"></td>
+          <td><b>${r.salaryMonth}</b></td>
+          <td>${displayDate}</td>
+          <td><b>${r.unit}</b> ${r.activityName ? `<br><small style="color:var(--primary-color);">活動: ${r.activityName}</small>` : ''}<br><small class="city-badge">${r.city||'未標示'}</small></td>
+          <td>${timeInfo}</td>
+          <td><span class="wage-badge">${wageInfo}</span></td>
+          <td style="color:var(--success-color);">+${formatMoney(addSum)}</td>
+          <td style="color:var(--danger-color);">-${formatMoney(dedSum)}</td>
+          <td><b>${formatMoney(r.totalPay)}</b></td>
+          <td><span class="status-badge current">${r.payDate || '當天領現'}</span></td>
+        `;
+        tbody.appendChild(tr);
+      });
+      updateDeleteButtonState();
+    }
+
+    function toggleSelectAll(masterCheckbox) {
+      document.querySelectorAll('.record-checkbox').forEach(cb => cb.checked = masterCheckbox.checked);
+      updateDeleteButtonState();
+    }
+    
+    function updateDeleteButtonState() {
+      const selected = document.querySelectorAll('.record-checkbox:checked');
+      document.getElementById('selectedCount').textContent = selected.length;
+      document.getElementById('deleteSelectedBtn').disabled = selected.length === 0;
+    }
+
+    function deleteSelectedRecords() {
+      const idsToDelete = Array.from(document.querySelectorAll('.record-checkbox:checked')).map(cb => Number(cb.value));
+      if (confirm(`確定要刪除已勾選的 ${idsToDelete.length} 筆資料嗎？`)) {
+        records = records.filter(r => !idsToDelete.includes(r.id));
+        saveRecordsToCloud();
+        updateView();
+      }
+    }
+
+    function updateView() { renderTable(); updateFilterOptions(); updateStatsView(); }
+    
+    function updateFilterOptions() {
+      const selectUnit = document.getElementById('filterUnit');
+      const selectJobType = document.getElementById('filterJobType');
+      if (!selectUnit) return;
+      
+      const currentU = selectUnit.value, currentJ = selectJobType.value;
+      
+      const units = [...new Set(records.map(r => r.unit))].filter(Boolean);
+      selectUnit.innerHTML = '<option value="ALL">全部單位</option>' + units.map(u => `<option value="${u}">${u}</option>`).join('');
+      selectUnit.value = currentU;
+
+      const jobTypes = [...new Set(records.map(r => r.jobType || '其他'))].filter(Boolean);
+      selectJobType.innerHTML = '<option value="ALL">全部類型</option>' + jobTypes.map(j => `<option value="${j}">${j}</option>`).join('');
+      selectJobType.value = currentJ;
+    }
+
+    function initYearSelectOptions() {
+      const recordYears = records.map(r => r.salaryMonth ? r.salaryMonth.substring(0, 4) : '').filter(Boolean);
+      const years = [...new Set([String(new Date().getFullYear()), ...recordYears])].sort().reverse();
+      document.querySelectorAll('.stats-year-select').forEach(sel => {
+        const current = sel.value || years[0];
+        sel.innerHTML = years.map(y => `<option value="${y}">${y} 年</option>`).join('');
+        sel.value = current;
+      });
+    }
+    
+    function syncStatsYear(val) { document.querySelectorAll('.stats-year-select').forEach(s => s.value = val); updateStatsView(); }
+    function syncStatsMonth(val) { document.querySelectorAll('.stats-month-select').forEach(s => s.value = val); updateStatsView(); }
+    function syncRangeStart(val) { document.querySelectorAll('.stats-range-start').forEach(s => s.value = val); updateStatsView(); }
+    function syncRangeEnd(val) { document.querySelectorAll('.stats-range-end').forEach(s => s.value = val); updateStatsView(); }
+    function syncTargetMonthly(val) { document.querySelectorAll('.target-monthly-input').forEach(i => i.value = val); updateStatsView(); }
+    function syncTargetYearly(val) { document.querySelectorAll('.target-yearly-input').forEach(i => i.value = val); updateStatsView(); }
+
+    function toggleStatsMode(mode) {
+      const isRange = (mode === 'range');
+      document.querySelectorAll('.single-mode-group').forEach(el => el.style.display = isRange ? 'none' : 'flex');
+      document.querySelectorAll('.range-mode-group').forEach(el => el.style.display = isRange ? 'flex' : 'none');
+      document.querySelectorAll('.stats-mode-select').forEach(el => el.value = mode);
+      updateStatsView();
+    }
+
+    function updateStatsView() {
+      const year = document.querySelector('.stats-year-select')?.value || String(new Date().getFullYear());
+      const mode = document.querySelector('.stats-mode-select')?.value || 'month';
+      const month = document.querySelector('.stats-month-select')?.value || 'ALL';
+      const rangeStart = document.querySelector('.stats-range-start')?.value || '01';
+      const rangeEnd = document.querySelector('.stats-range-end')?.value || '12';
+      
+      let periodRecords = [];
+      let activeMonthsCount = 1;
+      let chartLabels = [];
+
+      if (mode === 'range') {
+        const startM = parseInt(rangeStart, 10);
+        const endM = parseInt(rangeEnd, 10);
+        const validMonths = [];
+        for (let m = Math.min(startM, endM); m <= Math.max(startM, endM); m++) {
+          validMonths.push(String(m).padStart(2, '0'));
+        }
+        periodRecords = records.filter(r => {
+          if (!r.salaryMonth.startsWith(year)) return false;
+          const mPart = r.salaryMonth.substring(5, 7);
+          return validMonths.includes(mPart);
+        });
+        activeMonthsCount = validMonths.length || 1;
+        chartLabels = validMonths.map(m => `${parseInt(m, 10)}月`);
+      } else {
+        periodRecords = records.filter(r => r.salaryMonth.startsWith(year));
+        if (month !== 'ALL') {
+          periodRecords = periodRecords.filter(r => r.salaryMonth === `${year}-${month}`);
+          activeMonthsCount = 1;
+          chartLabels = [`${parseInt(month, 10)}月`];
+        } else {
+          activeMonthsCount = 12;
+          chartLabels = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+        }
+      }
+
+      const totalIncome = periodRecords.reduce((s, r) => s + r.totalPay, 0);
+      const avgIncome = totalIncome / activeMonthsCount;
+      
+      const targetMonthly = parseFloat(document.querySelector('.target-monthly-input').value) || 0;
+      const targetYearly = parseFloat(document.querySelector('.target-yearly-input').value) || 0;
+
+      document.querySelectorAll('.statYearTotal').forEach(el => el.innerHTML = formatMoney(totalIncome));
+      document.querySelectorAll('.statMonthAvg').forEach(el => el.innerHTML = formatMoney(avgIncome));
+      document.querySelectorAll('.statYearTargetProgress').forEach(el => el.textContent = `年目標達成率: ${targetYearly > 0 ? ((totalIncome/targetYearly)*100).toFixed(1) : 0}%`);
+      document.querySelectorAll('.statMonthTargetProgress').forEach(el => el.textContent = `月目標達成率: ${targetMonthly > 0 ? ((avgIncome/targetMonthly)*100).toFixed(1) : 0}%`);
+
+      const unitSums = {}, jobTypeSums = {};
+      let totalAllowance = 0, totalMeal = 0, totalBonus = 0, totalLabor = 0, totalHealth = 0, totalTransfer = 0;
+      let wageTypeSums = { '時薪': 0, '日薪': 0, '其他': 0 };
+      
+      periodRecords.forEach(r => {
+        unitSums[r.unit] = (unitSums[r.unit] || 0) + r.totalPay;
+        jobTypeSums[r.jobType || '其他'] = (jobTypeSums[r.jobType || '其他'] || 0) + r.totalPay;
+        
+        totalAllowance += (r.allowance || 0);
+        totalMeal += (r.mealAllowance || 0);
+        totalBonus += (r.performanceBonus || 0);
+        totalLabor += (r.laborInsurance || 0);
+        totalHealth += (r.healthInsurance || 0);
+        totalTransfer += (r.transferFee || 0);
+        
+        if(r.wageType === 'hourly') wageTypeSums['時薪'] += r.totalPay;
+        else if(r.wageType === 'daily') wageTypeSums['日薪'] += r.totalPay;
+        else wageTypeSums['其他'] += r.totalPay;
+      });
+
+      const topUnits = Object.entries(unitSums).sort((a,b)=>b[1]-a[1]).slice(0,3).map((x,i)=>`${i+1}. <b>${x[0]}</b>: $${x[1].toLocaleString()}`).join('<br>') || '無紀錄';
+      const topJobs = Object.entries(jobTypeSums).sort((a,b)=>b[1]-a[1]).slice(0,3).map((x,i)=>`${i+1}. <b>${x[0]}</b>: $${x[1].toLocaleString()}`).join('<br>') || '無紀錄';
+
+      document.querySelectorAll('.statAddDeductSummary').forEach(el => el.innerHTML = `
+        🟢 <b>津貼</b>: $${totalAllowance.toLocaleString()} | <b>餐費</b>: $${totalMeal.toLocaleString()}<br>
+        🟢 <b>獎金</b>: $${totalBonus.toLocaleString()}<br>
+        🔴 <b>勞健保/手續費扣項</b>: -$${(totalLabor + totalHealth + totalTransfer).toLocaleString()}
+      `);
+      document.querySelectorAll('.statTopUnits').forEach(el => el.innerHTML = topUnits);
+      document.querySelectorAll('.statTopJobTypes').forEach(el => el.innerHTML = topJobs);
+      document.querySelectorAll('.statWageTypes').forEach(el => el.innerHTML = Object.entries(wageTypeSums).filter(x=>x[1]>0).map(x=>`<b>${x[0]}</b>: $${x[1].toLocaleString()}`).join('<br>') || '無紀錄');
+
+      renderMonthlyChart(year, mode, month, rangeStart, rangeEnd, targetMonthly, periodRecords, chartLabels);
+      renderPieChart('unitPieChart', unitSums, pieChartInstance, 'pie');
+      renderPieChart('jobTypePieChart', jobTypeSums, jobTypeChartInstance, 'doughnut');
+      renderPieChart('wageTypePieChart', wageTypeSums, wageTypeChartInstance, 'pie', ['#3f51b5', '#ff9800', '#9e9e9e']);
+    }
+
+    function renderMonthlyChart(year, mode, month, rangeStart, rangeEnd, targetMonthly, periodRecords, labels) {
+      const ctx = document.getElementById('monthlyChart')?.getContext('2d');
+      if (!ctx) return;
+      
+      let data = [];
+      if (mode === 'range') {
+        const startM = parseInt(rangeStart, 10);
+        const endM = parseInt(rangeEnd, 10);
+        const validMonths = [];
+        for (let m = Math.min(startM, endM); m <= Math.max(startM, endM); m++) {
+          validMonths.push(String(m).padStart(2, '0'));
+        }
+        data = validMonths.map(mStr => {
+          const fullM = `${year}-${mStr}`;
+          return periodRecords.filter(r => r.salaryMonth === fullM).reduce((s,r) => s + r.totalPay, 0);
+        });
+      } else {
+        if (month === 'ALL') {
+          const mStrs = Array.from({length:12}, (_,i) => `${year}-${String(i+1).padStart(2,'0')}`);
+          data = mStrs.map(m => periodRecords.filter(r => r.salaryMonth === m).reduce((s,r) => s+r.totalPay, 0));
+        } else {
+          data = [periodRecords.reduce((s,r) => s+r.totalPay, 0)];
+        }
+      }
+
+      if (monthlyChartInstance) monthlyChartInstance.destroy();
+      monthlyChartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: { labels, datasets: [
+          { label: '實際收入', data, backgroundColor: '#3f51b5', borderRadius: 4 },
+          { label: '目標月薪', data: Array(labels.length).fill(targetMonthly), type: 'line', borderColor: '#ff4081', borderDash: [5,5], fill: false }
+        ]},
+        options: { responsive: true, maintainAspectRatio: false }
+      });
+    }
+
+    function renderPieChart(canvasId, dataObj, chartInstance, type, colors) {
+      const ctx = document.getElementById(canvasId)?.getContext('2d');
+      if (!ctx) return;
+      const filtered = Object.entries(dataObj).filter(x => x[1] > 0);
+      const labels = filtered.map(x => x[0]), data = filtered.map(x => x[1]);
+      
+      const defaultColors = ['#00bcd4', '#8e24aa', '#ff5722', '#43a047', '#e91e63', '#3f51b5', '#ffb300', '#009688'];
+      
+      let existingChart = Chart.getChart(canvasId);
+      if (existingChart) existingChart.destroy();
+      
+      if (labels.length === 0) { ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height); return; }
+      
+      new Chart(ctx, {
+        type: type,
+        data: { labels, datasets: [{ data, backgroundColor: colors || defaultColors }] },
+        options: commonPieOptions
+      });
+    }
+
+    function openChartModal(id) { const m = document.getElementById(id); if(m) m.classList.add('active'); }
+    function closeChartModal(id) { const m = document.getElementById(id); if(m) m.classList.remove('active'); }
+    function closeChartModalOnOverlay(e, id) { if(e.target.classList.contains('modal-overlay')) closeChartModal(id); }
+
+    function switchTab(id, el) {
+      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById(id).classList.add('active'); el.classList.add('active');
+      if(window.innerWidth <= 768) { document.getElementById('sidebar').classList.remove('mobile-open'); document.getElementById('sidebarOverlay').classList.remove('active'); }
+      if(id === 'trendTab' || id === 'pieTab') updateStatsView();
+    }
+    
+    document.getElementById('toggleSidebar').addEventListener('click', () => document.getElementById('sidebar').classList.toggle('collapsed'));
+    document.getElementById('openMobileMenu').addEventListener('click', () => { document.getElementById('sidebar').classList.add('mobile-open'); document.getElementById('sidebarOverlay').classList.add('active'); });
+    document.getElementById('sidebarOverlay').addEventListener('click', () => { document.getElementById('sidebar').classList.remove('mobile-open'); document.getElementById('sidebarOverlay').classList.remove('active'); });
+    document.getElementById('theme-toggle').addEventListener('click', () => {
+      document.body.classList.toggle('dark-mode');
+      const isDark = document.body.classList.contains('dark-mode');
+      document.getElementById('theme-icon').textContent = isDark ? 'light_mode' : 'dark_mode';
+      document.getElementById('theme-text').textContent = isDark ? '切換明亮模式' : '切換暗黑模式';
+    });
+  </script>
+</body>
+</html>
