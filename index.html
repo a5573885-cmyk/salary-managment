@@ -1533,7 +1533,13 @@
       }
     }
 
-    function updateView() { renderTable(); updateFilterOptions(); updateStatsView(); }
+    // [已修正] 將 initYearSelectOptions 加入 updateView 內，確保載入歷史資料後自動更新年份清單
+    function updateView() { 
+      renderTable(); 
+      updateFilterOptions(); 
+      initYearSelectOptions(); 
+      updateStatsView(); 
+    }
     
     function updateFilterOptions() {
       const selectUnit = document.getElementById('filterUnit');
@@ -1557,7 +1563,11 @@
       document.querySelectorAll('.stats-year-select').forEach(sel => {
         const current = sel.value || years[0];
         sel.innerHTML = years.map(y => `<option value="${y}">${y} 年</option>`).join('');
-        sel.value = current;
+        if (years.includes(current)) {
+          sel.value = current;
+        } else {
+          sel.value = years[0];
+        }
       });
     }
     
