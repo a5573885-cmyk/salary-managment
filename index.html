@@ -305,13 +305,13 @@
 
     .status-badge { padding: 4px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: 600; }
     .status-badge.current { background-color: #e8f5e9; color: #2e7d32; }
-    .status-badge.cross { background-color: #fff3e0; color: #ef6c00; }
+    .training-badge { padding: 2px 8px; border-radius: 4px; font-size: 0.8rem; background-color: #fff3e0; color: #e65100; border: 1px solid #ffe0b2; margin-left: 4px; }
     .job-badge { padding: 2px 8px; border-radius: 4px; font-size: 0.8rem; background-color: #e1f5fe; color: #0288d1; }
     .city-badge { padding: 2px 8px; border-radius: 4px; font-size: 0.8rem; background-color: #f3e5f5; color: #7b1fa2; }
     .wage-badge { padding: 2px 8px; border-radius: 4px; font-size: 0.8rem; background-color: #e8f5e9; color: #2e7d32; }
 
     .stats-grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 24px; }
-    .stats-grid-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px; }
+    .stats-grid-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 24px; }
     
     @media (max-width: 768px) { .stats-grid-2 { grid-template-columns: 1fr; } }
 
@@ -342,18 +342,9 @@
     .modal-close-btn { background: transparent; border: none; color: var(--text-secondary); cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 4px; border-radius: 50%; }
     .modal-close-btn:hover { background-color: rgba(0, 0, 0, 0.1); color: var(--text-color); }
     .modal-body { padding: 20px; position: relative; }
-    .modal-pie-chart-box { position: relative; height: 320px; width: 100%; }
+    .modal-pie-chart-box { position: relative; min-height: 300px; width: 100%; }
     .scrollable-chart-container { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
     .modal-trend-chart-box { position: relative; height: 350px; width: 100%; min-width: 100%; }
-    
-    /* 區間日期工時細項清單區 */
-    #rangeConfigContainer {
-      background: var(--bg-color); border: 1px solid var(--border-color); padding: 16px; border-radius: 6px; margin-bottom: 16px;
-    }
-    .date-row-item {
-      display: flex; align-items: center; gap: 12px; margin-bottom: 10px; background: var(--card-bg); padding: 10px; border-radius: 6px; border: 1px solid var(--border-color); flex-wrap: wrap;
-    }
-    .date-row-item label { font-size: 0.9rem; font-weight: 600; min-width: 110px; color: var(--text-color); }
 
     /* 試算預覽區域 */
     #stagingArea {
@@ -420,8 +411,8 @@
           <span class="nav-btn-text">收入趨勢圖</span>
         </button>
         <button class="nav-btn" onclick="switchTab('pieTab', this)">
-          <span class="material-icons">pie_chart</span>
-          <span class="nav-btn-text">收入佔比圖表分析</span>
+          <span class="material-icons">bar_chart</span>
+          <span class="nav-btn-text">收入統計分析</span>
         </button>
       </nav>
     </div>
@@ -463,7 +454,7 @@
       <!-- TAB 1: 新增薪資紀錄 -->
       <section id="inputTab" class="tab-content active">
         <div class="card">
-          <h3 class="card-title"><span class="material-icons">add_circle_outline</span> 新增薪資紀錄 (支援活動名稱、自訂加減項與單天模式)</h3>
+          <h3 class="card-title"><span class="material-icons">add_circle_outline</span> 新增薪資紀錄 (支援工作天數與教育訓練設定)</h3>
           <form id="salaryForm" onsubmit="previewSalary(event)">
             <div class="form-grid">
               <div class="form-group">
@@ -522,28 +513,30 @@
                 <label id="baseWageLabel">時薪金額</label>
                 <input type="number" id="baseWage" step="0.1" placeholder="例如: 30" required>
               </div>
-              
-              <div class="form-group" style="grid-column: 1 / -1; display: flex; align-items: center; gap: 12px; margin-bottom: 4px;">
-                <label style="margin-bottom:0;">工作日期模式：</label>
-                <button type="button" class="btn-open-modal" style="width: auto; margin: 0; padding: 4px 12px;" onclick="setSingleDayMode()">📌 設為單天模式</button>
-                <button type="button" class="btn-open-modal" style="width: auto; margin: 0; padding: 4px 12px; background: transparent; border-color: var(--text-secondary); color: var(--text-secondary);" onclick="setRangeMode()">📅 區間模式</button>
+
+              <!-- 需求修改1：工作日期選擇拿掉，改成輸入工作天數 -->
+              <div class="form-group">
+                <label>工作天數 (天)</label>
+                <input type="number" id="workDaysCount" min="1" max="365" value="1" required placeholder="例如: 1 天、2 天">
               </div>
 
               <div class="form-group">
-                <label id="startDateLabel">工作起始日期</label>
-                <div class="input-icon-wrapper">
-                  <input type="date" id="workDateStart" onchange="generateDateRangeRows()" required>
-                  <span class="material-icons field-icon">event</span>
-                </div>
+                <label>每日工時 (小時)</label>
+                <input type="number" id="dailyWorkHours" min="0" max="24" value="8" required>
               </div>
-              <div class="form-group" id="endDateGroup">
-                <label>工作結束日期</label>
-                <div class="input-icon-wrapper">
-                  <input type="date" id="workDateEnd" onchange="generateDateRangeRows()" required>
-                  <span class="material-icons field-icon">event</span>
-                </div>
+              <div class="form-group">
+                <label>每日工時 (分鐘)</label>
+                <input type="number" id="dailyWorkMinutes" min="0" max="59" value="0" required>
               </div>
-              
+
+              <!-- 需求修改2：新增教育訓練確認按鈕 -->
+              <div class="form-group" style="justify-content: center;">
+                <label style="cursor: pointer; display: flex; align-items: center; gap: 8px; margin-top: 20px;">
+                  <input type="checkbox" id="isTraining" class="custom-checkbox">
+                  <b style="color: var(--primary-color);">此筆紀錄包含教育訓練</b>
+                </label>
+              </div>
+
               <div class="form-group">
                 <label>加班費計算規則</label>
                 <div class="input-icon-wrapper">
@@ -595,28 +588,6 @@
                 <input type="number" id="transferFee" value="0" step="0.1" placeholder="0">
               </div>
             </div>
-
-            <div class="form-group" style="margin-bottom: 20px;">
-              <label style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 8px;">
-                <span>📅 每日工時與休假設定 (可勾選休假或調整每日工時)</span>
-                <button type="button" class="btn-open-modal" style="width:auto; margin:0; padding:4px 10px; font-size:0.8rem;" onclick="applyDefaultHoursToAll()">套用預設工時到所有天數</button>
-              </label>
-              
-              <div style="display:flex; gap:12px; margin-bottom:10px;">
-                <div class="form-group" style="flex:1;">
-                  <label style="font-size:0.8rem;">預設每日小時</label>
-                  <input type="number" id="defaultHours" value="8" min="0" max="24">
-                </div>
-                <div class="form-group" style="flex:1;">
-                  <label style="font-size:0.8rem;">預設每日分鐘</label>
-                  <input type="number" id="defaultMinutes" value="0" min="0" max="59">
-                </div>
-              </div>
-
-              <div id="rangeConfigContainer">
-                <div style="color:var(--text-secondary); text-align:center; padding:10px;">請先選擇工作日期以展開每日明細</div>
-              </div>
-            </div>
             
             <button type="submit" class="btn-submit">
               <span class="material-icons">calculate</span> 試算並預覽結果
@@ -631,8 +602,8 @@
               <table>
                 <thead>
                   <tr>
-                    <th>工作日期</th>
-                    <th>活動名稱</th>
+                    <th>天數</th>
+                    <th>活動名稱 / 教育訓練</th>
                     <th>單日工時</th>
                     <th>基本薪資</th>
                     <th>加班費</th>
@@ -704,7 +675,7 @@
                 <tr>
                   <th style="width: 40px; text-align: center;"><input type="checkbox" id="selectAllCheckbox" class="custom-checkbox" onchange="toggleSelectAll(this)"></th>
                   <th>薪資月份</th>
-                  <th>工作日期</th>
+                  <th>工作天數</th>
                   <th>單位 / 活動 / 城市</th>
                   <th>工時資訊</th>
                   <th>計薪基準</th>
@@ -793,7 +764,7 @@
         </div>
       </section>
 
-      <!-- TAB 4: 收入佔比圖表分析 -->
+      <!-- TAB 4: 收入佔比圖表分析 (修改4：圖表全面改為條列式圖示) -->
       <section id="pieTab" class="tab-content">
         <div class="card">
           <div class="form-grid" style="align-items: flex-end;">
@@ -845,20 +816,24 @@
         </div>
 
         <div class="stats-grid-4">
+          <!-- 需求修改2：列入教育訓練統計 -->
+          <div class="stat-card" style="border-left-color: #00bcd4;">
+            <div><h4>🎓 教育訓練統計</h4><div class="value statTrainingSummary" style="font-size: 0.9rem; font-weight: normal; margin-top: 4px;"></div></div>
+          </div>
           <div class="stat-card" style="border-left-color: #4caf50;">
             <div><h4>加減項統計 (津貼/獎金/扣項)</h4><div class="value statAddDeductSummary" style="font-size: 0.9rem; font-weight: normal; margin-top: 4px;"></div></div>
           </div>
           <div class="stat-card" style="border-left-color: #ff9800;">
-            <div><h4>主要單位</h4><div class="value statTopUnits" style="font-size: 0.9rem; font-weight: normal; margin-top: 4px;"></div></div>
-            <button class="btn-open-modal" onclick="openChartModal('unitModal')"><span class="material-icons" style="font-size: 18px;">pie_chart</span> 查看</button>
+            <div><h4>主要單位統計</h4><div class="value statTopUnits" style="font-size: 0.9rem; font-weight: normal; margin-top: 4px;"></div></div>
+            <button class="btn-open-modal" onclick="openChartModal('unitModal')"><span class="material-icons" style="font-size: 18px;">bar_chart</span> 查看條列圖表</button>
           </div>
           <div class="stat-card" style="border-left-color: #9c27b0;">
-            <div><h4>工作類型</h4><div class="value statTopJobTypes" style="font-size: 0.9rem; font-weight: normal; margin-top: 4px;"></div></div>
-            <button class="btn-open-modal" onclick="openChartModal('jobTypeModal')"><span class="material-icons" style="font-size: 18px;">pie_chart</span> 查看</button>
+            <div><h4>工作類型統計</h4><div class="value statTopJobTypes" style="font-size: 0.9rem; font-weight: normal; margin-top: 4px;"></div></div>
+            <button class="btn-open-modal" onclick="openChartModal('jobTypeModal')"><span class="material-icons" style="font-size: 18px;">bar_chart</span> 查看條列圖表</button>
           </div>
           <div class="stat-card" style="border-left-color: #e91e63;">
-            <div><h4>計薪方式 (時薪/日薪)</h4><div class="value statWageTypes" style="font-size: 0.9rem; font-weight: normal; margin-top: 4px;"></div></div>
-            <button class="btn-open-modal" onclick="openChartModal('wageTypeModal')"><span class="material-icons" style="font-size: 18px;">pie_chart</span> 查看</button>
+            <div><h4>計薪方式統計</h4><div class="value statWageTypes" style="font-size: 0.9rem; font-weight: normal; margin-top: 4px;"></div></div>
+            <button class="btn-open-modal" onclick="openChartModal('wageTypeModal')"><span class="material-icons" style="font-size: 18px;">bar_chart</span> 查看條列圖表</button>
           </div>
         </div>
       </section>
@@ -908,8 +883,14 @@
               <input type="number" id="editBaseWage" step="0.1" required>
             </div>
             <div class="form-group">
-              <label>工作日期</label>
-              <input type="date" id="editWorkDate" required>
+              <label>工作天數</label>
+              <input type="number" id="editWorkDays" min="1" required>
+            </div>
+            <div class="form-group" style="justify-content: center;">
+              <label style="cursor: pointer; display: flex; align-items: center; gap: 8px; margin-top: 15px;">
+                <input type="checkbox" id="editIsTraining" class="custom-checkbox">
+                <b style="color: var(--primary-color);">教育訓練</b>
+              </label>
             </div>
             <div class="form-group">
               <label>工作時數 (小時)</label>
@@ -961,7 +942,7 @@
     </div>
   </div>
 
-  <!-- Modals -->
+  <!-- Modals (修改4：替換圓餅圖 Modal 為條列式圖示 Modal) -->
   <div class="modal-overlay" id="trendModal" onclick="closeChartModalOnOverlay(event, 'trendModal')">
     <div class="modal-container large-modal">
       <div class="modal-header">
@@ -975,20 +956,37 @@
   </div>
   
   <div class="modal-overlay" id="unitModal" onclick="closeChartModalOnOverlay(event, 'unitModal')">
-    <div class="modal-container"><div class="modal-header"><div class="modal-title"><span class="material-icons">pie_chart</span><span>付款單位佔比</span></div><button class="modal-close-btn" onclick="closeChartModal('unitModal')"><span class="material-icons">close</span></button></div><div class="modal-body"><div class="modal-pie-chart-box"><canvas id="unitPieChart"></canvas></div></div></div>
+    <div class="modal-container large-modal">
+      <div class="modal-header">
+        <div class="modal-title"><span class="material-icons">bar_chart</span><span>付款單位統計 (條列圖示)</span></div>
+        <button class="modal-close-btn" onclick="closeChartModal('unitModal')"><span class="material-icons">close</span></button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-pie-chart-box"><canvas id="unitBarChart"></canvas></div>
+      </div>
+    </div>
   </div>
+
   <div class="modal-overlay" id="jobTypeModal" onclick="closeChartModalOnOverlay(event, 'jobTypeModal')">
-    <div class="modal-container"><div class="modal-header"><div class="modal-title"><span class="material-icons">donut_small</span><span>工作類型佔比</span></div><button class="modal-close-btn" onclick="closeChartModal('jobTypeModal')"><span class="material-icons">close</span></button></div><div class="modal-body"><div class="modal-pie-chart-box"><canvas id="jobTypePieChart"></canvas></div></div></div>
+    <div class="modal-container large-modal">
+      <div class="modal-header">
+        <div class="modal-title"><span class="material-icons">bar_chart</span><span>工作類型統計 (條列圖示)</span></div>
+        <button class="modal-close-btn" onclick="closeChartModal('jobTypeModal')"><span class="material-icons">close</span></button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-pie-chart-box"><canvas id="jobTypeBarChart"></canvas></div>
+      </div>
+    </div>
   </div>
   
   <div class="modal-overlay" id="wageTypeModal" onclick="closeChartModalOnOverlay(event, 'wageTypeModal')">
-    <div class="modal-container">
+    <div class="modal-container large-modal">
       <div class="modal-header">
-        <div class="modal-title"><span class="material-icons">donut_small</span><span>計薪方式佔比分析</span></div>
+        <div class="modal-title"><span class="material-icons">bar_chart</span><span>計薪方式統計 (條列圖示)</span></div>
         <button class="modal-close-btn" onclick="closeChartModal('wageTypeModal')"><span class="material-icons">close</span></button>
       </div>
       <div class="modal-body">
-        <div class="modal-pie-chart-box"><canvas id="wageTypePieChart"></canvas></div>
+        <div class="modal-pie-chart-box"><canvas id="wageTypeBarChart"></canvas></div>
       </div>
     </div>
   </div>
@@ -1050,22 +1048,40 @@
     let records = [];
     let stagedRecords = []; 
     let isTwdEnabled = JSON.parse(localStorage.getItem('salary_twd_enabled')) || false;
-    let isSingleDayMode = true;
     
-    let monthlyChartInstance = null, pieChartInstance = null, jobTypeChartInstance = null;
-    let statusChartInstance = null, wageTypeChartInstance = null;
+    let monthlyChartInstance = null;
 
-    const commonPieOptions = { responsive: true, maintainAspectRatio: false, layout: { padding: 10 }, plugins: { legend: { position: 'bottom' } } };
+    /* 修改4：條列式圖示 (Horizontal Bar Chart) 通用設定選項 */
+    const commonBarOptions = {
+      indexAxis: 'y',
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: function(context) {
+              const val = context.raw || 0;
+              return ` 金額: $${val.toLocaleString()}`;
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          beginAtZero: true,
+          grid: { color: 'rgba(0,0,0,0.05)' }
+        },
+        y: {
+          grid: { display: false }
+        }
+      }
+    };
 
     document.addEventListener('DOMContentLoaded', () => {
       initYearSelectOptions();
       document.getElementById('enableTwd').checked = isTwdEnabled;
       document.getElementById('rateInputGroup').style.display = isTwdEnabled ? 'flex' : 'none';
-      
-      setSingleDayMode();
-
-      document.getElementById('workDateStart').addEventListener('change', generateDateRangeRows);
-      document.getElementById('workDateEnd').addEventListener('change', generateDateRangeRows);
 
       const checkFirebase = setInterval(() => {
         if (window.db && window.dbOnValue) {
@@ -1074,23 +1090,6 @@
         }
       }, 100);
     });
-
-    function setSingleDayMode() {
-      isSingleDayMode = true;
-      document.getElementById('endDateGroup').style.display = 'none';
-      document.getElementById('startDateLabel').textContent = '工作日期 (單天)';
-      const startVal = document.getElementById('workDateStart').value || new Date().toISOString().split('T')[0];
-      document.getElementById('workDateStart').value = startVal;
-      document.getElementById('workDateEnd').value = startVal;
-      generateDateRangeRows();
-    }
-
-    function setRangeMode() {
-      isSingleDayMode = false;
-      document.getElementById('endDateGroup').style.display = 'flex';
-      document.getElementById('startDateLabel').textContent = '工作起始日期';
-      generateDateRangeRows();
-    }
 
     function initFirebaseSync() {
       window.dbOnValue(window.dbRef(window.db, 'salary_records'), (snapshot) => {
@@ -1114,89 +1113,7 @@
       document.getElementById('baseWageLabel').textContent = type === 'hourly' ? '時薪金額' : '日薪金額';
     }
 
-    function getDatesInRange(startDate, endDate) {
-      const dates = [];
-      let current = new Date(startDate);
-      const end = new Date(endDate);
-      while (current <= end) {
-        const y = current.getFullYear();
-        const m = String(current.getMonth() + 1).padStart(2, '0');
-        const d = String(current.getDate()).padStart(2, '0');
-        dates.push(`${y}-${m}-${d}`);
-        current.setDate(current.getDate() + 1);
-      }
-      return dates;
-    }
-
-    function generateDateRangeRows() {
-      const startStr = document.getElementById('workDateStart').value;
-      const endStr = isSingleDayMode ? startStr : document.getElementById('workDateEnd').value;
-      if (isSingleDayMode) {
-        document.getElementById('workDateEnd').value = startStr;
-      }
-      
-      const container = document.getElementById('rangeConfigContainer');
-      
-      if (!startStr) {
-        container.innerHTML = '<div style="color:var(--text-secondary); text-align:center; padding:10px;">請先選擇工作日期以展開每日明細</div>';
-        return;
-      }
-
-      const dates = getDatesInRange(startStr, endStr);
-      if (dates.length === 0 || dates.length > 90) {
-        if (dates.length > 90) {
-          container.innerHTML = '<div style="color:var(--danger-color); text-align:center; padding:10px;">日期區間不可超過 90 天，請縮短區間。</div>';
-        }
-        return;
-      }
-
-      const defH = document.getElementById('defaultHours').value || 8;
-      const defM = document.getElementById('defaultMinutes').value || 0;
-
-      let html = '';
-      dates.forEach((dateStr) => {
-        html += `
-          <div class="date-row-item" data-date="${dateStr}">
-            <label>${dateStr}</label>
-            <label style="font-weight:normal; display:flex; align-items:center; gap:4px; cursor:pointer; color:var(--danger-color);">
-              <input type="checkbox" class="rest-checkbox custom-checkbox" onchange="toggleDayRest(this, '${dateStr}')"> 休假日 (不上班)
-            </label>
-            <div style="display:flex; align-items:center; gap:6px; flex:1;" class="hours-input-group">
-              <span>時:</span>
-              <input type="number" class="day-hours" value="${defH}" min="0" max="24" style="width:70px; padding:6px;">
-              <span>分:</span>
-              <input type="number" class="day-minutes" value="${defM}" min="0" max="59" style="width:70px; padding:6px;">
-            </div>
-          </div>
-        `;
-      });
-      container.innerHTML = html;
-    }
-
-    function toggleDayRest(checkbox) {
-      const item = checkbox.closest('.date-row-item');
-      const group = item.querySelector('.hours-input-group');
-      if (checkbox.checked) {
-        group.style.opacity = '0.3';
-        group.querySelectorAll('input').forEach(i => i.disabled = true);
-      } else {
-        group.style.opacity = '1';
-        group.querySelectorAll('input').forEach(i => i.disabled = false);
-      }
-    }
-
-    function applyDefaultHoursToAll() {
-      const defH = document.getElementById('defaultHours').value || 8;
-      const defM = document.getElementById('defaultMinutes').value || 0;
-      document.querySelectorAll('.date-row-item').forEach(item => {
-        const restCb = item.querySelector('.rest-checkbox');
-        if (!restCb.checked) {
-          item.querySelector('.day-hours').value = defH;
-          item.querySelector('.day-minutes').value = defM;
-        }
-      });
-    }
-
+    /* 需求修改1與2：將日期選擇改為天數輸入，並包含教育訓練屬性 */
     function previewSalary(event) {
       event.preventDefault();
       
@@ -1210,6 +1127,11 @@
       const otRule = document.getElementById('otRule').value;
       const payDate = document.getElementById('payDate').value;
       
+      const workDaysCount = parseInt(document.getElementById('workDaysCount').value) || 1;
+      const hours = parseInt(document.getElementById('dailyWorkHours').value) || 0;
+      const minutes = parseInt(document.getElementById('dailyWorkMinutes').value) || 0;
+      const isTraining = document.getElementById('isTraining').checked;
+
       const allowance = parseFloat(document.getElementById('allowance').value) || 0;
       const mealAllowance = parseFloat(document.getElementById('mealAllowance').value) || 0;
       const performanceBonus = parseFloat(document.getElementById('performanceBonus').value) || 0;
@@ -1220,69 +1142,55 @@
       const transferFee = parseFloat(document.getElementById('transferFee').value) || 0;
       const totalDeductions = laborInsurance + healthInsurance + transferFee;
 
-      const dateRows = document.querySelectorAll('.date-row-item');
-      if (dateRows.length === 0) {
-        alert("請先設定工作日期！");
+      const totalWorkHours = hours + (minutes / 60);
+      if (totalWorkHours <= 0) {
+        alert("請輸入有效的每日工時！");
         return;
       }
 
       stagedRecords = [];
-      const activeRows = Array.from(dateRows).filter(item => !item.querySelector('.rest-checkbox').checked);
-      const countValidDays = activeRows.length || 1;
+      const baseRateHourly = wageType === 'hourly' ? baseWage : (baseWage / 8);
+      
+      let basicHrs = Math.min(8, totalWorkHours);
+      let otHrs = Math.max(0, totalWorkHours - 8);
+      let ot1Hrs = Math.min(2, otHrs);
+      let ot2Hrs = Math.max(0, otHrs - 2);
 
-      dateRows.forEach(item => {
-        const dateStr = item.getAttribute('data-date');
-        const isRest = item.querySelector('.rest-checkbox').checked;
-        if (isRest) return;
+      let basicPay = (wageType === 'daily') ? baseWage : (basicHrs * baseRateHourly);
 
-        const hours = parseInt(item.querySelector('.day-hours').value) || 0;
-        const minutes = parseInt(item.querySelector('.day-minutes').value) || 0;
-        const totalWorkHours = hours + (minutes / 60);
-        if (totalWorkHours <= 0) return;
+      let otPay = 0;
+      if (otRule === 'TW') {
+        otPay = (ot1Hrs * baseRateHourly * 1.34) + (ot2Hrs * baseRateHourly * 1.67);
+      } else if (otRule === 'AU') {
+        otPay = (ot1Hrs * baseRateHourly * 1.5) + (ot2Hrs * baseRateHourly * 2.0);
+      } else if (otRule === 'NONE') {
+        otPay = otHrs * baseRateHourly;
+      }
 
-        const baseRateHourly = wageType === 'hourly' ? baseWage : (baseWage / 8);
-        
-        let basicHrs = Math.min(8, totalWorkHours);
-        let otHrs = Math.max(0, totalWorkHours - 8);
-        let ot1Hrs = Math.min(2, otHrs);
-        let ot2Hrs = Math.max(0, otHrs - 2);
+      const dayAddition = totalAdditions / workDaysCount;
+      const dayDeduction = totalDeductions / workDaysCount;
+      const dayTotal = basicPay + otPay + dayAddition - dayDeduction;
 
-        let basicPay = (wageType === 'daily') ? baseWage : (basicHrs * baseRateHourly);
-
-        let otPay = 0;
-        if (otRule === 'TW') {
-          otPay = (ot1Hrs * baseRateHourly * 1.34) + (ot2Hrs * baseRateHourly * 1.67);
-        } else if (otRule === 'AU') {
-          otPay = (ot1Hrs * baseRateHourly * 1.5) + (ot2Hrs * baseRateHourly * 2.0);
-        } else if (otRule === 'NONE') {
-          otPay = otHrs * baseRateHourly;
-        }
-
-        const dayAddition = totalAdditions / countValidDays;
-        const dayDeduction = totalDeductions / countValidDays;
-        const dayTotal = basicPay + otPay + dayAddition - dayDeduction;
-
+      for (let day = 1; day <= workDaysCount; day++) {
         stagedRecords.push({
-          id: Date.now() + Math.floor(Math.random() * 10000),
+          id: Date.now() + Math.floor(Math.random() * 10000) + day,
           salaryMonth, unit, activityName, jobType, city,
           wageType, baseWage,
-          workDate: dateStr,
+          workDaysCount: 1,
+          dayIndex: day,
+          totalDays: workDaysCount,
+          isTraining: isTraining,
           workHours: hours, workMinutes: minutes,
           otRule, basicPay, otPay,
-          allowance: allowance / countValidDays,
-          mealAllowance: mealAllowance / countValidDays,
-          performanceBonus: performanceBonus / countValidDays,
-          laborInsurance: laborInsurance / countValidDays,
-          healthInsurance: healthInsurance / countValidDays,
-          transferFee: transferFee / countValidDays,
+          allowance: allowance / workDaysCount,
+          mealAllowance: mealAllowance / workDaysCount,
+          performanceBonus: performanceBonus / workDaysCount,
+          laborInsurance: laborInsurance / workDaysCount,
+          healthInsurance: healthInsurance / workDaysCount,
+          transferFee: transferFee / workDaysCount,
           totalPay: dayTotal,
           payDate
         });
-      });
-
-      if (stagedRecords.length === 0) {
-        alert("所有選定日期皆設定為休假或工時為 0，無法產生紀錄！");
-        return;
       }
 
       renderStagingTable();
@@ -1308,8 +1216,8 @@
 
         const tr = document.createElement('tr');
         tr.innerHTML = `
-          <td>${r.workDate}</td>
-          <td>${r.activityName || '-'}</td>
+          <td>第 ${r.dayIndex} 天 (共${r.totalDays}天)</td>
+          <td>${r.activityName || '-'} ${r.isTraining ? '<span class="training-badge">教育訓練</span>' : ''}</td>
           <td>${r.workHours}h ${r.workMinutes}m</td>
           <td>${formatMoney(r.basicPay)}</td>
           <td style="color:var(--danger-color);">${formatMoney(r.otPay)}</td>
@@ -1332,13 +1240,12 @@
       stagedRecords = [];
       document.getElementById('stagingArea').style.display = 'none';
       document.getElementById('salaryForm').reset();
-      setSingleDayMode();
       saveRecordsToCloud();
       updateView();
       alert("薪資紀錄已儲存並成功加入！");
     }
 
-    // 編輯歷史紀錄 Modal 控制
+    /* 編輯歷史紀錄 Modal 控制 */
     function openEditRecordModal(id) {
       const r = records.find(item => item.id === id);
       if (!r) return;
@@ -1351,15 +1258,16 @@
       document.getElementById('editCity').value = r.city || '';
       document.getElementById('editWageType').value = r.wageType || 'hourly';
       document.getElementById('editBaseWage').value = r.baseWage || 0;
-      document.getElementById('editWorkDate').value = r.workDate || '';
+      document.getElementById('editWorkDays').value = r.workDaysCount || 1;
+      document.getElementById('editIsTraining').checked = !!r.isTraining;
       document.getElementById('editWorkHours').value = r.workHours !== undefined ? r.workHours : 8;
       document.getElementById('editWorkMinutes').value = r.workMinutes !== undefined ? r.workMinutes : 0;
-      document.getElementById('editAllowance').value = r.allowance !== undefined ? r.allowance * (r.validDaysCount || 1) : 0;
-      document.getElementById('editMealAllowance').value = r.mealAllowance !== undefined ? r.mealAllowance * (r.validDaysCount || 1) : 0;
-      document.getElementById('editPerformanceBonus').value = r.performanceBonus !== undefined ? r.performanceBonus * (r.validDaysCount || 1) : 0;
-      document.getElementById('editLaborInsurance').value = r.laborInsurance !== undefined ? r.laborInsurance * (r.validDaysCount || 1) : 0;
-      document.getElementById('editHealthInsurance').value = r.healthInsurance !== undefined ? r.healthInsurance * (r.validDaysCount || 1) : 0;
-      document.getElementById('editTransferFee').value = r.transferFee !== undefined ? r.transferFee * (r.validDaysCount || 1) : 0;
+      document.getElementById('editAllowance').value = r.allowance || 0;
+      document.getElementById('editMealAllowance').value = r.mealAllowance || 0;
+      document.getElementById('editPerformanceBonus').value = r.performanceBonus || 0;
+      document.getElementById('editLaborInsurance').value = r.laborInsurance || 0;
+      document.getElementById('editHealthInsurance').value = r.healthInsurance || 0;
+      document.getElementById('editTransferFee').value = r.transferFee || 0;
       document.getElementById('editPayDate').value = r.payDate || '當天領現';
       
       openChartModal('editRecordModal');
@@ -1378,7 +1286,8 @@
       const city = document.getElementById('editCity').value.trim() || '未標示';
       const wageType = document.getElementById('editWageType').value;
       const baseWage = parseFloat(document.getElementById('editBaseWage').value) || 0;
-      const workDate = document.getElementById('editWorkDate').value;
+      const workDaysCount = parseInt(document.getElementById('editWorkDays').value) || 1;
+      const isTraining = document.getElementById('editIsTraining').checked;
       const workHours = parseInt(document.getElementById('editWorkHours').value) || 0;
       const workMinutes = parseInt(document.getElementById('editWorkMinutes').value) || 0;
       
@@ -1418,7 +1327,7 @@
       records[index] = {
         ...existingRecord,
         salaryMonth, unit, activityName, jobType, city,
-        wageType, baseWage, workDate, workHours, workMinutes,
+        wageType, baseWage, workDaysCount, isTraining, workHours, workMinutes,
         basicPay, otPay, allowance, mealAllowance, performanceBonus,
         laborInsurance, healthInsurance, transferFee, totalPay, payDate
       };
@@ -1454,11 +1363,7 @@
       const filterUnit = document.getElementById('filterUnit').value;
       const filterJobType = document.getElementById('filterJobType').value;
 
-      let filtered = records.slice().sort((a, b) => {
-        const dateA = a.workDate || a.salaryMonth;
-        const dateB = b.workDate || b.salaryMonth;
-        return dateB.localeCompare(dateA);
-      });
+      let filtered = records.slice().sort((a, b) => (b.salaryMonth || '').localeCompare(a.salaryMonth || ''));
 
       if (startDate) filtered = filtered.filter(r => r.salaryMonth >= startDate);
       if (endDate) filtered = filtered.filter(r => r.salaryMonth <= endDate);
@@ -1468,7 +1373,6 @@
           (r.salaryMonth||'').toLowerCase().includes(keyword) || 
           (r.unit||'').toLowerCase().includes(keyword) || 
           (r.activityName||'').toLowerCase().includes(keyword) ||
-          (r.workDate||'').toLowerCase().includes(keyword) ||
           (r.city||'').toLowerCase().includes(keyword)
         );
       }
@@ -1483,7 +1387,6 @@
       }
 
       filtered.forEach(r => {
-        const displayDate = r.workDate ? r.workDate : '-';
         const timeInfo = r.workHours !== undefined ? `${r.workHours}h ${r.workMinutes}m` : '-';
         const wageInfo = r.wageType === 'daily' ? `日薪 $${r.baseWage}` : `時薪 $${r.baseWage}`;
         
@@ -1494,8 +1397,13 @@
         tr.innerHTML = `
           <td style="text-align:center;"><input type="checkbox" class="custom-checkbox record-checkbox" value="${r.id}" onchange="updateDeleteButtonState()"></td>
           <td><b>${r.salaryMonth}</b></td>
-          <td>${displayDate}</td>
-          <td><b>${r.unit}</b> ${r.activityName ? `<br><small style="color:var(--primary-color);">活動: ${r.activityName}</small>` : ''}<br><small class="city-badge">${r.city||'未標示'}</small></td>
+          <td>${r.workDaysCount || 1} 天</td>
+          <td>
+            <b>${r.unit}</b> 
+            ${r.activityName ? `<br><small style="color:var(--primary-color);">活動: ${r.activityName}</small>` : ''}
+            ${r.isTraining ? '<span class="training-badge">教育訓練</span>' : ''}
+            <br><small class="city-badge">${r.city||'未標示'}</small>
+          </td>
           <td>${timeInfo}</td>
           <td><span class="wage-badge">${wageInfo}</span></td>
           <td style="color:var(--success-color);">+${formatMoney(addSum)}</td>
@@ -1533,7 +1441,6 @@
       }
     }
 
-    // 每次更新畫面時同步更新年份清單
     function updateView() { 
       renderTable(); 
       updateFilterOptions(); 
@@ -1586,6 +1493,7 @@
       updateStatsView();
     }
 
+    /* 統計檢視更新（包含教育訓練與條列式統計圖示更新） */
     function updateStatsView() {
       const year = document.querySelector('.stats-year-select')?.value || String(new Date().getFullYear());
       const mode = document.querySelector('.stats-mode-select')?.value || 'month';
@@ -1638,6 +1546,10 @@
       let totalAllowance = 0, totalMeal = 0, totalBonus = 0, totalLabor = 0, totalHealth = 0, totalTransfer = 0;
       let wageTypeSums = { '時薪': 0, '日薪': 0, '其他': 0 };
       
+      /* 需求修改2：列入教育訓練統計計算 */
+      let trainingDaysCount = 0;
+      let trainingTotalPay = 0;
+
       periodRecords.forEach(r => {
         unitSums[r.unit] = (unitSums[r.unit] || 0) + r.totalPay;
         jobTypeSums[r.jobType || '其他'] = (jobTypeSums[r.jobType || '其他'] || 0) + r.totalPay;
@@ -1652,10 +1564,20 @@
         if(r.wageType === 'hourly') wageTypeSums['時薪'] += r.totalPay;
         else if(r.wageType === 'daily') wageTypeSums['日薪'] += r.totalPay;
         else wageTypeSums['其他'] += r.totalPay;
+
+        if (r.isTraining) {
+          trainingDaysCount += (r.workDaysCount || 1);
+          trainingTotalPay += r.totalPay;
+        }
       });
 
       const topUnits = Object.entries(unitSums).sort((a,b)=>b[1]-a[1]).slice(0,3).map((x,i)=>`${i+1}. <b>${x[0]}</b>: $${x[1].toLocaleString()}`).join('<br>') || '無紀錄';
       const topJobs = Object.entries(jobTypeSums).sort((a,b)=>b[1]-a[1]).slice(0,3).map((x,i)=>`${i+1}. <b>${x[0]}</b>: $${x[1].toLocaleString()}`).join('<br>') || '無紀錄';
+
+      document.querySelectorAll('.statTrainingSummary').forEach(el => el.innerHTML = `
+        🎓 <b>訓練總天數</b>: ${trainingDaysCount} 天<br>
+        💰 <b>訓練期間收入</b>: $${trainingTotalPay.toLocaleString()}
+      `);
 
       document.querySelectorAll('.statAddDeductSummary').forEach(el => el.innerHTML = `
         🟢 <b>津貼</b>: $${totalAllowance.toLocaleString()} | <b>餐費</b>: $${totalMeal.toLocaleString()}<br>
@@ -1667,9 +1589,11 @@
       document.querySelectorAll('.statWageTypes').forEach(el => el.innerHTML = Object.entries(wageTypeSums).filter(x=>x[1]>0).map(x=>`<b>${x[0]}</b>: $${x[1].toLocaleString()}`).join('<br>') || '無紀錄');
 
       renderMonthlyChart(year, mode, month, rangeStart, rangeEnd, targetMonthly, periodRecords, chartLabels);
-      renderPieChart('unitPieChart', unitSums, pieChartInstance, 'pie');
-      renderPieChart('jobTypePieChart', jobTypeSums, jobTypeChartInstance, 'doughnut');
-      renderPieChart('wageTypePieChart', wageTypeSums, wageTypeChartInstance, 'pie', ['#3f51b5', '#ff9800', '#9e9e9e']);
+      
+      /* 修改4：渲染條列式圖表取代圓餅圖 */
+      renderHorizontalBarChart('unitBarChart', unitSums, '#ff9800');
+      renderHorizontalBarChart('jobTypeBarChart', jobTypeSums, '#9c27b0');
+      renderHorizontalBarChart('wageTypeBarChart', wageTypeSums, '#e91e63');
     }
 
     function renderMonthlyChart(year, mode, month, rangeStart, rangeEnd, targetMonthly, periodRecords, labels) {
@@ -1708,23 +1632,72 @@
       });
     }
 
-    function renderPieChart(canvasId, dataObj, chartInstance, type, colors) {
-      const ctx = document.getElementById(canvasId)?.getContext('2d');
+    /* 修改4：將圓餅圖渲染改為條列式橫向長條圖 (Horizontal Bar Chart) 並標示每一筆資料 */
+    function renderHorizontalBarChart(canvasId, dataObj, barColor) {
+      const canvas = document.getElementById(canvasId);
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
       if (!ctx) return;
-      const filtered = Object.entries(dataObj).filter(x => x[1] > 0);
-      const labels = filtered.map(x => x[0]), data = filtered.map(x => x[1]);
-      
-      const defaultColors = ['#00bcd4', '#8e24aa', '#ff5722', '#43a047', '#e91e63', '#3f51b5', '#ffb300', '#009688'];
-      
+
+      const filtered = Object.entries(dataObj).filter(x => x[1] > 0).sort((a,b) => b[1] - a[1]);
+      const labels = filtered.map(x => x[0]);
+      const data = filtered.map(x => x[1]);
+
       let existingChart = Chart.getChart(canvasId);
       if (existingChart) existingChart.destroy();
       
-      if (labels.length === 0) { ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height); return; }
-      
+      if (labels.length === 0) { 
+        ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height); 
+        return; 
+      }
+
+      const total = data.reduce((a, b) => a + b, 0);
+
       new Chart(ctx, {
-        type: type,
-        data: { labels, datasets: [{ data, backgroundColor: colors || defaultColors }] },
-        options: commonPieOptions
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: '總收入金額',
+            data: data,
+            backgroundColor: barColor || '#3f51b5',
+            borderRadius: 4
+          }]
+        },
+        plugins: [{
+          id: 'customDataLabels',
+          afterDatasetsDraw(chart) {
+            const { ctx } = chart;
+            chart.data.datasets.forEach((dataset, i) => {
+              const meta = chart.getDatasetMeta(i);
+              meta.data.forEach((bar, index) => {
+                const val = dataset.data[index];
+                const pct = total > 0 ? ((val / total) * 100).toFixed(1) : 0;
+                const text = `$${val.toLocaleString()} (${pct}%)`;
+                
+                ctx.save();
+                ctx.fillStyle = document.body.classList.contains('dark-mode') ? '#f8fafc' : '#333333';
+                ctx.font = 'bold 12px sans-serif';
+                ctx.textAlign = 'left';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(text, bar.x + 8, bar.y);
+                ctx.restore();
+              });
+            });
+          }
+        }],
+        options: {
+          ...commonBarOptions,
+          scales: {
+            x: {
+              beginAtZero: true,
+              grace: '15%'
+            },
+            y: {
+              grid: { display: false }
+            }
+          }
+        }
       });
     }
 
@@ -1748,6 +1721,7 @@
       const isDark = document.body.classList.contains('dark-mode');
       document.getElementById('theme-icon').textContent = isDark ? 'light_mode' : 'dark_mode';
       document.getElementById('theme-text').textContent = isDark ? '切換明亮模式' : '切換暗黑模式';
+      updateStatsView();
     });
   </script>
 </body>
