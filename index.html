@@ -511,10 +511,15 @@
               </div>
               <div class="form-group">
                 <label id="baseWageLabel">時薪金額</label>
-                <input type="number" id="baseWage" step="0.1" placeholder="例如: 30" required>
+                <input type="number" id="baseWage" step="0.1" placeholder="例如: 30">
               </div>
 
-              <!-- 需求修改1：工作日期選擇拿掉，改成輸入工作天數 -->
+              <!-- 新增：直接指定總金額欄位 -->
+              <div class="form-group">
+                <label style="color: var(--primary-color);">直接指定總金額 (選填)</label>
+                <input type="number" id="manualTotalAmount" step="0.1" placeholder="若填寫將直接以此總金額計算">
+              </div>
+
               <div class="form-group">
                 <label>工作天數 (天)</label>
                 <input type="number" id="workDaysCount" min="1" max="365" value="1" required placeholder="例如: 1 天、2 天">
@@ -529,7 +534,6 @@
                 <input type="number" id="dailyWorkMinutes" min="0" max="59" value="0" required>
               </div>
 
-              <!-- 需求修改2：新增教育訓練確認按鈕 -->
               <div class="form-group" style="justify-content: center;">
                 <label style="cursor: pointer; display: flex; align-items: center; gap: 8px; margin-top: 20px;">
                   <input type="checkbox" id="isTraining" class="custom-checkbox">
@@ -764,7 +768,7 @@
         </div>
       </section>
 
-      <!-- TAB 4: 收入佔比圖表分析 (修改4：圖表全面改為條列式圖示) -->
+      <!-- TAB 4: 收入佔比圖表分析 -->
       <section id="pieTab" class="tab-content">
         <div class="card">
           <div class="form-grid" style="align-items: flex-end;">
@@ -816,7 +820,6 @@
         </div>
 
         <div class="stats-grid-4">
-          <!-- 需求修改2：列入教育訓練統計 -->
           <div class="stat-card" style="border-left-color: #00bcd4;">
             <div><h4>🎓 教育訓練統計</h4><div class="value statTrainingSummary" style="font-size: 0.9rem; font-weight: normal; margin-top: 4px;"></div></div>
           </div>
@@ -880,7 +883,7 @@
             </div>
             <div class="form-group">
               <label>基本金額 (時薪/日薪)</label>
-              <input type="number" id="editBaseWage" step="0.1" required>
+              <input type="number" id="editBaseWage" step="0.1">
             </div>
             <div class="form-group">
               <label>工作天數</label>
@@ -942,7 +945,7 @@
     </div>
   </div>
 
-  <!-- Modals (修改4：替換圓餅圖 Modal 為條列式圖示 Modal) -->
+  <!-- Modals -->
   <div class="modal-overlay" id="trendModal" onclick="closeChartModalOnOverlay(event, 'trendModal')">
     <div class="modal-container large-modal">
       <div class="modal-header">
@@ -1051,7 +1054,6 @@
     
     let monthlyChartInstance = null;
 
-    /* 修改4：條列式圖示 (Horizontal Bar Chart) 通用設定選項 */
     const commonBarOptions = {
       indexAxis: 'y',
       responsive: true,
@@ -1113,7 +1115,6 @@
       document.getElementById('baseWageLabel').textContent = type === 'hourly' ? '時薪金額' : '日薪金額';
     }
 
-    /* 需求修改1與2：將日期選擇改為天數輸入，並包含教育訓練屬性 */
     function previewSalary(event) {
       event.preventDefault();
       
@@ -1123,24 +1124,21 @@
       const jobType = document.getElementById('jobType').value.trim() || '其他';
       const city = document.getElementById('city').value.trim() || '未標示';
       const wageType = document.getElementById('wageType').value;
-      const baseWage = parseFloat(document.getElementById('baseWage').value) || 0;
       const otRule = document.getElementById('otRule').value;
       const payDate = document.getElementById('payDate').value;
       
+      const manualTotal = parseFloat(document.getElementById('manualTotalAmount').value);
       const workDaysCount = parseInt(document.getElementById('workDaysCount').value) || 1;
       const hours = parseInt(document.getElementById('dailyWorkHours').value) || 0;
       const minutes = parseInt(document.getElementById('dailyWorkMinutes').value) || 0;
       const isTraining = document.getElementById('isTraining').checked;
 
-      const allowance = parseFloat(document.getElementById('allowance').value) || 0;
-      const mealAllowance = parseFloat(document.getElementById('mealAllowance').value) || 0;
-      const performanceBonus = parseFloat(document.getElementById('performanceBonus').value) || 0;
-      const totalAdditions = allowance + mealAllowance + performanceBonus;
-
-      const laborInsurance = parseFloat(document.getElementById('laborInsurance').value) || 0;
-      const healthInsurance = parseFloat(document.getElementById('healthInsurance').value) || 0;
-      const transferFee = parseFloat(document.getElementById('transferFee').value) || 0;
-      const totalDeductions = laborInsurance + healthInsurance + transferFee;
+      let allowance = parseFloat(document.getElementById('allowance').value) || 0;
+      let mealAllowance = parseFloat(document.getElementById('mealAllowance').value) || 0;
+      let performanceBonus = parseFloat(document.getElementById('performanceBonus').value) || 0;
+      let laborInsurance = parseFloat(document.getElementById('laborInsurance').value) || 0;
+      let healthInsurance = parseFloat(document.getElementById('healthInsurance').value) || 0;
+      let transferFee = parseFloat(document.getElementById('transferFee').value) || 0;
 
       const totalWorkHours = hours + (minutes / 60);
       if (totalWorkHours <= 0) {
@@ -1149,48 +1147,83 @@
       }
 
       stagedRecords = [];
-      const baseRateHourly = wageType === 'hourly' ? baseWage : (baseWage / 8);
-      
-      let basicHrs = Math.min(8, totalWorkHours);
-      let otHrs = Math.max(0, totalWorkHours - 8);
-      let ot1Hrs = Math.min(2, otHrs);
-      let ot2Hrs = Math.max(0, otHrs - 2);
 
-      let basicPay = (wageType === 'daily') ? baseWage : (basicHrs * baseRateHourly);
+      if (!isNaN(manualTotal) && manualTotal !== 0) {
+        const dayTotal = manualTotal / workDaysCount;
+        for (let day = 1; day <= workDaysCount; day++) {
+          stagedRecords.push({
+            id: Date.now() + Math.floor(Math.random() * 10000) + day,
+            salaryMonth, unit, activityName, jobType, city,
+            wageType, baseWage: 0,
+            workDaysCount: 1,
+            dayIndex: day,
+            totalDays: workDaysCount,
+            isTraining,
+            workHours: hours, workMinutes: minutes,
+            otRule,
+            basicPay: dayTotal,
+            otPay: 0,
+            allowance: 0,
+            mealAllowance: 0,
+            performanceBonus: 0,
+            laborInsurance: 0,
+            healthInsurance: 0,
+            transferFee: 0,
+            totalPay: dayTotal,
+            payDate
+          });
+        }
+      } else {
+        const baseWage = parseFloat(document.getElementById('baseWage').value);
+        if (isNaN(baseWage)) {
+          alert("請輸入基本金額（時薪/日薪）或直接指定總金額！");
+          return;
+        }
+        const baseRateHourly = wageType === 'hourly' ? baseWage : (baseWage / 8);
+        
+        let basicHrs = Math.min(8, totalWorkHours);
+        let otHrs = Math.max(0, totalWorkHours - 8);
+        let ot1Hrs = Math.min(2, otHrs);
+        let ot2Hrs = Math.max(0, otHrs - 2);
 
-      let otPay = 0;
-      if (otRule === 'TW') {
-        otPay = (ot1Hrs * baseRateHourly * 1.34) + (ot2Hrs * baseRateHourly * 1.67);
-      } else if (otRule === 'AU') {
-        otPay = (ot1Hrs * baseRateHourly * 1.5) + (ot2Hrs * baseRateHourly * 2.0);
-      } else if (otRule === 'NONE') {
-        otPay = otHrs * baseRateHourly;
-      }
+        let basicPay = (wageType === 'daily') ? baseWage : (basicHrs * baseRateHourly);
 
-      const dayAddition = totalAdditions / workDaysCount;
-      const dayDeduction = totalDeductions / workDaysCount;
-      const dayTotal = basicPay + otPay + dayAddition - dayDeduction;
+        let otPay = 0;
+        if (otRule === 'TW') {
+          otPay = (ot1Hrs * baseRateHourly * 1.34) + (ot2Hrs * baseRateHourly * 1.67);
+        } else if (otRule === 'AU') {
+          otPay = (ot1Hrs * baseRateHourly * 1.5) + (ot2Hrs * baseRateHourly * 2.0);
+        } else if (otRule === 'NONE') {
+          otPay = otHrs * baseRateHourly;
+        }
 
-      for (let day = 1; day <= workDaysCount; day++) {
-        stagedRecords.push({
-          id: Date.now() + Math.floor(Math.random() * 10000) + day,
-          salaryMonth, unit, activityName, jobType, city,
-          wageType, baseWage,
-          workDaysCount: 1,
-          dayIndex: day,
-          totalDays: workDaysCount,
-          isTraining: isTraining,
-          workHours: hours, workMinutes: minutes,
-          otRule, basicPay, otPay,
-          allowance: allowance / workDaysCount,
-          mealAllowance: mealAllowance / workDaysCount,
-          performanceBonus: performanceBonus / workDaysCount,
-          laborInsurance: laborInsurance / workDaysCount,
-          healthInsurance: healthInsurance / workDaysCount,
-          transferFee: transferFee / workDaysCount,
-          totalPay: dayTotal,
-          payDate
-        });
+        const totalAdditions = allowance + mealAllowance + performanceBonus;
+        const totalDeductions = laborInsurance + healthInsurance + transferFee;
+        const dayAddition = totalAdditions / workDaysCount;
+        const dayDeduction = totalDeductions / workDaysCount;
+        const dayTotal = basicPay + otPay + dayAddition - dayDeduction;
+
+        for (let day = 1; day <= workDaysCount; day++) {
+          stagedRecords.push({
+            id: Date.now() + Math.floor(Math.random() * 10000) + day,
+            salaryMonth, unit, activityName, jobType, city,
+            wageType, baseWage,
+            workDaysCount: 1,
+            dayIndex: day,
+            totalDays: workDaysCount,
+            isTraining,
+            workHours: hours, workMinutes: minutes,
+            otRule, basicPay, otPay,
+            allowance: allowance / workDaysCount,
+            mealAllowance: mealAllowance / workDaysCount,
+            performanceBonus: performanceBonus / workDaysCount,
+            laborInsurance: laborInsurance / workDaysCount,
+            healthInsurance: healthInsurance / workDaysCount,
+            transferFee: transferFee / workDaysCount,
+            totalPay: dayTotal,
+            payDate
+          });
+        }
       }
 
       renderStagingTable();
@@ -1245,7 +1278,6 @@
       alert("薪資紀錄已儲存並成功加入！");
     }
 
-    /* 編輯歷史紀錄 Modal 控制 */
     function openEditRecordModal(id) {
       const r = records.find(item => item.id === id);
       if (!r) return;
@@ -1388,7 +1420,7 @@
 
       filtered.forEach(r => {
         const timeInfo = r.workHours !== undefined ? `${r.workHours}h ${r.workMinutes}m` : '-';
-        const wageInfo = r.wageType === 'daily' ? `日薪 $${r.baseWage}` : `時薪 $${r.baseWage}`;
+        const wageInfo = r.baseWage > 0 ? (r.wageType === 'daily' ? `日薪 $${r.baseWage}` : `時薪 $${r.baseWage}`) : '指定總金額';
         
         const addSum = (r.allowance || 0) + (r.mealAllowance || 0) + (r.performanceBonus || 0);
         const dedSum = (r.laborInsurance || 0) + (r.healthInsurance || 0) + (r.transferFee || 0);
@@ -1493,7 +1525,6 @@
       updateStatsView();
     }
 
-    /* 統計檢視更新（包含教育訓練與條列式統計圖示更新） */
     function updateStatsView() {
       const year = document.querySelector('.stats-year-select')?.value || String(new Date().getFullYear());
       const mode = document.querySelector('.stats-mode-select')?.value || 'month';
@@ -1546,7 +1577,6 @@
       let totalAllowance = 0, totalMeal = 0, totalBonus = 0, totalLabor = 0, totalHealth = 0, totalTransfer = 0;
       let wageTypeSums = { '時薪': 0, '日薪': 0, '其他': 0 };
       
-      /* 需求修改2：列入教育訓練統計計算 */
       let trainingDaysCount = 0;
       let trainingTotalPay = 0;
 
@@ -1590,7 +1620,6 @@
 
       renderMonthlyChart(year, mode, month, rangeStart, rangeEnd, targetMonthly, periodRecords, chartLabels);
       
-      /* 修改4：渲染條列式圖表取代圓餅圖 */
       renderHorizontalBarChart('unitBarChart', unitSums, '#ff9800');
       renderHorizontalBarChart('jobTypeBarChart', jobTypeSums, '#9c27b0');
       renderHorizontalBarChart('wageTypeBarChart', wageTypeSums, '#e91e63');
@@ -1632,7 +1661,6 @@
       });
     }
 
-    /* 修改4：將圓餅圖渲染改為條列式橫向長條圖 (Horizontal Bar Chart) 並標示每一筆資料 */
     function renderHorizontalBarChart(canvasId, dataObj, barColor) {
       const canvas = document.getElementById(canvasId);
       if (!canvas) return;
